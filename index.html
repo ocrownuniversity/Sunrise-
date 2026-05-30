@@ -1091,7 +1091,7 @@ footer{border-top:1px solid rgba(201,168,76,0.1);padding:38px 24px;text-align:ce
   <div id="page-admin" class="page">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
       <div style="width:44px;height:44px;border-radius:12px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.28);display:flex;align-items:center;justify-content:center;font-size:20px">⚙</div>
-      <div><div style="font-size:18px;font-weight:700">Admin Panel</div><div style="color:var(--gray);font-size:12px">Manage Z Monie platform</div></div>
+      <div><div style="font-size:18px;font-weight:700">Admin Panel</div><div style="color:var(--gray);font-size:12px" id="admin-panel-sub">Manage Z Monie platform</div></div>
     </div>
     <div class="admin-tabs scroll-x">
       <button class="admin-tab active" onclick="adminTab('overview',this)">📊 Overview</button>
@@ -1401,18 +1401,40 @@ async function doLogout(){
 }
 
 // --- APP ENTRY ------------------------------------------------
+// Check if current user is admin (case-insensitive email match)
+function isAdminUser(){
+  if(!currentUser) return false;
+  return currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() || userData?.isAdmin === true;
+}
+
+function showAdminControls(){
+  if(isAdminUser()){
+    document.getElementById('admin-btn').style.display='inline-flex';
+    document.getElementById('profile-admin-badge').style.display='inline-block';
+    // Add admin shortcut on dashboard if not already there
+    if(!document.getElementById('dash-admin-shortcut')){
+      const dashGrid = document.querySelector('.svcs-grid');
+      if(dashGrid){
+        const btn = document.createElement('button');
+        btn.className='svc-btn';
+        btn.id='dash-admin-shortcut';
+        btn.onclick=()=>showPage('admin');
+        btn.innerHTML='<div class="svc-btn-icon" style="background:rgba(201,168,76,.18);border:1px solid rgba(201,168,76,.35)">⚙️</div><span class="svc-btn-label" style="color:var(--gold);font-weight:600">Admin</span>';
+        dashGrid.appendChild(btn);
+      }
+    }
+  }
+}
+
 async function enterApp(){
   document.getElementById('home-page').classList.remove('active');
   document.getElementById('app-shell').style.display='block';
   await loadUserData();
   showPage('dashboard');
-  if(userData?.isAdmin || currentUser?.email===ADMIN_EMAIL){
-    document.getElementById('admin-btn').style.display='inline-flex';
-    document.getElementById('profile-admin-badge').style.display='inline-block';
-  }
+  showAdminControls();
   // Real-time wallet listener
   db.collection('users').doc(currentUser.uid).onSnapshot(snap=>{
-    if(snap.exists){ userData={...userData,...snap.data()}; updateUI(); }
+    if(snap.exists){ userData={...userData,...snap.data()}; updateUI(); showAdminControls(); }
   });
   // Real-time notifications
   db.collection('notifications').where('userId','==',currentUser.uid).orderBy('createdAt','desc').limit(10).onSnapshot(snap=>{
@@ -1423,6 +1445,13 @@ async function enterApp(){
 async function loadUserData(){
   const snap = await db.collection('users').doc(currentUser.uid).get();
   userData = snap.exists ? snap.data() : {};
+  // Auto-fix: if this is the admin email but isAdmin not set in Firestore, patch it now
+  if(isAdminUser() && !userData.isAdmin){
+    try {
+      await db.collection('users').doc(currentUser.uid).update({isAdmin: true});
+      userData.isAdmin = true;
+    } catch(e){ console.log('Could not patch isAdmin:', e); }
+  }
   updateUI();
   loadFundRequests();
   loadTransactions();
@@ -1452,6 +1481,7 @@ function updateUI(){
   document.getElementById('ref-code-disp').textContent = 'Code: '+code;
   document.getElementById('ref-count').textContent = userData.referralCount||0;
   document.getElementById('ref-earned').textContent = '₦'+((userData.referralCount||0)*200).toLocaleString();
+  showAdminControls();
 }
 
 function formatCurrency(n){ return '₦'+Number(n).toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2}) }
@@ -1841,6 +1871,9 @@ function adminTab(name, btn){
 }
 
 async function renderAdmin(){
+  // Update subtitle with admin identity
+  const sub = document.getElementById('admin-panel-sub');
+  if(sub) sub.textContent = 'Logged in as: '+(currentUser?.email||'Admin');
   try {
     const [usersSnap, txnsSnap, fundSnap] = await Promise.all([
       db.collection('users').get(),
