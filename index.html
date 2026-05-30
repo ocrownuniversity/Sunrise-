@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<meta name="theme-color" content="#0A0A0B"/>
+<meta name="description" content="BENIM VTU - Nigeria's Premium Virtual Top-Up Platform"/>
+<title>BENIM VTU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:#0A0A0B;color:#F0EFE8;
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+input,select,textarea,button{font-family:inherit}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:#111}
+::-webkit-scrollbar-thumb{background:#7A5E20;border-radius:2px}
+
+/* ═══════════════════════════════════════════════
+   CSS VARIABLES
+═══════════════════════════════════════════════ */
+:root{
+  --gold:#C9A84C;--gold-l:#E8C96A;--gold-d:#8A6820;
+  --black:#0A0A0B;--bg:#0E0E11;--bg2:#141418;
+  --card:rgba(255,255,255,0.035);--border:rgba(201,168,76,0.14);
+  --white:#F0EFE8;--gray:#7A7A8A;--gray2:#4A4A5A;
+  --green:#22C55E;--red:#EF4444;--amber:#F59E0B;
+}
+
+/* ═══════════════════════════════════════════════
+   UTILITY CLASSES
+═══════════════════════════════════════════════ */
+.serif{font-family:'Playfair Display',serif}
+.gold-grad{background:linear-gradient(135deg,#C9A84C,#E8C96A,#C9A84C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.glass{background:var(--card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:16px}
+.gold-glow{box-shadow:0 0 40px rgba(201,168,76,0.12),0 0 80px rgba(201,168,76,0.04)}
+.btn-gold{
+  background:linear-gradient(135deg,#C9A84C,#E8C96A,#9A7830);
+  background-size:200% auto;color:#0A0A0B;font-weight:600;
+  border:none;cursor:pointer;transition:all .3s ease;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-gold:hover{background-position:right center;transform:translateY(-1px);box-shadow:0 8px 28px rgba(201,168,76,.35)}
+.btn-ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--white);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-ghost:hover{background:rgba(255,255,255,0.1);border-color:rgba(201,168,76,0.3)}
+.input{
+  background:rgba(255,255,255,0.05);border:1px solid rgba(201,168,76,0.18);
+  color:var(--white);outline:none;transition:all .25s;width:100%;
+}
+.input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,0.1)}
+.input::placeholder{color:var(--gray)}
+.input option{background:#1a1a20;color:var(--white)}
+.badge-success{background:rgba(34,197,94,0.14);color:#22C55E;border:1px solid rgba(34,197,94,0.22)}
+.badge-pending{background:rgba(245,158,11,0.14);color:#F59E0B;border:1px solid rgba(245,158,11,0.22)}
+.badge-failed{background:rgba(239,68,68,0.14);color:#EF4444;border:1px solid rgba(239,68,68,0.22)}
+.scroll-x{overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+.scroll-x::-webkit-scrollbar{display:none}
+
+/* ═══════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes pulseGold{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.5)}50%{box-shadow:0 0 0 8px rgba(201,168,76,0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+
+.anim-fade-up{animation:fadeUp .5s ease forwards}
+.anim-fade-in{animation:fadeIn .35s ease forwards}
+.anim-slide-up{animation:slideUp .4s cubic-bezier(.34,1.56,.64,1) forwards}
+.anim-float{animation:float 3s ease-in-out infinite}
+.anim-slide-right{animation:slideInRight .4s ease forwards}
+
+/* ═══════════════════════════════════════════════
+   LAYOUT SHELLS
+═══════════════════════════════════════════════ */
+#app{min-height:100vh}
+
+/* ── LOADING ── */
+#loading-screen{
+  position:fixed;inset:0;background:var(--black);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;
+}
+.logo-box{
+  width:88px;height:88px;border-radius:22px;
+  background:linear-gradient(135deg,#C9A84C,#8A6820);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-weight:900;font-size:42px;color:#0A0A0B;
+  margin-bottom:20px;
+}
+.spinner{
+  width:32px;height:32px;border:2.5px solid rgba(201,168,76,0.18);
+  border-top-color:var(--gold);border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+.spinner-sm{
+  width:18px;height:18px;border:2px solid rgba(201,168,76,0.18);
+  border-top-color:var(--gold);border-radius:50%;
+  animation:spin .8s linear infinite;display:inline-block;
+}
+
+/* ── NAVBAR ── */
+#navbar{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  padding:14px 24px;display:flex;align-items:center;justify-content:space-between;
+  transition:all .3s ease;
+}
+#navbar.scrolled{
+  background:rgba(10,10,11,0.96);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(201,168,76,0.1);
+}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo-box{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,#C9A84C,#8A6820);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-weight:700;font-size:18px;color:#0A0A0B;
+}
+.nav-logo-text{font-family:'Playfair Display',serif;font-weight:700;font-size:18px}
+.nav-actions{display:flex;gap:10px}
+
+/* ── APP HEADER ── */
+#app-header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(14,14,17,0.96);backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(201,168,76,0.1);
+  padding:12px 18px;display:flex;align-items:center;justify-content:space-between;
+}
+.app-logo{display:flex;align-items:center;gap:8px}
+.app-logo-box{
+  width:32px;height:32px;border-radius:9px;
+  background:linear-gradient(135deg,#C9A84C,#8A6820);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:#0A0A0B;
+}
+.header-actions{display:flex;gap:8px;align-items:center}
+.icon-btn{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;color:var(--gray);
+}
+.icon-btn:hover{background:rgba(255,255,255,0.1);color:var(--white)}
+
+/* ── BOTTOM NAV ── */
+#bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(10,10,11,0.97);backdrop-filter:blur(24px);
+  border-top:1px solid rgba(201,168,76,0.12);
+  z-index:100;
+}
+.bottom-nav-inner{
+  max-width:640px;margin:0 auto;
+  display:flex;justify-content:space-around;padding:6px 0;
+}
+.nav-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 16px;background:none;border:none;cursor:pointer;
+  color:var(--gray2);transition:all .2s;
+}
+.nav-btn.active{color:var(--gold)}
+.nav-btn-icon{
+  width:32px;height:32px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.nav-btn.active .nav-btn-icon{background:rgba(201,168,76,0.14)}
+.nav-btn span{font-size:11px;font-weight:400}
+.nav-btn.active span{font-weight:600}
+
+/* ── PAGE WRAPPER ── */
+.page{max-width:640px;margin:0 auto;padding:20px 16px 100px;display:none}
+.page.active{display:block}
+
+/* ═══════════════════════════════════════════════
+   HOMEPAGE
+═══════════════════════════════════════════════ */
+#home-page{display:none}
+#home-page.active{display:block}
+
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:110px 24px 70px;position:relative;overflow:hidden;
+}
+.particle{
+  position:absolute;border-radius:50%;pointer-events:none;
+  animation:float 4s ease-in-out infinite;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(201,168,76,0.09);border:1px solid rgba(201,168,76,0.24);
+  border-radius:20px;padding:6px 16px;margin-bottom:24px;
+  font-size:13px;color:var(--gold-l);
+}
+.pulse-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--gold);
+  animation:pulseGold 2s infinite;
+}
+.hero-title{
+  font-size:clamp(34px,6vw,70px);font-weight:900;line-height:1.08;
+  margin-bottom:22px;color:var(--white);
+}
+.hero-sub{
+  font-size:clamp(16px,2vw,19px);color:var(--gray);
+  line-height:1.75;max-width:500px;margin:0 auto 38px;
+}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.hero-stats{
+  display:flex;gap:44px;justify-content:center;
+  margin-top:56px;flex-wrap:wrap;
+}
+.hero-stat-val{font-size:28px;font-weight:700;font-family:'Playfair Display',serif}
+.hero-stat-lab{color:var(--gray);font-size:12px;margin-top:2px}
+
+/* SECTIONS */
+.section{padding:80px 24px;max-width:1100px;margin:0 auto}
+.section-head{text-align:center;margin-bottom:48px}
+.section-title{font-size:clamp(26px,4vw,42px);font-weight:700;margin-bottom:10px;font-family:'Playfair Display',serif}
+.section-sub{color:var(--gray);font-size:15px}
+
+/* Service cards */
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:14px}
+.svc-card{
+  padding:24px 14px;text-align:center;cursor:pointer;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+.svc-card:hover{transform:translateY(-5px) scale(1.03);border-color:rgba(201,168,76,0.38)!important;box-shadow:0 14px 44px rgba(201,168,76,0.1)}
+.svc-icon{
+  width:52px;height:52px;border-radius:14px;margin:0 auto 14px;
+  display:flex;align-items:center;justify-content:center;
+}
+.svc-name{font-weight:600;font-size:14px;margin-bottom:3px}
+.svc-desc{color:var(--gray);font-size:12px}
+
+/* Why us */
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.why-feature{display:flex;gap:14px;margin-bottom:22px;align-items:flex-start}
+.why-icon-box{
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;
+  background:rgba(201,168,76,0.09);border:1px solid rgba(201,168,76,0.18);
+  display:flex;align-items:center;justify-content:center;
+}
+.why-title{font-weight:600;margin-bottom:3px;font-size:14px}
+.why-desc{color:var(--gray);font-size:13px;line-height:1.6}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stat-box{padding:22px;text-align:center;border-radius:16px}
+.stat-val{font-size:30px;font-weight:700;font-family:'Playfair Display',serif}
+.stat-lab{color:var(--gray);font-size:12px;margin-top:4px}
+
+/* Testimonials */
+.test-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+.test-card{padding:26px}
+.test-stars{display:flex;gap:2px;margin-bottom:14px;color:var(--gold)}
+.test-text{color:var(--white);line-height:1.7;margin-bottom:18px;font-size:14px}
+.test-name{font-weight:600;font-size:14px}
+.test-role{color:var(--gray);font-size:12px}
+
+/* FAQ */
+.faq-list{display:flex;flex-direction:column;gap:10px;max-width:700px;margin:0 auto}
+.faq-item{overflow:hidden}
+.faq-q{
+  width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:18px 22px;background:none;border:none;color:var(--white);
+  font-size:14px;font-weight:500;cursor:pointer;text-align:left;
+}
+.faq-a{padding:0 22px 18px;color:var(--gray);font-size:13px;line-height:1.7;display:none}
+.faq-a.open{display:block}
+.faq-chevron{color:var(--gold);font-size:20px;transition:transform .25s;flex-shrink:0}
+.faq-chevron.open{transform:rotate(45deg)}
+
+/* CTA */
+.cta-box{
+  max-width:580px;margin:0 auto;
+  padding:56px 36px;border-radius:24px;text-align:center;
+}
+.cta-title{font-size:clamp(26px,4vw,38px);font-weight:700;margin-bottom:14px;font-family:'Playfair Display',serif}
+.cta-sub{color:var(--gray);margin-bottom:30px;line-height:1.7}
+
+/* Footer */
+footer{
+  border-top:1px solid rgba(201,168,76,0.1);
+  padding:38px 24px;text-align:center;
+}
+.footer-logo{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px}
+.footer-copy{color:var(--gray);font-size:13px;margin-bottom:16px}
+.footer-links{display:flex;justify-content:center;gap:20px;font-size:13px;flex-wrap:wrap}
+.footer-link{color:var(--gray);cursor:pointer;transition:color .2s}
+.footer-link:hover{color:var(--gold)}
+
+/* ═══════════════════════════════════════════════
+   AUTH MODAL
+═══════════════════════════════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.82);
+  backdrop-filter:blur(10px);z-index:500;
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+@media(min-width:640px){.modal-overlay{align-items:center}}
+.modal-box{
+  width:100%;max-width:460px;max-height:92vh;overflow-y:auto;
+  background:#141418;border:1px solid rgba(201,168,76,0.14);
+  border-radius:24px 24px 0 0;padding:28px 24px;
+}
+@media(min-width:640px){.modal-box{border-radius:24px}}
+.modal-box.anim{animation:slideUp .38s cubic-bezier(.34,1.56,.64,1)}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px}
+.modal-title{font-size:22px;font-weight:700;font-family:'Playfair Display',serif;margin-bottom:3px}
+.modal-sub{color:var(--gray);font-size:13px}
+.modal-close{
+  width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,0.06);
+  border:none;cursor:pointer;color:var(--gray);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  transition:all .2s;
+}
+.modal-close:hover{background:rgba(255,255,255,0.12);color:var(--white)}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;color:var(--gray);display:block;margin-bottom:7px}
+.form-input{
+  padding:13px 15px;border-radius:11px;font-size:14px;
+  position:relative;
+}
+.pass-wrap{position:relative}
+.pass-toggle{
+  position:absolute;right:13px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;color:var(--gray);padding:4px;
+}
+.auth-switch{text-align:center;margin-top:18px;color:var(--gray);font-size:13px}
+.auth-switch a{color:var(--gold);cursor:pointer;font-weight:500}
+
+/* ═══════════════════════════════════════════════
+   APP PAGES
+═══════════════════════════════════════════════ */
+
+/* --- DASHBOARD --- */
+.wallet-card{
+  background:linear-gradient(135deg,#181204,#251c07,#181204);
+  border:1px solid rgba(201,168,76,0.28);border-radius:22px;
+  padding:26px 22px;margin-bottom:22px;position:relative;overflow:hidden;
+}
+.wallet-glow-1{
+  position:absolute;top:-50px;right:-50px;width:220px;height:220px;
+  background:radial-gradient(circle,rgba(201,168,76,0.12) 0%,transparent 70%);
+  border-radius:50%;pointer-events:none;
+}
+.wallet-glow-2{
+  position:absolute;bottom:-40px;left:-40px;width:160px;height:160px;
+  background:radial-gradient(circle,rgba(201,168,76,0.06) 0%,transparent 70%);
+  border-radius:50%;pointer-events:none;
+}
+.wallet-inner{position:relative;z-index:1}
+.wallet-label{color:rgba(201,168,76,0.7);font-size:12px;margin-bottom:5px}
+.wallet-balance{font-size:40px;font-weight:700;font-family:'Playfair Display',serif}
+.wallet-hide{
+  background:rgba(255,255,255,0.1);border:none;border-radius:8px;
+  padding:5px;cursor:pointer;color:rgba(201,168,76,0.7);
+  display:inline-flex;align-items:center;
+}
+.wallet-btns{display:flex;gap:10px;margin-top:18px}
+.wallet-btn-primary{flex:1;padding:11px;border-radius:11px;font-size:14px}
+.wallet-btn-sec{
+  flex:1;padding:11px;border-radius:11px;font-size:14px;
+  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);
+  color:var(--white);cursor:pointer;font-weight:500;transition:all .2s;
+}
+.wallet-btn-sec:hover{background:rgba(255,255,255,0.12)}
+
+.greeting{margin-bottom:18px}
+.greeting-name{font-size:18px;font-weight:600}
+.greeting-sub{color:var(--gray);font-size:13px}
+
+.svcs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.svc-btn{
+  padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:7px;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.1);
+  border-radius:14px;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);
+}
+.svc-btn:hover{transform:translateY(-3px) scale(1.03);border-color:rgba(201,168,76,0.35)}
+.svc-btn-icon{
+  width:42px;height:42px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+}
+.svc-btn-label{font-size:11px;font-weight:500;color:var(--gray);text-align:center;line-height:1.3}
+
+.promo-banner{
+  background:linear-gradient(135deg,rgba(201,168,76,0.09),rgba(201,168,76,0.02));
+  border:1px solid rgba(201,168,76,0.2);border-radius:15px;
+  padding:16px 18px;display:flex;align-items:center;gap:14px;
+  cursor:pointer;margin-bottom:22px;transition:all .2s;
+}
+.promo-banner:hover{border-color:rgba(201,168,76,0.4)}
+.promo-icon{
+  width:46px;height:46px;border-radius:13px;background:rgba(201,168,76,0.14);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.promo-title{font-weight:600;font-size:14px;margin-bottom:2px}
+.promo-sub{color:var(--gray);font-size:12px}
+
+.section-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.section-label{font-weight:600;font-size:15px}
+.section-link{color:var(--gold);background:none;border:none;font-size:13px;cursor:pointer}
+
+/* TXN ROW */
+.txn-row{
+  display:flex;align-items:center;gap:13px;padding:13px 15px;
+  border-radius:14px;margin-bottom:8px;
+}
+.txn-icon{
+  width:42px;height:42px;border-radius:12px;flex-shrink:0;
+  background:rgba(201,168,76,0.09);border:1px solid rgba(201,168,76,0.15);
+  display:flex;align-items:center;justify-content:center;
+}
+.txn-info{flex:1;min-width:0}
+.txn-desc{font-weight:500;font-size:13px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-date{color:var(--gray);font-size:11px}
+.txn-right{text-align:right;flex-shrink:0}
+.txn-amount{font-weight:600;font-size:14px}
+.txn-badge{font-size:10px;padding:2px 8px;border-radius:6px;display:inline-block;margin-top:2px}
+
+/* --- SERVICE FORM --- */
+.back-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 13px;border-radius:9px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  color:var(--gray);font-size:12px;cursor:pointer;margin-bottom:18px;
+  transition:all .2s;
+}
+.back-btn:hover{background:rgba(255,255,255,0.09);color:var(--white)}
+
+.service-header{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.service-icon-box{
+  width:48px;height:48px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+}
+.service-title{font-size:20px;font-weight:700}
+.service-bal{color:var(--gray);font-size:12px}
+
+.form-box{border-radius:20px;padding:22px}
+.quick-amounts{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.quick-amt{
+  padding:8px 13px;border-radius:10px;font-size:12px;cursor:pointer;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  color:var(--gray);transition:all .2s;
+}
+.quick-amt.active{background:rgba(201,168,76,0.15);border-color:var(--gold);color:var(--gold);font-weight:600}
+.amount-preview{
+  background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.14);
+  border-radius:11px;padding:13px 15px;margin-top:4px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.amount-preview-lab{color:var(--gray);font-size:13px}
+.amount-preview-val{font-weight:700;font-size:18px}
+
+/* RECEIPT */
+.receipt-box{border-radius:22px;padding:30px;text-align:center}
+.receipt-check{
+  width:80px;height:80px;border-radius:50%;
+  background:rgba(34,197,94,0.13);border:2px solid rgba(34,197,94,0.38);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 18px;
+}
+.receipt-list{
+  background:rgba(255,255,255,0.03);border-radius:14px;
+  padding:18px;margin:22px 0;text-align:left;
+}
+.receipt-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;
+}
+.receipt-row:last-child{border-bottom:none}
+.receipt-key{color:var(--gray)}
+.receipt-btns{display:flex;gap:10px;margin-top:4px}
+
+/* --- WALLET PAGE --- */
+.wallet-pg-card{
+  background:linear-gradient(135deg,#181204,#251c07);
+  border:1px solid rgba(201,168,76,0.28);border-radius:22px;
+  padding:28px;text-align:center;margin-bottom:18px;
+}
+.bank-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;
+}
+.bank-key{color:var(--gray)}
+.copy-acct{
+  background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);
+  border-radius:7px;padding:4px 8px;cursor:pointer;color:var(--gold);
+  display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;
+}
+.qr-box{
+  width:150px;height:150px;margin:0 auto;background:#fff;
+  border-radius:10px;padding:8px;overflow:hidden;
+}
+.qr-inner{
+  width:100%;height:100%;
+  background:repeating-conic-gradient(#000 0% 25%,transparent 0% 50%) 0 0/10px 10px;
+  border-radius:4px;
+}
+
+/* --- FUND WALLET --- */
+.fund-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.fund-amt{
+  padding:14px 6px;border-radius:12px;cursor:pointer;text-align:center;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  color:var(--gray);font-size:13px;transition:all .2s;
+}
+.fund-amt.active{background:rgba(201,168,76,0.14);border-color:var(--gold);color:var(--gold);font-weight:600}
+
+/* --- HISTORY PAGE --- */
+.filter-row{display:flex;gap:7px;margin-bottom:18px;overflow-x:auto;padding-bottom:4px}
+.filter-chip{
+  padding:7px 13px;border-radius:18px;white-space:nowrap;cursor:pointer;font-size:12px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  color:var(--gray);transition:all .2s;
+}
+.filter-chip.active{background:rgba(201,168,76,0.14);border-color:var(--gold);color:var(--gold);font-weight:500}
+
+/* --- PROFILE --- */
+.profile-avatar{
+  width:80px;height:80px;border-radius:50%;margin:0 auto 12px;
+  background:linear-gradient(135deg,#C9A84C,#8A6820);
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;font-weight:700;color:#0A0A0B;
+  font-family:'Playfair Display',serif;
+  border:3px solid rgba(201,168,76,0.28);
+}
+.profile-name{font-size:20px;font-weight:700;margin-bottom:3px}
+.profile-email{color:var(--gray);font-size:13px}
+.admin-badge{
+  font-size:11px;padding:3px 10px;border-radius:18px;
+  background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.28);
+  color:var(--gold);margin-top:8px;display:inline-block;
+}
+.menu-item{
+  display:flex;align-items:center;gap:13px;padding:15px 18px;
+  border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:all .2s;
+}
+.menu-item:last-child{border-bottom:none}
+.menu-item:hover{background:rgba(255,255,255,0.03)}
+.menu-item-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.12);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.menu-item-info{flex:1}
+.menu-item-title{font-weight:500;font-size:13px;margin-bottom:1px}
+.menu-item-sub{color:var(--gray);font-size:11px}
+.logout-btn{
+  width:100%;padding:14px;border-radius:13px;cursor:pointer;
+  background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);
+  color:#EF4444;font-weight:600;font-size:14px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .2s;
+}
+.logout-btn:hover{background:rgba(239,68,68,0.14)}
+
+/* --- REFERRAL --- */
+.ref-hero{
+  border:1px solid rgba(201,168,76,0.28);border-radius:22px;
+  padding:30px;text-align:center;margin-bottom:16px;
+  background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(201,168,76,0.03));
+}
+.ref-amt{font-size:40px;font-weight:700;font-family:'Playfair Display',serif}
+.ref-code-box{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.18);
+  border-radius:12px;padding:13px 15px;
+}
+.ref-code{font-size:22px;font-weight:700;letter-spacing:2px;color:var(--gold);flex:1}
+.copy-btn{
+  background:linear-gradient(135deg,#C9A84C,#8A6820);border:none;border-radius:9px;
+  padding:8px 14px;cursor:pointer;color:#0A0A0B;font-weight:600;font-size:12px;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.ref-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.ref-stat{padding:18px;text-align:center;border-radius:14px}
+.ref-stat-val{font-size:26px;font-weight:700;font-family:'Playfair Display',serif}
+.ref-stat-lab{color:var(--gray);font-size:11px}
+.how-step{display:flex;gap:13px;margin-bottom:13px;align-items:flex-start}
+.step-num{
+  width:28px;height:28px;border-radius:50%;background:rgba(201,168,76,0.13);
+  border:1px solid rgba(201,168,76,0.28);display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:var(--gold);
+}
+
+/* --- ADMIN --- */
+.admin-tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:18px;padding-bottom:2px}
+.admin-tab{
+  padding:8px 13px;border-radius:9px;white-space:nowrap;cursor:pointer;font-size:12px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  color:var(--gray);transition:all .2s;
+}
+.admin-tab.active{background:rgba(201,168,76,0.14);border-color:var(--gold);color:var(--gold);font-weight:500}
+.admin-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.admin-stat{padding:18px;border-radius:14px}
+.admin-stat-val{font-size:24px;font-weight:700;font-family:'Playfair Display',serif;margin-top:6px}
+.admin-stat-lab{color:var(--gray);font-size:11px;margin-top:2px}
+.user-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:13px 15px;border-radius:13px;margin-bottom:8px;
+}
+.user-name{font-weight:600;font-size:13px}
+.user-email{color:var(--gray);font-size:11px}
+.user-bal{color:var(--gold);font-weight:600;font-size:13px}
+
+/* ═══════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════ */
+#toast-container{
+  position:fixed;top:18px;right:16px;z-index:9999;
+  display:flex;flex-direction:column;gap:8px;
+}
+.toast{
+  padding:12px 18px;border-radius:12px;font-size:13px;
+  display:flex;align-items:center;gap:10px;max-width:320px;
+  background:#1a1a20;border:1px solid rgba(255,255,255,0.1);color:var(--white);
+  animation:slideInRight .35s ease;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+}
+.toast.success{border-color:rgba(34,197,94,0.28)}
+.toast.error{border-color:rgba(239,68,68,0.28)}
+.toast.info{border-color:rgba(201,168,76,0.28)}
+
+/* ═══════════════════════════════════════════════
+   EMPTY STATE
+═══════════════════════════════════════════════ */
+.empty{text-align:center;padding:60px 20px;color:var(--gray)}
+.empty svg{opacity:.18;margin-bottom:14px}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════ */
+@media(max-width:768px){
+  .why-grid{grid-template-columns:1fr}
+  .section{padding:56px 18px}
+}
+@media(max-width:420px){
+  .svcs-grid{grid-template-columns:repeat(4,1fr);gap:8px}
+  .svc-btn-icon{width:36px;height:36px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+     TOAST CONTAINER
+═══════════════════════════════════ -->
+<div id="toast-container"></div>
+
+<!-- ═══════════════════════════════════
+     LOADING SCREEN
+═══════════════════════════════════ -->
+<div id="loading-screen">
+  <div class="logo-box anim-float">B</div>
+  <div class="serif gold-grad" style="font-size:28px;font-weight:700;margin-bottom:6px">BENIM VTU</div>
+  <div style="color:var(--gray);font-size:13px;margin-bottom:28px">Premium Digital Services</div>
+  <div class="spinner"></div>
+</div>
+
+<!-- ═══════════════════════════════════
+     AUTH MODAL
+═══════════════════════════════════ -->
+<div id="auth-modal" class="modal-overlay" onclick="closeAuthIfOverlay(event)">
+  <div class="modal-box" id="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title serif" id="modal-title">Welcome Back</div>
+        <div class="modal-sub" id="modal-sub">Sign in to your account</div>
+      </div>
+      <button class="modal-close" onclick="closeAuth()">✕</button>
+    </div>
+
+    <!-- Register only -->
+    <div class="form-group" id="field-name" style="display:none">
+      <label class="form-label">Full Name</label>
+      <input class="input form-input" id="inp-name" type="text" placeholder="Your full name"/>
+    </div>
+    <!-- Common -->
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input class="input form-input" id="inp-email" type="email" placeholder="you@email.com"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="pass-wrap">
+        <input class="input form-input" id="inp-pass" type="password" placeholder="Enter password" style="padding-right:44px"/>
+        <button class="pass-toggle" onclick="togglePass()">👁</button>
+      </div>
+    </div>
+    <!-- Register only -->
+    <div id="field-phone" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input class="input form-input" id="inp-phone" type="tel" placeholder="08012345678"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Referral Code <span style="color:var(--gray2)">(optional)</span></label>
+        <input class="input form-input" id="inp-ref" type="text" placeholder="e.g. BEN12345"/>
+      </div>
+    </div>
+
+    <button class="btn-gold" id="auth-btn" onclick="doAuth()" style="width:100%;padding:14px;border-radius:12px;font-size:15px;margin-top:4px">
+      Sign In
+    </button>
+
+    <div class="auth-switch">
+      <span id="auth-switch-text">Don't have an account? </span>
+      <a onclick="switchAuthMode()">Sign Up</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     HOMEPAGE
+═══════════════════════════════════ -->
+<div id="home-page">
+  <!-- NAVBAR -->
+  <nav id="navbar">
+    <div class="nav-logo">
+      <div class="nav-logo-box">B</div>
+      <span class="nav-logo-text serif">BENIM VTU</span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-ghost" onclick="openAuth('login')" style="padding:8px 18px;border-radius:10px;font-size:13px;font-weight:500">Login</button>
+      <button class="btn-gold" onclick="openAuth('register')" style="padding:8px 20px;border-radius:10px;font-size:13px">Get Started</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <!-- Particles -->
+    <div class="particle" style="width:280px;height:280px;background:radial-gradient(circle,rgba(201,168,76,.07) 0%,transparent 70%);top:10%;left:5%"></div>
+    <div class="particle" style="width:220px;height:220px;background:radial-gradient(circle,rgba(201,168,76,.05) 0%,transparent 70%);top:65%;right:5%;animation-delay:.8s"></div>
+    <div class="particle" style="width:160px;height:160px;background:radial-gradient(circle,rgba(201,168,76,.09) 0%,transparent 70%);top:30%;right:15%;animation-delay:1.6s"></div>
+
+    <div class="anim-fade-up" style="position:relative;z-index:1;max-width:680px">
+      <div class="hero-tag">
+        <div class="pulse-dot"></div>
+        Nigeria's #1 VTU Platform
+      </div>
+      <h1 class="hero-title serif">
+        Power Your Life<br>
+        <span class="gold-grad">Instantly & Securely</span>
+      </h1>
+      <p class="hero-sub">Top up airtime, buy data, pay bills and more — all from one premium platform built for speed, security and reliability.</p>
+      <div class="hero-btns">
+        <button class="btn-gold" onclick="openAuth('register')" style="padding:14px 34px;border-radius:13px;font-size:16px">
+          Start Free →
+        </button>
+        <button class="btn-ghost" onclick="openAuth('login')" style="padding:14px 28px;border-radius:13px;font-size:16px">
+          Sign In
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-val gold-grad serif">50K+</div>
+          <div class="hero-stat-lab">Happy Users</div>
+        </div>
+        <div>
+          <div class="hero-stat-val gold-grad serif">₦500M+</div>
+          <div class="hero-stat-lab">Processed</div>
+        </div>
+        <div>
+          <div class="hero-stat-val gold-grad serif">99.9%</div>
+          <div class="hero-stat-lab">Uptime</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES SECTION -->
+  <div style="background:rgba(255,255,255,0.01);padding:4px 0">
+  <div class="section">
+    <div class="section-head">
+      <h2 class="section-title">Our <span class="gold-grad">Services</span></h2>
+      <p class="section-sub">Everything you need in one premium platform</p>
+    </div>
+    <div class="services-grid">
+      <div class="glass svc-card"><div class="svc-icon" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.2)">📱</div><div class="svc-name">Airtime</div><div class="svc-desc">Instant recharge</div></div>
+      <div class="glass svc-card"><div class="svc-icon" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)">📶</div><div class="svc-name">Data</div><div class="svc-desc">All networks</div></div>
+      <div class="glass svc-card"><div class="svc-icon" style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2)">📺</div><div class="svc-name">Cable TV</div><div class="svc-desc">DSTV, GOtv & more</div></div>
+      <div class="glass svc-card"><div class="svc-icon" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)">⚡</div><div class="svc-name">Electricity</div><div class="svc-desc">Prepaid & postpaid</div></div>
+      <div class="glass svc-card"><div class="svc-icon" style="background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.2)">🔄</div><div class="svc-name">Airtime2Cash</div><div class="svc-desc">Convert & earn</div></div>
+      <div class="glass svc-card"><div class="svc-icon" style="background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2)">💳</div><div class="svc-name">Wallet</div><div class="svc-desc">Fund & withdraw</div></div>
+    </div>
+  </div>
+  </div>
+
+  <!-- WHY US -->
+  <div class="section">
+    <div class="why-grid">
+      <div>
+        <h2 class="section-title" style="text-align:left;margin-bottom:28px">Why Choose <span class="gold-grad">BENIM VTU?</span></h2>
+        <div class="why-feature">
+          <div class="why-icon-box">🛡️</div>
+          <div><div class="why-title">Bank-Grade Security</div><div class="why-desc">Military-grade encryption protects your data and funds 24/7.</div></div>
+        </div>
+        <div class="why-feature">
+          <div class="why-icon-box">⚡</div>
+          <div><div class="why-title">Lightning Fast</div><div class="why-desc">Transactions processed in under 3 seconds on all networks.</div></div>
+        </div>
+        <div class="why-feature">
+          <div class="why-icon-box">📈</div>
+          <div><div class="why-title">Best Rates</div><div class="why-desc">Competitive pricing with zero hidden charges on all services.</div></div>
+        </div>
+        <div class="why-feature">
+          <div class="why-icon-box">🌟</div>
+          <div><div class="why-title">24/7 Support</div><div class="why-desc">Our support team is always available to assist you.</div></div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="glass stat-box"><div class="stat-val gold-grad serif">12K+</div><div class="stat-lab">Daily Transactions</div></div>
+        <div class="glass stat-box"><div class="stat-val gold-grad serif">100%</div><div class="stat-lab">Network Coverage</div></div>
+        <div class="glass stat-box"><div class="stat-val gold-grad serif">50K+</div><div class="stat-lab">Happy Users</div></div>
+        <div class="glass stat-box"><div class="stat-val gold-grad serif">99.9%</div><div class="stat-lab">Uptime SLA</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div style="background:rgba(255,255,255,0.01);padding:4px 0">
+  <div class="section">
+    <div class="section-head">
+      <h2 class="section-title">What Customers <span class="gold-grad">Say</span></h2>
+    </div>
+    <div class="test-grid">
+      <div class="glass test-card"><div class="test-stars">★★★★★</div><p class="test-text">"BENIM VTU saved me so much time. Instant and truly reliable every single time!"</p><div class="test-name">Chioma A.</div><div class="test-role">Business Owner</div></div>
+      <div class="glass test-card"><div class="test-stars">★★★★★</div><p class="test-text">"Best VTU platform in Nigeria. Never fails! I use it daily for my business."</p><div class="test-name">Emeka R.</div><div class="test-role">Student</div></div>
+      <div class="glass test-card"><div class="test-stars">★★★★★</div><p class="test-text">"The referral bonus is amazing. Already earned ₦15,000 just from inviting friends!"</p><div class="test-name">Fatima M.</div><div class="test-role">Entrepreneur</div></div>
+    </div>
+  </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="section">
+    <div class="section-head">
+      <h2 class="section-title">Frequently Asked <span class="gold-grad">Questions</span></h2>
+    </div>
+    <div class="faq-list">
+      <div class="glass faq-item"><button class="faq-q" onclick="toggleFaq(0)">How do I fund my wallet?<span class="faq-chevron" id="faq-chev-0">+</span></button><div class="faq-a" id="faq-a-0">Transfer to our bank account or pay with card. Your wallet is credited automatically within 5 minutes.</div></div>
+      <div class="glass faq-item"><button class="faq-q" onclick="toggleFaq(1)">Are transactions instant?<span class="faq-chevron" id="faq-chev-1">+</span></button><div class="faq-a" id="faq-a-1">Yes! All airtime, data and bill payments are processed within 3 seconds on all networks.</div></div>
+      <div class="glass faq-item"><button class="faq-q" onclick="toggleFaq(2)">How does the referral system work?<span class="faq-chevron" id="faq-chev-2">+</span></button><div class="faq-a" id="faq-a-2">Share your unique referral link. Earn ₦200 for every friend who registers and makes their first purchase.</div></div>
+      <div class="glass faq-item"><button class="faq-q" onclick="toggleFaq(3)">Is my data safe?<span class="faq-chevron" id="faq-chev-3">+</span></button><div class="faq-a" id="faq-a-3">Absolutely. We use bank-grade Firebase security with encrypted connections to protect all user data.</div></div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="section" style="padding-top:20px">
+    <div class="glass gold-glow cta-box">
+      <div class="cta-title serif">Ready to Get <span class="gold-grad">Started?</span></div>
+      <p class="cta-sub">Join thousands of Nigerians enjoying fast, reliable digital services every single day.</p>
+      <button class="btn-gold" onclick="openAuth('register')" style="padding:15px 40px;border-radius:13px;font-size:16px">Create Free Account</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">
+      <div class="nav-logo-box">B</div>
+      <span class="serif" style="font-weight:700">BENIM VTU</span>
+    </div>
+    <div class="footer-copy">© 2024 BENIM VTU. All rights reserved.</div>
+    <div class="footer-links">
+      <span class="footer-link">Privacy Policy</span>
+      <span class="footer-link">Terms of Service</span>
+      <span class="footer-link">Contact Us</span>
+      <span class="footer-link">Support</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════
+     APP SHELL (logged-in)
+═══════════════════════════════════ -->
+<div id="app-shell" style="display:none">
+  <!-- App Header -->
+  <div id="app-header">
+    <div class="app-logo">
+      <div class="app-logo-box">B</div>
+      <span class="serif" style="font-weight:700;font-size:16px">BENIM VTU</span>
+    </div>
+    <div class="header-actions">
+      <button id="admin-btn" class="btn-ghost" onclick="showPage('admin')" style="padding:6px 12px;border-radius:8px;font-size:12px;font-weight:500;color:var(--gold);border-color:rgba(201,168,76,0.2);display:none">⚙ Admin</button>
+      <button class="icon-btn" onclick="showPage('notifications')">🔔</button>
+    </div>
+  </div>
+
+  <!-- Pages -->
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page active">
+    <div class="wallet-card">
+      <div class="wallet-glow-1"></div>
+      <div class="wallet-glow-2"></div>
+      <div class="wallet-inner">
+        <div class="wallet-label">Wallet Balance</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <div class="wallet-balance" id="dash-balance">₦0.00</div>
+          <button class="wallet-hide" onclick="toggleBalVis()" id="bal-eye" title="Toggle balance">👁</button>
+        </div>
+        <div style="color:rgba(201,168,76,0.5);font-size:12px">Available for transactions</div>
+        <div class="wallet-btns">
+          <button class="btn-gold wallet-btn-primary" onclick="showPage('fund')">+ Fund Wallet</button>
+          <button class="wallet-btn-sec" onclick="showPage('history')">View History</button>
+        </div>
+      </div>
+    </div>
+    <div class="greeting">
+      <div class="greeting-name" id="greeting-name">Hello, User 👋</div>
+      <div class="greeting-sub">What would you like to do today?</div>
+    </div>
+    <div class="svcs-grid">
+      <button class="svc-btn" onclick="showPage('airtime')"><div class="svc-btn-icon" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.2)">📱</div><span class="svc-btn-label">Airtime</span></button>
+      <button class="svc-btn" onclick="showPage('data')"><div class="svc-btn-icon" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)">📶</div><span class="svc-btn-label">Data</span></button>
+      <button class="svc-btn" onclick="showPage('cable')"><div class="svc-btn-icon" style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2)">📺</div><span class="svc-btn-label">Cable TV</span></button>
+      <button class="svc-btn" onclick="showPage('electricity')"><div class="svc-btn-icon" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)">⚡</div><span class="svc-btn-label">Electricity</span></button>
+      <button class="svc-btn" onclick="showPage('airtime2cash')"><div class="svc-btn-icon" style="background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.2)">🔄</div><span class="svc-btn-label">Airtime 2 Cash</span></button>
+      <button class="svc-btn" onclick="showPage('fund')"><div class="svc-btn-icon" style="background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2)">💳</div><span class="svc-btn-label">Fund Wallet</span></button>
+      <button class="svc-btn" onclick="showPage('referral')"><div class="svc-btn-icon" style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2)">🎁</div><span class="svc-btn-label">Referral</span></button>
+      <button class="svc-btn" onclick="showPage('history')"><div class="svc-btn-icon" style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2)">📋</div><span class="svc-btn-label">History</span></button>
+    </div>
+    <div class="promo-banner" onclick="showPage('referral')">
+      <div class="promo-icon">🎁</div>
+      <div style="flex:1">
+        <div class="promo-title">Earn ₦200 per referral! 🔥</div>
+        <div class="promo-sub">Invite friends and earn instantly to your wallet</div>
+      </div>
+      <span style="color:var(--gold)">→</span>
+    </div>
+    <div class="section-row">
+      <span class="section-label">Recent Transactions</span>
+      <button class="section-link" onclick="showPage('history')">See all</button>
+    </div>
+    <div id="recent-txns"><div class="empty" style="padding:30px 0"><div style="font-size:32px;opacity:.3">📋</div><div style="margin-top:8px;font-size:13px">No transactions yet</div></div></div>
+  </div>
+
+  <!-- WALLET -->
+  <div id="page-wallet" class="page">
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:18px">My Wallet</h2>
+    <div class="wallet-pg-card">
+      <div style="color:rgba(201,168,76,0.7);font-size:12px;margin-bottom:8px">Total Balance</div>
+      <div class="serif" style="font-size:44px;font-weight:700" id="wallet-pg-bal">₦0.00</div>
+      <div style="color:var(--gray);font-size:12px;margin-top:4px">Available for transactions</div>
+    </div>
+    <div class="glass" style="padding:22px;border-radius:18px;margin-bottom:14px">
+      <div style="font-weight:600;font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:8px">💰 Fund via Bank Transfer</div>
+      <div class="bank-row"><span class="bank-key">Bank Name</span><span>First Bank Nigeria</span></div>
+      <div class="bank-row"><span class="bank-key">Account Name</span><span>BENIM VTU LTD</span></div>
+      <div class="bank-row">
+        <span class="bank-key">Account Number</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-weight:600">3012345678</span>
+          <button class="copy-acct" onclick="copyText('3012345678','Account number copied!')">📋 Copy</button>
+        </div>
+      </div>
+      <p style="color:var(--gray);font-size:11px;margin-top:12px;line-height:1.6">ℹ️ Send any amount and your wallet will be credited within 5 minutes after confirmation.</p>
+    </div>
+    <div class="glass" style="padding:22px;border-radius:18px;text-align:center">
+      <div style="font-weight:600;font-size:15px;margin-bottom:14px">📲 QR Payment</div>
+      <div class="qr-box"><div class="qr-inner"></div></div>
+      <p style="color:var(--gray);font-size:12px;margin-top:10px">Scan to fund wallet instantly</p>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="page-history" class="page">
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:16px">Transaction History</h2>
+    <div class="filter-row scroll-x" id="filter-row">
+      <button class="filter-chip active" onclick="filterTxns('all',this)">All</button>
+      <button class="filter-chip" onclick="filterTxns('airtime',this)">Airtime</button>
+      <button class="filter-chip" onclick="filterTxns('data',this)">Data</button>
+      <button class="filter-chip" onclick="filterTxns('cable',this)">Cable TV</button>
+      <button class="filter-chip" onclick="filterTxns('electricity',this)">Electricity</button>
+      <button class="filter-chip" onclick="filterTxns('wallet_fund',this)">Wallet Fund</button>
+      <button class="filter-chip" onclick="filterTxns('airtime2cash',this)">Airtime2Cash</button>
+    </div>
+    <div id="history-list"><div class="empty"><div style="font-size:40px;opacity:.2">📋</div><div style="margin-top:10px">No transactions found</div></div></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div id="page-profile" class="page">
+    <div style="text-align:center;margin-bottom:24px">
+      <div class="profile-avatar" id="profile-avatar">U</div>
+      <div class="profile-name" id="profile-name">User</div>
+      <div class="profile-email" id="profile-email">—</div>
+      <div class="admin-badge" id="profile-admin-badge" style="display:none">⚙ Admin</div>
+    </div>
+    <div class="glass" style="padding:20px;border-radius:18px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-weight:600;font-size:14px">Profile Info</span>
+        <button id="edit-save-btn" onclick="toggleEdit()" style="padding:6px 13px;border-radius:9px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--gray);cursor:pointer;font-size:12px">Edit</button>
+      </div>
+      <div class="form-group"><label class="form-label">Full Name</label><input class="input form-input" id="edit-name" type="text" disabled style="opacity:.7;padding:11px 13px;border-radius:10px;font-size:13px"/></div>
+      <div class="form-group"><label class="form-label">Phone Number</label><input class="input form-input" id="edit-phone" type="tel" disabled style="opacity:.7;padding:11px 13px;border-radius:10px;font-size:13px" placeholder="Add phone"/></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="input form-input" id="edit-email-disp" type="email" disabled style="opacity:.5;padding:11px 13px;border-radius:10px;font-size:13px"/></div>
+    </div>
+    <div class="glass" style="border-radius:18px;overflow:hidden;margin-bottom:14px">
+      <div class="menu-item" onclick="showPage('notifications')"><div class="menu-item-icon">🔔</div><div class="menu-item-info"><div class="menu-item-title">Notifications</div><div class="menu-item-sub">Manage your alerts</div></div><span style="color:var(--gray);font-size:16px">›</span></div>
+      <div class="menu-item" onclick="showPage('referral')"><div class="menu-item-icon">🎁</div><div class="menu-item-info"><div class="menu-item-title">Referral Program</div><div class="menu-item-sub" id="ref-code-disp">Code: —</div></div><span style="color:var(--gray);font-size:16px">›</span></div>
+      <div class="menu-item"><div class="menu-item-icon">🛡️</div><div class="menu-item-info"><div class="menu-item-title">Security Settings</div><div class="menu-item-sub">Change password & 2FA</div></div><span style="color:var(--gray);font-size:16px">›</span></div>
+      <div class="menu-item"><div class="menu-item-icon">❓</div><div class="menu-item-info"><div class="menu-item-title">Help & Support</div><div class="menu-item-sub">Get help from our team</div></div><span style="color:var(--gray);font-size:16px">›</span></div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">🚪 Sign Out</button>
+    <p style="text-align:center;color:rgba(255,255,255,0.18);font-size:11px;margin-top:18px">BENIM VTU v1.0.0 • © 2024</p>
+  </div>
+
+  <!-- AIRTIME -->
+  <div id="page-airtime" class="page">
+    <button class="back-btn" onclick="showPage('dashboard')">← Back</button>
+    <div class="service-header">
+      <div class="service-icon-box" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.2)">📱</div>
+      <div><div class="service-title">Buy Airtime</div><div class="service-bal" id="airtime-bal">Wallet: ₦0</div></div>
+    </div>
+    <div class="glass form-box">
+      <div class="form-group">
+        <label class="form-label">Network</label>
+        <select class="input form-input" id="airtime-network" style="padding:12px 14px;border-radius:10px;font-size:14px">
+          <option value="">Select Network</option>
+          <option>MTN</option><option>Airtel</option><option>Glo</option><option>9mobile</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input class="input form-input" id="airtime-phone" type="tel" placeholder="08012345678" style="padding:12px 14px;border-radius:10px;font-size:14px"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount (₦)</label>
+        <input class="input form-input" id="airtime-amount" type="number" placeholder="Min ₦50" style="padding:12px 14px;border-radius:10px;font-size:14px" oninput="updateAmtPreview('airtime')"/>
+        <div class="quick-amounts" style="margin-top:10px">
+          <button class="quick-amt" onclick="setAmt('airtime',100,this)">₦100</button>
+          <button class="quick-amt" onclick="setAmt('airtime',200,this)">₦200</button>
+          <button class="quick-amt" onclick="setAmt('airtime',500,this)">₦500</button>
+          <button class="quick-amt" onclick="setAmt('airtime',1000,this)">₦1,000</button>
+          <button class="quick-amt" onclick="setAmt('airtime',2000,this)">₦2,000</button>
+          <button class="quick-amt" onclick="setAmt('airtime',5000,this)">₦5,000</button>
+        </div>
+      </div>
+      <div class="amount-preview" id="airtime-preview" style="display:none">
+        <span class="amount-preview-lab">You'll pay</span>
+        <span class="amount-preview-val gold-grad serif" id="airtime-preview-val">₦0</span>
+      </div>
+      <button class="btn-gold" style="width:100%;padding:14px;border-radius:12px;font-size:15px;margin-top:14px" onclick="doService('airtime')" id="airtime-submit-btn">
+        Buy Airtime
+      </button>
+    </div>
+  </div>
+
+  <!-- DATA -->
+  <div id="page-data" class="page">
+    <button class="back-btn" onclick="showPage('dashboard')">← Back</button>
+    <div class="service-header">
+      <div class="service-icon-box" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)">📶</div>
+      <div><div class="service-title">Buy Data</div><div class="service-bal" id="data-bal">Wallet: ₦0</div></div>
+    </div>
+    <div class="glass form-box">
+      <div class="form-group">
+        <label class="form-label">Network</label>
+        <select class="input form-input" id="data-network" style="padding:12px 14px;border-radius:10px;font-size:14px">
+          <option value="">Select Network</option>
+          <option>MTN</option><option>Airtel</option><option>Glo</option><option>9mobile</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input class="input form-input" id="data-phone" type="tel" placeholder="08012345678" style="padding:12px 14px;border-radius:10px;font-size:14px"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data Plan</label>
+        <select class="input form-input" id="data-plan" style="padding:12px 14px;border-radius:10px;font-size:14px" onchange="updatePlanPreview()">
+          <option value="">Select Plan</option>
+          <option value="300">500MB — ₦150</option>
+          <option value="300">1GB — ₦300</option>
+          <option value="500">2GB — ₦500</option>
+          <option value="1500">5GB — ₦1,500</option>
+          <option value="2500">10GB — ₦2,500</option>
+          <option value="5000">Unlimited — ₦5,000</option>
+        </select>
+      </div>
+      <div class="amount-preview" id="data-preview" style="display:none">
+        <span class="amount-preview-lab">You'll pay</span>
+        <span class="amount-preview-val gold-grad serif" id="data-preview-val">₦0</span>
+      </div>
+      <button class="btn-gold" style="width:100%;padding:14px;border-radius:12px;font-size:15px;margin-top:14px" onclick="doService('data')">Buy Data</button>
+    </div>
+  </div>
+
+  <!-- CABLE -->
+  <div id="page-cable" class="page">
+    <button class="back-btn" onclick="showPage('dashboard')">← Back</button>
+    <div class="service-header">
+      <div class="service-icon-box" style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2)">📺</div>
+      <div><div class="service-title">Cable TV Subscription</div><div class="service-bal" id="cable-bal">Wallet: ₦0</div></div>
+    </div>
+    <div class="glass form-box">
+      <div class="form-group">
+        <label class="form-label">Provider</label>
+        <select class="input form-input" id="cable-provider" style="padding:12px 14px;border-radius:10px;font-size:14px">
+          <option value="">Select Provider</option>
+          <option>DSTV</option><option>GOtv</option><option>Startimes</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Smartcard / IUC Number</label>
+        <input class="input form-input" id="cable-card" type="text" placeholder="Enter smartcard number" style="padding:12px 14px;border-radius:10px;font-size:14px"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Package</label>
+        <select class="input form-input" id="cable-plan" style="padding:12px 14px;border-radius:10px;font-size:14px" onchange="updateCablePreview()">
+          <option value="">Select Package</option>
+          <option value="4150">GOtv Max — ₦4,150</option>
+          <option value="900">Startimes Basic — ₦900</option>
+          <option value="9000">DSTV Compact — ₦9,000</option>
+          <option value="14250">DSTV Compact+ — ₦14,250</option>
+          <option value="24500">DSTV Premium — ₦24,500</option>
+        </select>
+      </div>
+      <div class="amount-preview" id="cable-preview" style="display:none">
+        <span class="amount-preview-lab">Subscription Fee</span>
+        <span class="amount-preview-val gold-grad serif" id="cable-preview-val">₦0</span>
+      </div>
+      <button class="btn-gold" style="width:100%;padding:14px;border-radius:12px;font-size:15px;margin-top:14px" onclick="doService('cable')">Subscribe Now</button>
+    </div>
+  </div>
+
+  <!-- ELECTRICITY -->
+  <div id="page-electricity" class="page">
+    <button class="back-btn" onclick="showPage('dashboard')">← Back</button>
+    <div class="service-header">
+      <div class="service-icon-box" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)">⚡</div>
+      <div><div class="service-title">Electricity Bill</div><div class="service-bal" id="elec-bal">Wallet: ₦0</div></div>
+    </div>
+    <div class="glass form-box">
+      <div class="form-group">
+        <label class="form-label">Distribution Company (DisCo)</label>
+        <select class="input form-input" id="elec-disco" style="padding:12px 14px;border-radius:10px;font-size:14px">
+          <option value="">Select DisCo</option>
+          <option>EKEDC (Eko)</option><option>IKEDC (Ikeja)</option><option>AEDC (Abuja)</option>
+          <option>PHED (Port Harcourt)</option><option>IBEDC (Ibadan)</option><option>KEDCO (Kano)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Meter Number</label>
+        <input class="input form-input" id="elec-meter" type="text" placeholder="Enter meter number" style="padding:12px 14px;border-radius:10px;font-size:14px"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Meter Type</label>
+        <select class="input form-input" id="elec-type" style="padding:12px 14px;border-radius:10px;font-size:14px">
+          <option>Prepaid</option><option>Postpaid</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount (₦)</label>
+        <input class="input form-input" id="elec-amount" type="number" placeholder="Min ₦500" style="padding:12px 14px;border-radius:10px;font-size:14px" oninput="updateAmtPreview('elec')"/>
+        <div class="quick-amounts" style="margin-top:10px">
+          <button class="quick-amt" onclick="setAmt('elec',1000,this)">₦1,000</button>
+          <button class="quick-amt" onclick="setAmt('elec',2000,this)">₦2,000</button>
+          <button class="quick-amt" onclick="setAmt('elec',5000,this)">₦5,000</button>
+          <button class="quick-amt" onclick="setAmt('elec',10000,this)">₦10,000</button>
+        </div>
+      </div>
+      <div class="amount-preview" id="elec-preview" style="display:none">
+        <span class="amount-preview-lab">You'll pay</span>
+        <span class="amount-preview-val gold-grad serif" id="elec-preview-val">₦0</span>
+      </div>
+      <button class="btn-gold" style="width:100%;padding:14px;border-radius:12px;font-size:15px;margin-top:14px" onclick="doService('electricity')">Pay Bill</button>
+    </div>
+  </div>
+
+  <!-- AIRTIME2CASH -->
+  <div id="page-airtime2cash" class="page">
+    <button class="back-btn" onclick="showPage('dashboard')">← Back</button>
+    <div class="service-header">
+      <div class="service-icon-box" style="background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.2)">🔄</div>
+      <div><div class="service-title">Airtime to Cash</div><div class="service-bal">Convert airtime at 75% rate</div></div>
+    </div>
+    <div class="glass" style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:12px;padding:14px 16px;margin-bottom:14px">
+      <p style="color:var(--gold);font-size:13px;font-weight:500">💡 You receive 75% of airtime value credited instantly to your wallet.</p>
+    </div>
+    <div class="glass form-box">
+      <div class="form-group">
+        <label class="form-label">Network</label>
+        <select class="input form-input" id="a2c-network" style="padding:12px 14px;border-radius:10px;font-size:14px">
+          <option value="">Select Network</option>
+          <option>MTN</option><option>Airtel</option><option>Glo</option><option>9mobile</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number (sender)</label>
+        <input class="input form-input" id="a2c-phone" type="tel" placeholder="Number to send airtime FROM" style="padding:12px 14px;border-radius:10px;font-size:14px"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Airtime Amount (₦)</label>
+        <input class="input form-input" id="a2c-amount" type="number" placeholder="Min ₦500" style="padding:12px 14px;border-radius:10px;font-size:14px" oninput="updateA2cPreview()"/>
+      </div>
+      <div class="amount-preview" id="a2c-preview" style="display:none">
+        <span class="amount-preview-lab">You'll receive</span>
+        <span class="amount-preview-val" style="color:var(--green);font-weight:700;font-size:20px" id="a2c-preview-val">₦0</span>
+      </div>
+      <button class="btn-gold" style="width:100%;padding:14px;border-radius:12px;font-size:15px;margin-top:14px" onclick="doAirtime2Cash()">Convert Airtime</button>
+    </div>
+  </div>
+
+  <!-- FUND WALLET -->
+  <div id="page-fund" class="page">
+    <button class="back-btn" onclick="showPage('dashboard')">← Back</button>
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:6px">Fund Wallet</h2>
+    <p style="color:var(--gray);font-size:13px;margin-bottom:20px">Choose an amount to add to your wallet (demo mode)</p>
+    <div class="glass form-box">
+      <div class="fund-grid" id="fund-grid">
+        <button class="fund-amt" onclick="setFundAmt(500,this)">₦500</button>
+        <button class="fund-amt" onclick="setFundAmt(1000,this)">₦1,000</button>
+        <button class="fund-amt" onclick="setFundAmt(2000,this)">₦2,000</button>
+        <button class="fund-amt" onclick="setFundAmt(5000,this)">₦5,000</button>
+        <button class="fund-amt" onclick="setFundAmt(10000,this)">₦10,000</button>
+        <button class="fund-amt" onclick="setFundAmt(20000,this)">₦20,000</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Or enter custom amount</label>
+        <input class="input form-input" id="fund-custom" type="number" placeholder="Enter amount (₦)" style="padding:12px 14px;border-radius:10px;font-size:14px" oninput="onFundCustom()"/>
+      </div>
+      <button class="btn-gold" style="width:100%;padding:14px;border-radius:12px;font-size:15px" id="fund-btn" onclick="doFund()">Fund Wallet</button>
+    </div>
+  </div>
+
+  <!-- REFERRAL -->
+  <div id="page-referral" class="page">
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:18px">Referral Program</h2>
+    <div class="ref-hero gold-glow">
+      <div style="font-size:40px;margin-bottom:10px">🎁</div>
+      <div class="ref-amt gold-grad serif">₦200</div>
+      <p style="color:var(--gray);font-size:13px;margin-top:4px">Per successful referral</p>
+    </div>
+    <div class="glass" style="padding:20px;border-radius:18px;margin-bottom:12px">
+      <label class="form-label" style="margin-bottom:10px;display:block">Your Referral Code</label>
+      <div class="ref-code-box">
+        <div class="ref-code" id="ref-code-val">—</div>
+        <button class="copy-btn" onclick="copyRefCode()">📋 Copy</button>
+      </div>
+    </div>
+    <div class="glass" style="padding:20px;border-radius:18px;margin-bottom:12px">
+      <label class="form-label" style="margin-bottom:10px;display:block">Referral Link</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div id="ref-link-val" style="flex:1;padding:11px 13px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:11px;color:var(--gray);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div>
+        <button class="copy-btn" onclick="copyRefLink()">📋</button>
+      </div>
+    </div>
+    <div class="ref-stats">
+      <div class="glass ref-stat"><div class="ref-stat-val gold-grad serif" id="ref-count">0</div><div class="ref-stat-lab">Total Referrals</div></div>
+      <div class="glass ref-stat"><div class="ref-stat-val gold-grad serif" id="ref-earned">₦0</div><div class="ref-stat-lab">Total Earned</div></div>
+    </div>
+    <div class="glass" style="padding:20px;border-radius:18px">
+      <div style="font-weight:600;font-size:14px;margin-bottom:14px">How it works</div>
+      <div class="how-step"><div class="step-num">1</div><p style="color:var(--gray);font-size:13px;line-height:1.5;padding-top:4px">Share your referral code or link with friends and family</p></div>
+      <div class="how-step"><div class="step-num">2</div><p style="color:var(--gray);font-size:13px;line-height:1.5;padding-top:4px">Friend registers using your code and makes first purchase</p></div>
+      <div class="how-step"><div class="step-num">3</div><p style="color:var(--gray);font-size:13px;line-height:1.5;padding-top:4px">You instantly earn ₦200 credited to your wallet</p></div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div id="page-notifications" class="page">
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:18px">Notifications</h2>
+    <div id="notifs-list">
+      <div class="glass" style="padding:16px 18px;border-radius:14px;margin-bottom:10px;border-color:rgba(201,168,76,0.28)">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:5px;flex-shrink:0;animation:pulseGold 2s infinite"></div>
+          <div>
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px">Welcome to BENIM VTU! 🎉</div>
+            <div style="color:var(--gray);font-size:12px;line-height:1.5">Your account is ready. Start enjoying premium VTU services today.</div>
+            <div style="color:rgba(255,255,255,0.25);font-size:11px;margin-top:8px">Just now</div>
+          </div>
+        </div>
+      </div>
+      <div class="glass" style="padding:16px 18px;border-radius:14px;margin-bottom:10px">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="width:8px;height:8px;border-radius:50%;background:transparent;margin-top:5px;flex-shrink:0"></div>
+          <div>
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px">Weekend Data Offer 🔥</div>
+            <div style="color:var(--gray);font-size:12px;line-height:1.5">Get 5% bonus data on all data purchases this weekend only!</div>
+            <div style="color:rgba(255,255,255,0.25);font-size:11px;margin-top:8px">2 hours ago</div>
+          </div>
+        </div>
+      </div>
+      <div class="glass" style="padding:16px 18px;border-radius:14px">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="width:8px;height:8px;border-radius:50%;background:transparent;margin-top:5px;flex-shrink:0"></div>
+          <div>
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px">Security Reminder 🛡️</div>
+            <div style="color:var(--gray);font-size:12px;line-height:1.5">Never share your password or OTP with anyone, including our staff.</div>
+            <div style="color:rgba(255,255,255,0.25);font-size:11px;margin-top:8px">1 day ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="page-admin" class="page">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+      <div style="width:44px;height:44px;border-radius:12px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.28);display:flex;align-items:center;justify-content:center;font-size:20px">⚙</div>
+      <div><div style="font-size:18px;font-weight:700">Admin Panel</div><div style="color:var(--gray);font-size:12px">Manage BENIM VTU platform</div></div>
+    </div>
+    <div class="admin-tabs scroll-x">
+      <button class="admin-tab active" onclick="adminTab('overview',this)">Overview</button>
+      <button class="admin-tab" onclick="adminTab('users',this)">Users</button>
+      <button class="admin-tab" onclick="adminTab('transactions',this)">Transactions</button>
+      <button class="admin-tab" onclick="adminTab('tools',this)">Tools</button>
+      <button class="admin-tab" onclick="adminTab('notify',this)">Notify</button>
+    </div>
+    <div id="admin-overview">
+      <div class="admin-stat-grid" id="admin-stats"></div>
+      <div class="glass" style="padding:18px;border-radius:16px">
+        <div style="font-weight:600;margin-bottom:12px">System Status</div>
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px"><span style="color:var(--gray)">VTU API</span><span style="color:var(--green)">Connected</span></div>
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px"><span style="color:var(--gray)">Firebase Auth</span><span style="color:var(--green)">Active</span></div>
+        <div style="display:flex;justify-content:space-between;padding:9px 0;font-size:13px"><span style="color:var(--gray)">Firestore DB</span><span style="color:var(--green)">Online</span></div>
+      </div>
+    </div>
+    <div id="admin-users" style="display:none"><div id="admin-users-list"></div></div>
+    <div id="admin-transactions" style="display:none"><div id="admin-txns-list"></div></div>
+    <div id="admin-tools" style="display:none">
+      <div class="glass" style="padding:22px;border-radius:18px;margin-bottom:14px">
+        <div style="font-weight:600;margin-bottom:14px">💳 Credit / Debit Wallet</div>
+        <div class="form-group"><label class="form-label">User Email</label><input class="input form-input" id="credit-email" type="email" placeholder="user@email.com" style="padding:11px 13px;border-radius:10px;font-size:13px"/></div>
+        <div class="form-group"><label class="form-label">Amount (₦)</label><input class="input form-input" id="credit-amt" type="number" placeholder="Amount to credit" style="padding:11px 13px;border-radius:10px;font-size:13px"/></div>
+        <button class="btn-gold" style="width:100%;padding:12px;border-radius:11px;font-size:14px" onclick="adminCredit()">Credit Wallet</button>
+      </div>
+      <div class="glass" style="padding:22px;border-radius:18px">
+        <div style="font-weight:600;margin-bottom:12px">🔌 VTU API Settings</div>
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px"><span style="color:var(--gray)">API Provider</span><span>VTPass / Blochq</span></div>
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px"><span style="color:var(--gray)">API Key</span><span>●●●●●●●●●●●●</span></div>
+        <div style="display:flex;justify-content:space-between;padding:9px 0;font-size:13px"><span style="color:var(--gray)">Base URL</span><span style="font-size:11px;color:var(--gray)">https://api.vtpass.com</span></div>
+        <button class="btn-ghost" style="width:100%;padding:11px;border-radius:10px;font-size:13px;margin-top:12px" onclick="toast('API settings saved (connect backend)','info')">Update Config</button>
+      </div>
+    </div>
+    <div id="admin-notify" style="display:none">
+      <div class="glass" style="padding:22px;border-radius:18px">
+        <div style="font-weight:600;margin-bottom:14px">📢 Send Notification to All Users</div>
+        <div class="form-group"><label class="form-label">Message Title</label><input class="input form-input" id="notif-title" type="text" placeholder="e.g. Weekend Offer!" style="padding:11px 13px;border-radius:10px;font-size:13px"/></div>
+        <div class="form-group"><label class="form-label">Message Body</label><textarea class="input form-input" id="notif-body" rows="4" placeholder="Your message here..." style="padding:11px 13px;border-radius:10px;font-size:13px;resize:none"></textarea></div>
+        <button class="btn-gold" style="width:100%;padding:13px;border-radius:11px;font-size:14px" onclick="adminSendNotif()">📤 Send to All Users</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECEIPT PAGE -->
+  <div id="page-receipt" class="page">
+    <div class="glass receipt-box">
+      <div class="receipt-check">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2 class="serif" style="font-size:22px;font-weight:700;margin-bottom:6px">Transaction Successful!</h2>
+      <p style="color:var(--gray);font-size:13px">Your transaction was processed successfully</p>
+      <div class="receipt-list" id="receipt-details"></div>
+      <div class="receipt-btns">
+        <button class="btn-ghost" style="flex:1;padding:12px;border-radius:12px;font-size:13px;border-color:rgba(201,168,76,0.2);color:var(--gold)" onclick="downloadReceipt()">⬇ Download</button>
+        <button class="btn-gold" style="flex:1;padding:12px;border-radius:12px;font-size:13px" onclick="showPage('dashboard')">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div id="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="nav-btn active" id="nav-dashboard" onclick="showPage('dashboard')">
+        <div class="nav-btn-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
+        </div>
+        <span>Home</span>
+      </button>
+      <button class="nav-btn" id="nav-wallet" onclick="showPage('wallet')">
+        <div class="nav-btn-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6zm16 5H5m7-5v14"/></svg>
+        </div>
+        <span>Wallet</span>
+      </button>
+      <button class="nav-btn" id="nav-history" onclick="showPage('history')">
+        <div class="nav-btn-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <span>History</span>
+      </button>
+      <button class="nav-btn" id="nav-profile" onclick="showPage('profile')">
+        <div class="nav-btn-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <span>Profile</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════ -->
+<script>
+// ─── FIREBASE CONFIG ─────────────────────────────────────────
+// ⚠️ REPLACE with your real Firebase config from console.firebase.google.com
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+// ─── LOCAL FALLBACK DB (works without Firebase) ──────────────
+// When Firebase is not configured, we use localStorage
+const ADMIN_EMAIL = "shopwitbenim@gmail.com";
+let currentUser = null;
+let userData = null;
+let balanceVisible = true;
+let currentFilter = "all";
+let fundAmount = 0;
+let isEditingProfile = false;
+let lastReceipt = {};
+let currentAdminTab = "overview";
+
+// LocalStorage mock DB
+function lsGet(key){ try{ return JSON.parse(localStorage.getItem(key)) }catch(e){ return null } }
+function lsSet(key,val){ localStorage.setItem(key, JSON.stringify(val)) }
+
+function getUsers(){ return lsGet('bvtu_users') || {} }
+function saveUsers(u){ lsSet('bvtu_users', u) }
+function getTxns(){ return lsGet('bvtu_txns') || [] }
+function saveTxns(t){ lsSet('bvtu_txns', t) }
+function getUserData(uid){ return getUsers()[uid] || null }
+function saveUserData(uid, data){
+  const users = getUsers();
+  users[uid] = {...(users[uid]||{}), ...data};
+  saveUsers(users);
+  if(currentUser && currentUser.uid === uid) userData = users[uid];
+}
+
+function addTxn(txn){
+  const txns = getTxns();
+  const id = 'txn_' + Date.now() + Math.random().toString(36).slice(2,7);
+  txns.push({id, ...txn, createdAt: new Date().toISOString()});
+  saveTxns(txns);
+  return id;
+}
+
+// ─── FIREBASE INIT ────────────────────────────────────────────
+let useFirebase = false;
+let db, auth;
+
+try {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db = firebase.firestore();
+  // Test if properly configured
+  if(firebaseConfig.apiKey !== "YOUR_API_KEY") useFirebase = true;
+} catch(e) { console.log("Running in local demo mode"); }
+
+// ─── AUTH FUNCTIONS ───────────────────────────────────────────
+let authMode = "login";
+
+function openAuth(mode){
+  authMode = mode;
+  const modal = document.getElementById('auth-modal');
+  const box = document.getElementById('modal-box');
+  modal.classList.add('open');
+  box.classList.remove('anim');
+  void box.offsetWidth;
+  box.classList.add('anim');
+
+  const isReg = mode === 'register';
+  document.getElementById('modal-title').textContent = isReg ? 'Create Account' : 'Welcome Back';
+  document.getElementById('modal-sub').textContent = isReg ? 'Join BENIM VTU today — it\'s free' : 'Sign in to your account';
+  document.getElementById('auth-btn').textContent = isReg ? 'Create Account' : 'Sign In';
+  document.getElementById('auth-switch-text').textContent = isReg ? 'Already have an account? ' : "Don't have an account? ";
+  document.getElementById('field-name').style.display = isReg ? 'block' : 'none';
+  document.getElementById('field-phone').style.display = isReg ? 'block' : 'none';
+}
+function closeAuth(){ document.getElementById('auth-modal').classList.remove('open') }
+function closeAuthIfOverlay(e){ if(e.target === document.getElementById('auth-modal')) closeAuth() }
+function switchAuthMode(){ openAuth(authMode === 'login' ? 'register' : 'login') }
+function togglePass(){
+  const i = document.getElementById('inp-pass');
+  i.type = i.type === 'password' ? 'text' : 'password';
+}
+
+async function doAuth(){
+  const email = document.getElementById('inp-email').value.trim();
+  const pass = document.getElementById('inp-pass').value;
+  const name = document.getElementById('inp-name').value.trim();
+  const phone = document.getElementById('inp-phone').value.trim();
+  const refCode = document.getElementById('inp-ref').value.trim();
+
+  if(!email || !pass){ toast('Please fill all required fields','error'); return }
+  if(authMode === 'register' && !name){ toast('Please enter your name','error'); return }
+
+  const btn = document.getElementById('auth-btn');
+  btn.innerHTML = '<span class="spinner-sm"></span>';
+  btn.disabled = true;
+
+  try {
+    if(useFirebase){
+      if(authMode === 'register'){
+        const cred = await auth.createUserWithEmailAndPassword(email, pass);
+        const uid = cred.user.uid;
+        const isAdmin = email === ADMIN_EMAIL;
+        const uData = {name, email, phone, wallet:0, isAdmin, status:'active', referralCode:'BEN'+Math.random().toString(36).slice(2,7).toUpperCase().replace(/[0-9]/g,''), referralCount:0, createdAt:new Date().toISOString()};
+        await db.collection('users').doc(uid).set(uData);
+        currentUser = {uid, email};
+        userData = uData;
+      } else {
+        const cred = await auth.signInWithEmailAndPassword(email, pass);
+        currentUser = {uid: cred.user.uid, email};
+        const snap = await db.collection('users').doc(cred.user.uid).get();
+        userData = snap.exists ? snap.data() : {};
+      }
+    } else {
+      // Local mode
+      const users = getUsers();
+      if(authMode === 'register'){
+        if(Object.values(users).find(u=>u.email===email)){ throw new Error('Email already registered') }
+        const uid = 'uid_'+Date.now();
+        const isAdmin = email === ADMIN_EMAIL;
+        const uData = {name, email, phone, wallet:0, isAdmin, status:'active', referralCode:'BEN'+Math.random().toString(36).slice(2,7).toUpperCase(), referralCount:0, createdAt:new Date().toISOString()};
+        users[uid] = uData;
+        saveUsers(users);
+        lsSet('bvtu_session', {uid, email});
+        currentUser = {uid, email};
+        userData = uData;
+        // Handle referral bonus
+        if(refCode){
+          const referrer = Object.entries(users).find(([id,u])=>u.referralCode===refCode);
+          if(referrer){
+            const [rid, ru] = referrer;
+            saveUserData(rid, {wallet: (ru.wallet||0)+200, referralCount:(ru.referralCount||0)+1});
+          }
+        }
+      } else {
+        const found = Object.entries(users).find(([id,u])=>u.email===email);
+        if(!found){ throw new Error('No account found with this email') }
+        const [uid, uData] = found;
+        // Simple pass check (in real app use Firebase)
+        const stored = lsGet('bvtu_pass_'+uid);
+        if(stored && stored !== pass){ throw new Error('Incorrect password') }
+        if(!stored) lsSet('bvtu_pass_'+uid, pass); // First login sets pass
+        lsSet('bvtu_session', {uid, email});
+        currentUser = {uid, email};
+        userData = uData;
+      }
+      if(authMode === 'register') lsSet('bvtu_pass_'+currentUser.uid, pass);
+    }
+    closeAuth();
+    enterApp();
+    toast(`Welcome${authMode==='register'?' to BENIM VTU':' back'}, ${(userData?.name||email).split(' ')[0]}! 🎉`);
+  } catch(err){
+    toast(err.message || 'Authentication failed', 'error');
+  } finally {
+    btn.innerHTML = authMode === 'login' ? 'Sign In' : 'Create Account';
+    btn.disabled = false;
+  }
+}
+
+async function doLogout(){
+  if(useFirebase) await auth.signOut();
+  lsSet('bvtu_session', null);
+  currentUser = null;
+  userData = null;
+  document.getElementById('app-shell').style.display = 'none';
+  document.getElementById('home-page').classList.add('active');
+  toast('Logged out successfully');
+}
+
+// ─── APP ENTRY ────────────────────────────────────────────────
+function enterApp(){
+  document.getElementById('home-page').classList.remove('active');
+  document.getElementById('app-shell').style.display = 'block';
+  refreshUserData();
+  showPage('dashboard');
+  if(userData?.isAdmin || currentUser?.email === ADMIN_EMAIL){
+    document.getElementById('admin-btn').style.display = 'inline-flex';
+    document.getElementById('profile-admin-badge').style.display = 'inline-block';
+  }
+}
+
+function refreshUserData(){
+  if(!currentUser) return;
+  if(!useFirebase){
+    userData = getUserData(currentUser.uid) || userData;
+  }
+  updateUI();
+}
+
+function updateUI(){
+  if(!userData) return;
+  const bal = formatCurrency(userData.wallet||0);
+  const hidden = '₦ ●●●●●';
+  document.getElementById('dash-balance').textContent = balanceVisible ? bal : hidden;
+  document.getElementById('wallet-pg-bal').textContent = bal;
+  document.getElementById('airtime-bal').textContent = 'Wallet: ' + bal;
+  document.getElementById('data-bal').textContent = 'Wallet: ' + bal;
+  document.getElementById('cable-bal').textContent = 'Wallet: ' + bal;
+  document.getElementById('elec-bal').textContent = 'Wallet: ' + bal;
+  document.getElementById('greeting-name').textContent = 'Hello, ' + ((userData.name||'User').split(' ')[0]) + ' 👋';
+  document.getElementById('profile-avatar').textContent = (userData.name||'U')[0].toUpperCase();
+  document.getElementById('profile-name').textContent = userData.name || '—';
+  document.getElementById('profile-email').textContent = currentUser.email;
+  document.getElementById('edit-name').value = userData.name || '';
+  document.getElementById('edit-phone').value = userData.phone || '';
+  document.getElementById('edit-email-disp').value = currentUser.email;
+  const code = userData.referralCode || '—';
+  document.getElementById('ref-code-val').textContent = code;
+  document.getElementById('ref-link-val').textContent = 'https://benimvtu.com/r/' + code;
+  document.getElementById('ref-code-disp').textContent = 'Code: ' + code;
+  document.getElementById('ref-count').textContent = userData.referralCount || 0;
+  document.getElementById('ref-earned').textContent = '₦' + ((userData.referralCount||0)*200).toLocaleString();
+  renderRecentTxns();
+}
+
+function formatCurrency(n){ return '₦' + Number(n).toLocaleString('en-NG', {minimumFractionDigits:2, maximumFractionDigits:2}) }
+
+function toggleBalVis(){
+  balanceVisible = !balanceVisible;
+  updateUI();
+}
+
+// ─── PAGE NAVIGATION ─────────────────────────────────────────
+const navPages = ['dashboard','wallet','history','profile'];
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const p = document.getElementById('page-'+name);
+  if(!p){ toast('Page not found','error'); return }
+  p.classList.add('active');
+  p.classList.remove('anim-fade-in');
+  void p.offsetWidth;
+  p.classList.add('anim-fade-in');
+  // Update bottom nav
+  navPages.forEach(n => {
+    const btn = document.getElementById('nav-'+n);
+    if(btn) btn.classList.toggle('active', n === name);
+  });
+  // Scroll to top
+  window.scrollTo({top:0, behavior:'smooth'});
+  // Page-specific actions
+  if(name === 'history') renderHistory(currentFilter);
+  if(name === 'admin') renderAdmin();
+}
+
+// ─── TRANSACTION ICONS ────────────────────────────────────────
+const txnIcons = {airtime:'📱',data:'📶',cable:'📺',electricity:'⚡',wallet_fund:'💳',airtime2cash:'🔄'};
+const txnLabels = {airtime:'Airtime Recharge',data:'Data Purchase',cable:'Cable TV',electricity:'Electricity',wallet_fund:'Wallet Funding',airtime2cash:'Airtime to Cash'};
+
+function renderTxnRow(tx){
+  const icon = txnIcons[tx.type] || '💰';
+  const label = tx.description || txnLabels[tx.type] || tx.type;
+  const amt = tx.debit ? '-'+formatCurrency(tx.amount) : '+'+formatCurrency(tx.amount);
+  const amtColor = tx.debit ? '#EF4444' : '#22C55E';
+  const status = tx.status || 'success';
+  const date = new Date(tx.createdAt).toLocaleDateString('en-NG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  return `<div class="txn-row glass">
+    <div class="txn-icon" style="font-size:18px">${icon}</div>
+    <div class="txn-info">
+      <div class="txn-desc">${label}</div>
+      <div class="txn-date">${date}</div>
+    </div>
+    <div class="txn-right">
+      <div class="txn-amount" style="color:${amtColor}">${amt}</div>
+      <span class="txn-badge badge-${status}">${status}</span>
+    </div>
+  </div>`;
+}
+
+function renderRecentTxns(){
+  const uid = currentUser?.uid;
+  const txns = getTxns().filter(t=>t.userId===uid).slice(-3).reverse();
+  const el = document.getElementById('recent-txns');
+  if(!txns.length){
+    el.innerHTML = '<div class="empty" style="padding:24px 0"><div style="font-size:32px;opacity:.25">📋</div><div style="margin-top:8px;font-size:12px">No transactions yet</div></div>';
+    return;
+  }
+  el.innerHTML = txns.map(renderTxnRow).join('');
+}
+
+function renderHistory(filter){
+  const uid = currentUser?.uid;
+  let txns = getTxns().filter(t=>t.userId===uid);
+  if(filter !== 'all') txns = txns.filter(t=>t.type===filter);
+  txns = txns.reverse();
+  const el = document.getElementById('history-list');
+  if(!txns.length){
+    el.innerHTML = '<div class="empty"><div style="font-size:40px;opacity:.2">📋</div><div style="margin-top:10px;font-size:13px">No transactions found</div></div>';
+    return;
+  }
+  el.innerHTML = txns.map(renderTxnRow).join('');
+}
+
+function filterTxns(type, btn){
+  currentFilter = type;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory(type);
+}
+
+// ─── SERVICE HELPERS ──────────────────────────────────────────
+function setAmt(svc, val, btn){
+  document.getElementById(svc+'-amount').value = val;
+  document.querySelectorAll('#page-'+svc+' .quick-amt').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  updateAmtPreview(svc);
+}
+
+function updateAmtPreview(svc){
+  const val = Number(document.getElementById(svc+'-amount').value || 0);
+  const prev = document.getElementById(svc+'-preview');
+  const prevVal = document.getElementById(svc+'-preview-val');
+  if(val > 0){
+    prev.style.display = 'flex';
+    prevVal.textContent = formatCurrency(val);
+  } else {
+    prev.style.display = 'none';
+  }
+}
+
+function updatePlanPreview(){
+  const sel = document.getElementById('data-plan');
+  const val = Number(sel.value || 0);
+  const prev = document.getElementById('data-preview');
+  document.getElementById('data-preview-val').textContent = formatCurrency(val);
+  prev.style.display = val > 0 ? 'flex' : 'none';
+}
+
+function updateCablePreview(){
+  const sel = document.getElementById('cable-plan');
+  const val = Number(sel.value || 0);
+  const prev = document.getElementById('cable-preview');
+  document.getElementById('cable-preview-val').textContent = formatCurrency(val);
+  prev.style.display = val > 0 ? 'flex' : 'none';
+}
+
+function updateA2cPreview(){
+  const val = Number(document.getElementById('a2c-amount').value || 0);
+  const prev = document.getElementById('a2c-preview');
+  if(val >= 500){
+    document.getElementById('a2c-preview-val').textContent = formatCurrency(Math.floor(val*0.75));
+    prev.style.display = 'flex';
+  } else { prev.style.display = 'none' }
+}
+
+// ─── SERVICE TRANSACTIONS ────────────────────────────────────
+async function doService(type){
+  if(!currentUser){ toast('Please login first','error'); return }
+  let amount = 0, description = '', valid = true, extra = {};
+
+  if(type === 'airtime'){
+    const net = document.getElementById('airtime-network').value;
+    const phone = document.getElementById('airtime-phone').value;
+    amount = Number(document.getElementById('airtime-amount').value);
+    if(!net||!phone||!amount){ toast('Fill all fields','error'); return }
+    description = `${net} Airtime → ${phone}`;
+    extra = {network:net, phone};
+  } else if(type === 'data'){
+    const net = document.getElementById('data-network').value;
+    const phone = document.getElementById('data-phone').value;
+    const plan = document.getElementById('data-plan');
+    amount = Number(plan.value);
+    if(!net||!phone||!amount){ toast('Fill all fields','error'); return }
+    description = `${net} Data → ${phone} (${plan.options[plan.selectedIndex].text})`;
+    extra = {network:net, phone, plan:plan.options[plan.selectedIndex].text};
+  } else if(type === 'cable'){
+    const prov = document.getElementById('cable-provider').value;
+    const card = document.getElementById('cable-card').value;
+    const plan = document.getElementById('cable-plan');
+    amount = Number(plan.value);
+    if(!prov||!card||!amount){ toast('Fill all fields','error'); return }
+    description = `${prov} – ${plan.options[plan.selectedIndex].text}`;
+    extra = {provider:prov, smartcard:card};
+  } else if(type === 'electricity'){
+    const disco = document.getElementById('elec-disco').value;
+    const meter = document.getElementById('elec-meter').value;
+    amount = Number(document.getElementById('elec-amount').value);
+    if(!disco||!meter||!amount){ toast('Fill all fields','error'); return }
+    description = `${disco} – Meter: ${meter}`;
+    extra = {disco, meter};
+  }
+
+  if(amount <= 0){ toast('Enter a valid amount','error'); return }
+  if(amount > (userData?.wallet||0)){ toast('Insufficient wallet balance','error'); return }
+
+  const btn = event.currentTarget;
+  const origTxt = btn.textContent;
+  btn.innerHTML = '<span class="spinner-sm"></span> Processing...';
+  btn.disabled = true;
+
+  await delay(1800); // Simulate API call
+
+  const newBal = (userData.wallet||0) - amount;
+  saveUserData(currentUser.uid, {wallet: newBal});
+  const txnId = addTxn({userId:currentUser.uid, type, amount, debit:true, status:'success', description, ...extra});
+  refreshUserData();
+  lastReceipt = {txnId, type, amount, description, status:'success', date:new Date().toISOString(), ...extra};
+  showReceipt();
+
+  btn.textContent = origTxt;
+  btn.disabled = false;
+}
+
+async function doAirtime2Cash(){
+  const net = document.getElementById('a2c-network').value;
+  const phone = document.getElementById('a2c-phone').value;
+  const amount = Number(document.getElementById('a2c-amount').value);
+  if(!net||!phone||!amount){ toast('Fill all fields','error'); return }
+  if(amount < 500){ toast('Minimum is ₦500 airtime','error'); return }
+
+  const btn = event.currentTarget;
+  btn.innerHTML = '<span class="spinner-sm"></span> Converting...';
+  btn.disabled = true;
+  await delay(2000);
+
+  const cashAmt = Math.floor(amount * 0.75);
+  saveUserData(currentUser.uid, {wallet:(userData.wallet||0)+cashAmt});
+  addTxn({userId:currentUser.uid, type:'airtime2cash', amount:cashAmt, debit:false, status:'success', description:`Airtime2Cash – ${net} ₦${amount}`});
+  refreshUserData();
+  toast(`₦${cashAmt.toLocaleString()} added to your wallet! ✓`);
+  showPage('wallet');
+  btn.textContent = 'Convert Airtime';
+  btn.disabled = false;
+}
+
+// ─── FUND WALLET ─────────────────────────────────────────────
+function setFundAmt(amt, btn){
+  fundAmount = amt;
+  document.getElementById('fund-custom').value = '';
+  document.querySelectorAll('.fund-amt').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('fund-btn').textContent = `Fund ${formatCurrency(amt)}`;
+}
+function onFundCustom(){
+  const val = Number(document.getElementById('fund-custom').value||0);
+  fundAmount = val;
+  document.querySelectorAll('.fund-amt').forEach(b=>b.classList.remove('active'));
+  document.getElementById('fund-btn').textContent = val > 0 ? `Fund ${formatCurrency(val)}` : 'Fund Wallet';
+}
+async function doFund(){
+  const amt = fundAmount || Number(document.getElementById('fund-custom').value||0);
+  if(!amt||amt<100){ toast('Minimum funding is ₦100','error'); return }
+  const btn = document.getElementById('fund-btn');
+  btn.innerHTML = '<span class="spinner-sm"></span> Processing...';
+  btn.disabled = true;
+  await delay(1800);
+  saveUserData(currentUser.uid, {wallet:(userData.wallet||0)+amt});
+  addTxn({userId:currentUser.uid, type:'wallet_fund', amount:amt, debit:false, status:'success', description:'Wallet Funding'});
+  refreshUserData();
+  toast(`₦${amt.toLocaleString()} added to your wallet! ✓`);
+  showPage('wallet');
+  btn.textContent = 'Fund Wallet';
+  btn.disabled = false;
+  fundAmount = 0;
+}
+
+// ─── RECEIPT ──────────────────────────────────────────────────
+function showReceipt(){
+  const r = lastReceipt;
+  const rows = [
+    ['Transaction ID', (r.txnId||'').slice(0,14)+'…'],
+    ['Service', txnLabels[r.type]||r.type],
+    ['Description', r.description||'—'],
+    ['Amount', formatCurrency(r.amount||0)],
+    ['Status', '✓ Successful'],
+    ['Date', new Date(r.date).toLocaleString('en-NG')],
+  ];
+  document.getElementById('receipt-details').innerHTML =
+    rows.map(([k,v])=>`<div class="receipt-row"><span class="receipt-key">${k}</span><span style="font-weight:500;font-size:12px;color:${k==='Status'?'#22C55E':'var(--white)'}">${v}</span></div>`).join('');
+  showPage('receipt');
+  toast('Transaction successful! ✓');
+}
+
+function downloadReceipt(){
+  const r = lastReceipt;
+  const content = `BENIM VTU - Transaction Receipt\n${'─'.repeat(35)}\nID: ${r.txnId||'—'}\nService: ${txnLabels[r.type]||r.type}\nDescription: ${r.description||'—'}\nAmount: ${formatCurrency(r.amount||0)}\nStatus: Successful\nDate: ${new Date(r.date).toLocaleString('en-NG')}\n${'─'.repeat(35)}\nThank you for using BENIM VTU!`;
+  const blob = new Blob([content], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'BENIM_Receipt_'+Date.now()+'.txt';
+  a.click();
+  toast('Receipt downloaded!');
+}
+
+// ─── PROFILE EDIT ────────────────────────────────────────────
+function toggleEdit(){
+  isEditingProfile = !isEditingProfile;
+  ['edit-name','edit-phone'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.disabled = !isEditingProfile;
+    el.style.opacity = isEditingProfile ? '1' : '0.7';
+  });
+  const btn = document.getElementById('edit-save-btn');
+  if(!isEditingProfile){
+    // Save
+    const name = document.getElementById('edit-name').value.trim();
+    const phone = document.getElementById('edit-phone').value.trim();
+    saveUserData(currentUser.uid, {name, phone});
+    refreshUserData();
+    toast('Profile updated! ✓');
+    btn.textContent = 'Edit';
+    btn.style.color = 'var(--gray)';
+  } else {
+    btn.textContent = 'Save';
+    btn.style.color = 'var(--gold)';
+  }
+}
+
+// ─── COPY HELPERS ─────────────────────────────────────────────
+function copyText(text, msg){
+  if(navigator.clipboard){ navigator.clipboard.writeText(text) }
+  else { const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t) }
+  toast(msg||'Copied!');
+}
+function copyRefCode(){ copyText(userData?.referralCode||'','Referral code copied!') }
+function copyRefLink(){ copyText('https://benimvtu.com/r/'+(userData?.referralCode||''),'Referral link copied!') }
+
+// ─── ADMIN ────────────────────────────────────────────────────
+function adminTab(name, btn){
+  currentAdminTab = name;
+  document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['overview','users','transactions','tools','notify'].forEach(t=>{
+    document.getElementById('admin-'+t).style.display = t===name ? 'block' : 'none';
+  });
+  if(name==='users') renderAdminUsers();
+  if(name==='transactions') renderAdminTxns();
+}
+
+function renderAdmin(){
+  const users = Object.values(getUsers());
+  const txns = getTxns();
+  const vol = txns.reduce((s,t)=>s+(t.amount||0),0);
+  document.getElementById('admin-stats').innerHTML = [
+    ['Total Users', users.length, '#C9A84C'],
+    ['Transactions', txns.length, '#22C55E'],
+    ['Volume', '₦'+vol.toLocaleString(), '#8B5CF6'],
+    ['Active', users.filter(u=>u.status!=='suspended').length, '#06B6D4'],
+  ].map(([lab,val,col])=>`<div class="glass admin-stat"><div style="font-size:20px">${lab==='Total Users'?'👥':lab==='Transactions'?'📋':lab==='Volume'?'💰':'✅'}</div><div class="admin-stat-val" style="color:${col}">${val}</div><div class="admin-stat-lab">${lab}</div></div>`).join('');
+}
+
+function renderAdminUsers(){
+  const users = Object.entries(getUsers());
+  document.getElementById('admin-users-list').innerHTML = users.length
+    ? users.map(([uid,u])=>`<div class="glass user-row"><div><div class="user-name">${u.name||'—'}${u.isAdmin?' 👑':''}</div><div class="user-email">${u.email}</div></div><div><div class="user-bal">₦${(u.wallet||0).toLocaleString()}</div><div style="font-size:10px;color:var(--gray);text-align:right">${u.status||'active'}</div></div></div>`).join('')
+    : '<div class="empty">No users registered</div>';
+}
+
+function renderAdminTxns(){
+  const txns = getTxns().slice().reverse().slice(0,30);
+  document.getElementById('admin-txns-list').innerHTML = txns.length
+    ? txns.map(renderTxnRow).join('')
+    : '<div class="empty">No transactions yet</div>';
+}
+
+async function adminCredit(){
+  const email = document.getElementById('credit-email').value.trim();
+  const amt = Number(document.getElementById('credit-amt').value);
+  if(!email||!amt){ toast('Fill all fields','error'); return }
+  const users = getUsers();
+  const found = Object.entries(users).find(([id,u])=>u.email===email);
+  if(!found){ toast('User not found','error'); return }
+  const [uid, u] = found;
+  saveUserData(uid, {wallet:(u.wallet||0)+amt});
+  addTxn({userId:uid, type:'wallet_fund', amount:amt, debit:false, status:'success', description:'Admin Credit'});
+  toast(`₦${amt.toLocaleString()} credited to ${u.name||email}!`);
+  document.getElementById('credit-email').value='';
+  document.getElementById('credit-amt').value='';
+}
+
+function adminSendNotif(){
+  const title = document.getElementById('notif-title').value.trim();
+  const body = document.getElementById('notif-body').value.trim();
+  if(!title||!body){ toast('Fill title and message','error'); return }
+  toast(`Notification "${title}" sent to all users! 📢`);
+  document.getElementById('notif-title').value='';
+  document.getElementById('notif-body').value='';
+}
+
+// ─── FAQ ───────────────────────────────────────────────────────
+function toggleFaq(i){
+  const a = document.getElementById('faq-a-'+i);
+  const c = document.getElementById('faq-chev-'+i);
+  a.classList.toggle('open');
+  c.classList.toggle('open');
+}
+
+// ─── TOAST ────────────────────────────────────────────────────
+function toast(msg, type='success'){
+  const icons = {success:'✓',error:'✕',info:'ℹ'};
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span style="font-size:16px">${icons[type]||icons.info}</span><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>el.remove(), 4000);
+}
+
+// ─── UTILS ────────────────────────────────────────────────────
+function delay(ms){ return new Promise(r=>setTimeout(r,ms)) }
+
+// ─── SCROLL NAV ───────────────────────────────────────────────
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar')?.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// ─── INIT ────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async ()=>{
+  // Try to restore session
+  let session = lsGet('bvtu_session');
+
+  if(useFirebase){
+    auth.onAuthStateChanged(async user=>{
+      if(user){
+        currentUser = {uid:user.uid, email:user.email};
+        const snap = await db.collection('users').doc(user.uid).get();
+        if(snap.exists){
+          userData = snap.data();
+        } else {
+          // First time admin
+          const isAdmin = user.email === ADMIN_EMAIL;
+          userData = {name:'User', email:user.email, wallet:0, isAdmin, status:'active', referralCode:'BEN'+Math.random().toString(36).slice(2,7).toUpperCase(), referralCount:0, createdAt:new Date().toISOString()};
+          await db.collection('users').doc(user.uid).set(userData);
+        }
+        setTimeout(()=>{
+          document.getElementById('loading-screen').style.display='none';
+          enterApp();
+        }, 900);
+      } else {
+        setTimeout(()=>{
+          document.getElementById('loading-screen').style.display='none';
+          document.getElementById('home-page').classList.add('active');
+        }, 900);
+      }
+    });
+  } else {
+    // Local mode
+    setTimeout(()=>{
+      document.getElementById('loading-screen').style.display='none';
+      if(session?.uid){
+        currentUser = session;
+        userData = getUserData(session.uid);
+        if(userData){
+          enterApp();
+        } else {
+          document.getElementById('home-page').classList.add('active');
+        }
+      } else {
+        document.getElementById('home-page').classList.add('active');
+      }
+    }, 1200);
+  }
+
+  // Seed a demo user for easy testing
+  const users = getUsers();
+  if(Object.keys(users).length === 0){
+    const demoUid = 'uid_demo';
+    users[demoUid] = {
+      name:'Demo User', email:'demo@benimvtu.com', phone:'08012345678',
+      wallet:5000, isAdmin:false, status:'active',
+      referralCode:'BENDEMO', referralCount:2,
+      createdAt:new Date().toISOString()
+    };
+    // Admin
+    const adminUid = 'uid_admin';
+    users[adminUid] = {
+      name:'BENIM Admin', email:ADMIN_EMAIL, phone:'08000000001',
+      wallet:100000, isAdmin:true, status:'active',
+      referralCode:'BENADMIN', referralCount:10,
+      createdAt:new Date().toISOString()
+    };
+    saveUsers(users);
+    lsSet('bvtu_pass_'+demoUid, 'demo1234');
+    lsSet('bvtu_pass_'+adminUid, 'admin1234');
+  }
+});
+</script>
+</body>
+</html>
