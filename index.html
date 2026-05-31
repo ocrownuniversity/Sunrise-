@@ -397,6 +397,15 @@ footer{border-top:1px solid rgba(201,168,76,0.1);padding:38px 24px;text-align:ce
 @keyframes zsFadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
 .zs-anim{animation:zsFadeUp .6s ease forwards;opacity:0;}
 .zs-anim-1{animation-delay:.1s}.zs-anim-2{animation-delay:.22s}.zs-anim-3{animation-delay:.34s}.zs-anim-4{animation-delay:.46s}.zs-anim-5{animation-delay:.58s}
+/* PIN MODAL */
+.pin-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.12);border:2px solid rgba(201,168,76,0.3);transition:all .2s;}
+.pin-dot.filled{background:var(--gold);border-color:var(--gold);transform:scale(1.15);}
+.pin-key{padding:16px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--white);font-size:20px;font-weight:600;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.pin-key:active{background:rgba(201,168,76,0.2);border-color:var(--gold);transform:scale(0.93);}
+/* Logo hold ring animation */
+@keyframes holdRing{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+.hold-progress{position:absolute;inset:-4px;border-radius:13px;pointer-events:none;}
+#app-logo-box{position:relative;}
 </style>
 </head>
 <body>
@@ -753,13 +762,46 @@ footer{border-top:1px solid rgba(201,168,76,0.1);padding:38px 24px;text-align:ce
 <!-- APP SHELL -->
 <div id="app-shell" style="display:none">
   <div id="app-header">
-    <div class="app-logo">
-      <div class="app-logo-box">Z</div>
+    <div class="app-logo" id="app-logo-hold" style="cursor:pointer;user-select:none;-webkit-user-select:none;">
+      <div class="app-logo-box" id="app-logo-box">Z</div>
       <span class="serif" style="font-weight:700;font-size:16px">Z Monie</span>
     </div>
     <div class="header-actions">
       <button id="admin-btn" class="btn-ghost" onclick="showPage('admin')" style="padding:6px 12px;border-radius:8px;font-size:12px;font-weight:500;color:var(--gold);border-color:rgba(201,168,76,0.2);display:none">⚙ Admin</button>
       <button class="icon-btn" onclick="showPage('notifications')" id="notif-bell">🔔</button>
+    </div>
+  </div>
+
+  <!-- ADMIN PIN MODAL -->
+  <div id="admin-pin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(14px);z-index:9000;align-items:center;justify-content:center;">
+    <div style="background:#141418;border:1px solid rgba(201,168,76,0.25);border-radius:24px;padding:32px 28px;width:90%;max-width:340px;text-align:center;">
+      <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#C9A84C,#8A6820);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px;">⚙️</div>
+      <div style="font-size:18px;font-weight:700;font-family:'Playfair Display',serif;margin-bottom:4px">Admin Access</div>
+      <div style="color:var(--gray);font-size:13px;margin-bottom:24px">Enter your admin PIN to continue</div>
+      <!-- PIN dots display -->
+      <div style="display:flex;justify-content:center;gap:12px;margin-bottom:24px" id="pin-dots">
+        <div class="pin-dot" id="dot-0"></div>
+        <div class="pin-dot" id="dot-1"></div>
+        <div class="pin-dot" id="dot-2"></div>
+        <div class="pin-dot" id="dot-3"></div>
+      </div>
+      <!-- PIN pad -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto 16px;">
+        <button class="pin-key" onclick="pinPress('1')">1</button>
+        <button class="pin-key" onclick="pinPress('2')">2</button>
+        <button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button>
+        <button class="pin-key" onclick="pinPress('5')">5</button>
+        <button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button>
+        <button class="pin-key" onclick="pinPress('8')">8</button>
+        <button class="pin-key" onclick="pinPress('9')">9</button>
+        <button class="pin-key" onclick="pinClear()" style="background:rgba(239,68,68,0.1);color:#EF4444;">✕</button>
+        <button class="pin-key" onclick="pinPress('0')">0</button>
+        <button class="pin-key" onclick="pinBackspace()" style="background:rgba(255,255,255,0.08);">⌫</button>
+      </div>
+      <button onclick="closeAdminPin()" style="background:none;border:none;color:var(--gray);font-size:13px;cursor:pointer;margin-top:4px">Cancel</button>
+      <div id="pin-error" style="color:#EF4444;font-size:12px;margin-top:10px;display:none">Incorrect PIN. Try again.</div>
     </div>
   </div>
 
@@ -1151,6 +1193,15 @@ footer{border-top:1px solid rgba(201,168,76,0.1);padding:38px 24px;text-align:ce
         <div class="form-group"><label class="form-label">Amount (₦)</label><input class="input form-input" id="debit-amt" type="number" placeholder="Amount to debit" style="padding:11px 13px;border-radius:10px;font-size:13px"/></div>
         <div class="form-group"><label class="form-label">Reason</label><input class="input form-input" id="debit-note" type="text" placeholder="Reason for debit" style="padding:11px 13px;border-radius:10px;font-size:13px"/></div>
         <button style="width:100%;padding:12px;border-radius:11px;font-size:14px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#EF4444;cursor:pointer;" onclick="adminDebit()">🔻 Debit Wallet</button>
+      </div>
+      <!-- CHANGE ADMIN PIN -->
+      <div class="glass" style="padding:22px;border-radius:18px;margin-bottom:14px;border-color:rgba(201,168,76,0.25);">
+        <div style="font-weight:600;margin-bottom:6px">🔐 Change Admin PIN</div>
+        <div style="color:var(--gray);font-size:12px;margin-bottom:14px">Your PIN is used for the 3-second logo hold access. Default is 1990.</div>
+        <div class="form-group"><label class="form-label">Current PIN</label><input class="input form-input" id="change-pin-old" type="password" maxlength="4" inputmode="numeric" pattern="\d{4}" placeholder="Enter current PIN" style="padding:11px 13px;border-radius:10px;font-size:13px;letter-spacing:4px"/></div>
+        <div class="form-group"><label class="form-label">New PIN (4 digits)</label><input class="input form-input" id="change-pin-new" type="password" maxlength="4" inputmode="numeric" pattern="\d{4}" placeholder="New 4-digit PIN" style="padding:11px 13px;border-radius:10px;font-size:13px;letter-spacing:4px"/></div>
+        <div class="form-group"><label class="form-label">Confirm New PIN</label><input class="input form-input" id="change-pin-confirm" type="password" maxlength="4" inputmode="numeric" pattern="\d{4}" placeholder="Repeat new PIN" style="padding:11px 13px;border-radius:10px;font-size:13px;letter-spacing:4px"/></div>
+        <button class="btn-gold" style="width:100%;padding:12px;border-radius:11px;font-size:14px" onclick="changeAdminPin()">🔐 Update PIN</button>
       </div>
     </div>
 
@@ -2058,6 +2109,138 @@ async function adminLog(action){
   } catch(e){}
 }
 
+// --- ADMIN PIN SYSTEM -------------------------------------------
+const DEFAULT_ADMIN_PIN = '1990';
+let adminPinEntry = '';
+let holdTimer = null;
+let holdActive = false;
+
+function getAdminPin(){
+  return localStorage.getItem('zmonie_admin_pin') || DEFAULT_ADMIN_PIN;
+}
+
+function openAdminPinModal(){
+  adminPinEntry = '';
+  updatePinDots();
+  document.getElementById('pin-error').style.display = 'none';
+  const modal = document.getElementById('admin-pin-modal');
+  modal.style.display = 'flex';
+  if(navigator.vibrate) navigator.vibrate(30);
+}
+
+function closeAdminPin(){
+  document.getElementById('admin-pin-modal').style.display = 'none';
+  adminPinEntry = '';
+  updatePinDots();
+  const box = document.getElementById('app-logo-box');
+  if(box){ box.style.boxShadow = ''; box.style.transition = ''; }
+}
+
+function pinPress(digit){
+  if(adminPinEntry.length >= 4) return;
+  adminPinEntry += digit;
+  updatePinDots();
+  if(navigator.vibrate) navigator.vibrate(10);
+  if(adminPinEntry.length === 4) setTimeout(checkAdminPin, 120);
+}
+
+function pinBackspace(){
+  adminPinEntry = adminPinEntry.slice(0,-1);
+  updatePinDots();
+}
+
+function pinClear(){
+  adminPinEntry = '';
+  updatePinDots();
+  document.getElementById('pin-error').style.display = 'none';
+}
+
+function updatePinDots(){
+  for(let i=0;i<4;i++){
+    const dot = document.getElementById('dot-'+i);
+    if(dot) dot.classList.toggle('filled', i < adminPinEntry.length);
+  }
+}
+
+function checkAdminPin(){
+  if(adminPinEntry === getAdminPin()){
+    closeAdminPin();
+    if(navigator.vibrate) navigator.vibrate([30,50,30]);
+    unlockAdminUI();
+    toast('Admin access granted! 👑');
+    showPage('admin');
+  } else {
+    document.getElementById('pin-error').style.display = 'block';
+    if(navigator.vibrate) navigator.vibrate([100,50,100]);
+    adminPinEntry = '';
+    updatePinDots();
+  }
+}
+
+function unlockAdminUI(){
+  document.getElementById('admin-btn').style.display = 'inline-flex';
+  document.getElementById('profile-admin-badge').style.display = 'inline-block';
+  if(!document.getElementById('dash-admin-shortcut')){
+    const dashGrid = document.querySelector('.svcs-grid');
+    if(dashGrid){
+      const btn = document.createElement('button');
+      btn.className = 'svc-btn';
+      btn.id = 'dash-admin-shortcut';
+      btn.onclick = ()=>showPage('admin');
+      btn.innerHTML = '<div class="svc-btn-icon" style="background:rgba(201,168,76,.18);border:1px solid rgba(201,168,76,.35)">⚙️</div><span class="svc-btn-label" style="color:var(--gold);font-weight:600">Admin</span>';
+      dashGrid.appendChild(btn);
+    }
+  }
+}
+
+function changeAdminPin(){
+  const oldPin = document.getElementById('change-pin-old')?.value?.trim();
+  const newPin = document.getElementById('change-pin-new')?.value?.trim();
+  const confirmPin = document.getElementById('change-pin-confirm')?.value?.trim();
+  if(!oldPin||!newPin||!confirmPin){ toast('Fill all PIN fields','error'); return }
+  if(oldPin !== getAdminPin()){ toast('Current PIN is incorrect','error'); return }
+  if(newPin.length!==4||!/^\d{4}$/.test(newPin)){ toast('New PIN must be exactly 4 digits','error'); return }
+  if(newPin !== confirmPin){ toast('PINs do not match','error'); return }
+  localStorage.setItem('zmonie_admin_pin', newPin);
+  toast('Admin PIN changed successfully! 🔐');
+  ['change-pin-old','change-pin-new','change-pin-confirm'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+}
+
+function setupLogoHold(){
+  const logo = document.getElementById('app-logo-hold');
+  const box = document.getElementById('app-logo-box');
+  if(!logo) return;
+
+  function startHold(){
+    holdActive = true;
+    box.style.transition = 'box-shadow 3s linear';
+    box.style.boxShadow = '0 0 0 0px rgba(201,168,76,0.7)';
+    setTimeout(()=>{ if(holdActive) box.style.boxShadow = '0 0 0 5px rgba(201,168,76,0.7)'; }, 10);
+    holdTimer = setTimeout(()=>{
+      if(holdActive){
+        if(navigator.vibrate) navigator.vibrate(60);
+        openAdminPinModal();
+      }
+    }, 3000);
+  }
+
+  function cancelHold(){
+    holdActive = false;
+    clearTimeout(holdTimer);
+    box.style.boxShadow = '';
+    box.style.transition = '';
+  }
+
+  logo.addEventListener('mousedown', startHold);
+  logo.addEventListener('touchstart', startHold, {passive:true});
+  logo.addEventListener('mouseup', cancelHold);
+  logo.addEventListener('mouseleave', cancelHold);
+  logo.addEventListener('touchend', cancelHold);
+  logo.addEventListener('touchcancel', cancelHold);
+  // Prevent context menu on long press mobile
+  logo.addEventListener('contextmenu', e=>e.preventDefault());
+}
+
 // --- FAQ ------------------------------------------------------
 function toggleFaq(i){
   document.getElementById('faq-a-'+i).classList.toggle('open');
@@ -2090,6 +2273,7 @@ window.addEventListener('scroll',()=>{
 
 // --- INIT -----------------------------------------------------
 window.addEventListener('DOMContentLoaded', ()=>{
+  setupLogoHold();
   auth.onAuthStateChanged(async user=>{
     if(user){
       currentUser = {uid:user.uid, email:user.email};
