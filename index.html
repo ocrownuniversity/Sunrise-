@@ -67,6 +67,7 @@ input,select,textarea,button{font-family:inherit}
 .anim-slide-right{animation:slideInRight .4s ease forwards}
 
 #app{min-height:100vh}
+#bottom-nav{display:none}
 
 /* LOADING */
 #loading-screen{position:fixed;inset:0;background:#0d0424;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;}
@@ -528,7 +529,7 @@ footer{border-top:1px solid rgba(107,47,232,0.15);padding:38px 24px;text-align:c
 <div id="toast-container"></div>
 
 <!-- FLOATING WHATSAPP -->
-<button id="wa-float" onclick="openWA('Hello Zmonie Service! I need assistance.', '2348068886569')" title="Chat on WhatsApp">💬</button>
+<button id="wa-float" style="display:none" onclick="openWA('Hello Zmonie Service! I need assistance.', '2348068886569')" title="Chat on WhatsApp">💬</button>
 
 <!-- LOADING SCREEN -->
 <div id="loading-screen">
@@ -603,7 +604,6 @@ footer{border-top:1px solid rgba(107,47,232,0.15);padding:38px 24px;text-align:c
       <button class="btn-gold" onclick="openAuth('register')" style="padding:8px 20px;border-radius:10px;font-size:13px">Get Started</button>
     </div>
   </nav>
-  </div>
 
   <!-- HERO -->
   <section class="hero">
@@ -1953,6 +1953,8 @@ async function doLogout(){
   await auth.signOut();
   currentUser=null; userData=null;
   document.getElementById('app-shell').style.display='none';
+  document.getElementById('bottom-nav').style.display='none';
+  document.getElementById('wa-float').style.display='none';
   document.getElementById('home-page').style.display='block';
   document.getElementById('home-page').classList.add('active');
   toast('Logged out successfully');
@@ -1988,11 +1990,13 @@ async function enterApp(){
   document.getElementById('home-page').style.display='none';
   document.getElementById('home-page').classList.remove('active');
   document.getElementById('app-shell').style.display='block';
+  document.getElementById('bottom-nav').style.display='block';
+  document.getElementById('wa-float').style.display='flex';
   await loadUserData();
-  _pageHistory = [];
+  pageHistory.length = 0;
   // Set base history state — next back press after this will exit app
   window.history.replaceState({zmoniePage:'dashboard',histLen:0}, '', window.location.pathname);
-  _activatePage('dashboard');
+  showPage('dashboard');
   initBanner();
   initPromoSlider();
   // Load pricing data and refresh service menus
