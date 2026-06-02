@@ -15,22 +15,8 @@
   --green:#16a34a;--green2:#22c55e;--green-d:#15803d;--green-l:#dcfce7;--green-xl:#f0fdf4;
   --white:#fff;--bg:#f4f6f8;--black:#0f172a;
   --g100:#f1f5f9;--g200:#e2e8f0;--g300:#cbd5e1;--g400:#94a3b8;--g500:#64748b;--g600:#475569;--g700:#334155;
-  --ok:#16a34a;--err:#dc2626;--warn:#d97706;
-  --blue:#2563eb;--purple:#7c3aed;--purple-l:#ede9fe
+  --ok:#16a34a;--err:#dc2626;--warn:#d97706
 }
-.finance-card{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 60%,#1e3a5f 100%);border-radius:20px;padding:20px;color:#fff;position:relative;overflow:hidden}
-.finance-card::before{content:'';position:absolute;top:-50px;right:-50px;width:160px;height:160px;background:rgba(139,92,246,.1);border-radius:50%}
-.fin-svc-item{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 10px;cursor:pointer;transition:all .15s;background:#fff;border-radius:14px;border:1px solid #eef0f3;text-align:center}
-.fin-svc-item:hover{background:#faf5ff;border-color:#c4b5fd}
-.fin-entry{background:#fff;border-radius:14px;border:1px solid #eef0f3;padding:14px 16px;margin-bottom:8px;transition:all .2s}
-.fin-entry:hover{border-color:#c4b5fd;background:#faf5ff}
-.status-badge{display:inline-flex;padding:4px 10px;border-radius:50px;font-size:11px;font-weight:700}
-.sb-pending{background:#fef3c7;color:#92400e}.sb-approved{background:#dcfce7;color:#15803d}.sb-active{background:#dbeafe;color:#1d4ed8}.sb-rejected{background:#fee2e2;color:#dc2626}.sb-matured{background:#ede9fe;color:#6d28d9}.sb-repaid,.sb-paid{background:#f0fdf4;color:#166534}
-.fin-stat{border-radius:14px;padding:16px;position:relative;overflow:hidden}
-.fin-stat::after{content:'';position:absolute;right:-10px;top:-10px;width:60px;height:60px;background:rgba(255,255,255,.1);border-radius:50%}
-.anav.fin-tab:hover,.anav.fin-tab.on{background:rgba(139,92,246,.15);color:#a78bfa}
-textarea.inp{resize:vertical;min-height:80px}
-.c-purple{background:#ede9fe;color:#6d28d9}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);overflow-x:hidden}
 /* PAGES */
 .page{display:none;min-height:100vh}.page.active{display:block}
@@ -399,9 +385,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
             <div class="svc-ico" style="background:#fce7f3">💡</div>
             <div class="svc-lbl">Electricity</div>
           </div>
-          <div class="svc-item" onclick="navToFinance()" style="border-bottom:none;border-radius:0 0 0 16px">
-            <div class="svc-ico" style="background:#ede9fe">🏦</div>
-            <div class="svc-lbl">Finance</div>
+          <div class="svc-item" onclick="openSvc('loan')" style="border-bottom:none;border-radius:0 0 0 16px">
+            <div class="svc-ico" style="background:#ede9fe">💰</div>
+            <div class="svc-lbl">Loan</div>
           </div>
           <div class="svc-item" onclick="openSvc('result')" style="border-bottom:none">
             <div class="svc-ico" style="background:#dcfce7">📋</div>
@@ -418,9 +404,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         </div>
       </div>
     </div>
-
-    <!-- Finance Banner -->
-    <div style="margin:0 14px 14px"><div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:16px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px" onclick="navToFinance()"><div style="width:46px;height:46px;background:rgba(139,92,246,.3);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🏦</div><div style="flex:1"><div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:2px">ZMONIE Finance</div><div style="font-size:12px;color:rgba(167,139,250,.8)">Loans with guarantors · Invest & Earn · Analytics</div></div><div style="background:rgba(139,92,246,.3);border:1px solid rgba(167,139,250,.4);color:#a78bfa;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;flex-shrink:0">Open →</div></div></div>
 
     <!-- Rewards Section -->
     <div style="margin:0 14px 14px">
@@ -464,11 +447,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
       <span>Card</span>
     </div>
-    <div class="bni" onclick="navToFinance()" style="flex:none;padding:0 16px">
-      <div style="width:44px;height:44px;background:linear-gradient(135deg,#6d28d9,#7c3aed);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:-12px;box-shadow:0 4px 14px rgba(109,40,217,.4)">
-        <span style="font-size:20px">🏦</span>
+    <div class="bni" onclick="openSvc('airtime')" style="flex:none;padding:0 16px">
+      <div style="width:44px;height:44px;background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:-12px;box-shadow:0 4px 14px rgba(22,163,74,.35)">
+        <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       </div>
-      <span style="margin-top:2px;font-size:10px;font-weight:600;color:#7c3aed">Finance</span>
+      <span style="margin-top:2px">Services</span>
     </div>
     <div class="bni" onclick="navTo('pg-notif',this)">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
@@ -478,86 +461,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       <span>Profile</span>
     </div>
-  </div>
-</div>
-
-<!-- ======== FINANCE DASHBOARD ======== -->
-<div id="pg-finance" class="page">
-  <div style="max-width:480px;margin:0 auto;background:var(--bg);min-height:100vh;padding-bottom:80px">
-    <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);padding:13px 16px;display:flex;align-items:center;justify-content:space-between">
-      <div style="display:flex;align-items:center;gap:10px">
-        <button onclick="goPg('pg-dash')" style="background:rgba(255,255,255,.1);border:none;width:32px;height:32px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <div><div style="font-size:11px;color:rgba(167,139,250,.7);font-weight:500">ZMONIE</div><div style="font-size:16px;font-weight:800;color:#fff">Finance Module</div></div>
-      </div>
-      <button onclick="goPg('pg-fin-notif');loadFinanceNotifs()" style="position:relative;background:rgba(255,255,255,.1);border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-        <span class="badge" id="fn-badge" style="display:none">!</span>
-      </button>
-    </div>
-    <div style="padding:14px 14px 0">
-      <div class="finance-card">
-        <div style="position:relative;z-index:1">
-          <div style="font-size:11px;color:rgba(167,139,250,.7);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Finance Overview</div>
-          <div style="display:flex;gap:12px;margin-bottom:16px">
-            <div><div style="font-size:10px;color:rgba(167,139,250,.6);margin-bottom:2px">Active Loans</div><div style="font-size:16px;font-weight:800;color:#fff" id="fn-active-loans">NGN 0</div></div>
-            <div style="width:1px;background:rgba(255,255,255,.1)"></div>
-            <div><div style="font-size:10px;color:rgba(167,139,250,.6);margin-bottom:2px">Investments</div><div style="font-size:16px;font-weight:800;color:#a78bfa" id="fn-investments">NGN 0</div></div>
-            <div style="width:1px;background:rgba(255,255,255,.1)"></div>
-            <div><div style="font-size:10px;color:rgba(167,139,250,.6);margin-bottom:2px">Expected Returns</div><div style="font-size:16px;font-weight:800;color:#4ade80" id="fn-returns">NGN 0</div></div>
-          </div>
-          <div style="display:flex;gap:8px">
-            <button onclick="openM('m-loan-apply')" style="flex:1;padding:10px;border-radius:10px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">🏦 Apply Loan</button>
-            <button onclick="openM('m-invest-apply')" style="flex:1;padding:10px;border-radius:10px;background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.3);color:#a78bfa;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">📈 Invest</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div style="margin:14px 14px 0">
-      <div style="font-size:14px;font-weight:700;color:var(--g700);margin-bottom:10px">Finance Services</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-        <div class="fin-svc-item" onclick="openM('m-loan-apply')"><div style="font-size:24px;margin-bottom:4px">🏦</div><div style="font-size:11px;font-weight:700;color:var(--g700)">Loan Center</div></div>
-        <div class="fin-svc-item" onclick="openM('m-invest-apply')"><div style="font-size:24px;margin-bottom:4px">📈</div><div style="font-size:11px;font-weight:700;color:var(--g700)">Invest & Earn</div></div>
-        <div class="fin-svc-item" onclick="loadFinTab('active')"><div style="font-size:24px;margin-bottom:4px">⚡</div><div style="font-size:11px;font-weight:700;color:var(--g700)">Active Items</div></div>
-        <div class="fin-svc-item" onclick="loadFinTab('history')"><div style="font-size:24px;margin-bottom:4px">📋</div><div style="font-size:11px;font-weight:700;color:var(--g700)">History</div></div>
-        <div class="fin-svc-item" onclick="loadFinTab('analytics')"><div style="font-size:24px;margin-bottom:4px">📊</div><div style="font-size:11px;font-weight:700;color:var(--g700)">Analytics</div></div>
-        <div class="fin-svc-item" onclick="goPg('pg-fin-notif');loadFinanceNotifs()"><div style="font-size:24px;margin-bottom:4px">🔔</div><div style="font-size:11px;font-weight:700;color:var(--g700)">Alerts</div></div>
-      </div>
-    </div>
-    <div style="margin:14px 14px 0">
-      <div class="sx" style="display:flex;gap:6px;margin-bottom:13px;padding-bottom:2px" id="fin-tabs">
-        <button onclick="loadFinTab('loans')" class="chip c-purple" style="cursor:pointer;white-space:nowrap;padding:7px 14px;border:none">My Loans</button>
-        <button onclick="loadFinTab('investments')" class="chip" style="background:var(--g100);color:var(--g600);cursor:pointer;white-space:nowrap;padding:7px 14px;border:none">Investments</button>
-        <button onclick="loadFinTab('active')" class="chip" style="background:var(--g100);color:var(--g600);cursor:pointer;white-space:nowrap;padding:7px 14px;border:none">Active</button>
-        <button onclick="loadFinTab('history')" class="chip" style="background:var(--g100);color:var(--g600);cursor:pointer;white-space:nowrap;padding:7px 14px;border:none">History</button>
-        <button onclick="loadFinTab('analytics')" class="chip" style="background:var(--g100);color:var(--g600);cursor:pointer;white-space:nowrap;padding:7px 14px;border:none">Analytics</button>
-      </div>
-      <div id="fin-content"><div style="padding:28px;text-align:center;color:var(--g400)"><div style="font-size:28px;margin-bottom:7px">🏦</div><p style="font-size:13px">Loading finance data...</p></div></div>
-    </div>
-  </div>
-  <div class="bnav">
-    <div class="bni" onclick="goPg('pg-dash')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></div>
-    <div class="bni" onclick="openM('m-loan-apply')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span>Loan</span></div>
-    <div class="bni on" style="flex:none;padding:0 16px;color:#7c3aed"><div style="width:44px;height:44px;background:linear-gradient(135deg,#6d28d9,#7c3aed);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:-12px;box-shadow:0 4px 14px rgba(109,40,217,.4)"><span style="font-size:20px">🏦</span></div><span style="margin-top:2px;font-size:10px;font-weight:600">Finance</span></div>
-    <div class="bni" onclick="openM('m-invest-apply')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg><span>Invest</span></div>
-    <div class="bni" onclick="goPg('pg-fin-notif');loadFinanceNotifs()"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span>Alerts</span></div>
-  </div>
-</div>
-
-<!-- ======== FINANCE NOTIFICATIONS ======== -->
-<div id="pg-fin-notif" class="page">
-  <div style="max-width:480px;margin:0 auto;padding-bottom:80px">
-    <div class="hdr" style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#1e1b4b,#312e81);border-bottom:1px solid rgba(167,139,250,.2)">
-      <button onclick="goPg('pg-finance')" style="background:rgba(255,255,255,.1);border:none;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:#fff"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <span style="font-size:16px;font-weight:700;color:#fff">Finance Alerts</span>
-    </div>
-    <div id="fin-notif-list"><div style="text-align:center;padding:52px 20px;color:var(--g400)"><div style="font-size:40px;margin-bottom:10px">🔔</div><p style="font-size:14px">No finance alerts yet</p></div></div>
-  </div>
-  <div class="bnav">
-    <div class="bni" onclick="goPg('pg-dash')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></div>
-    <div class="bni" onclick="goPg('pg-finance')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span>Finance</span></div>
-    <div class="bni on" style="flex:none;padding:0 16px;color:#7c3aed"><div style="width:44px;height:44px;background:linear-gradient(135deg,#6d28d9,#7c3aed);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:-12px;box-shadow:0 4px 14px rgba(109,40,217,.4)"><span style="font-size:20px">🏦</span></div><span style="margin-top:2px;font-size:10px;font-weight:600">Finance</span></div>
-    <div class="bni" onclick="openM('m-invest-apply')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg><span>Invest</span></div>
-    <div class="bni" onclick="goPg('pg-profile')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profile</span></div>
   </div>
 </div>
 
@@ -662,10 +565,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <div class="anav" onclick="aTab('promos')">🎯 Promo Slides</div>
         <div class="anav" onclick="aTab('broadcast')">📢 Broadcast</div>
         <div class="anav" onclick="aTab('wallet')">👛 Wallet Ops</div>
-        <div style="font-size:10px;font-weight:700;color:rgba(167,139,250,.35);padding:10px 6px 4px;text-transform:uppercase;letter-spacing:.8px">Finance</div>
-        <div class="anav fin-tab" onclick="aTab('fin-loans')">🏦 Loan Requests</div>
-        <div class="anav fin-tab" onclick="aTab('fin-investments')">📈 Investments</div>
-        <div class="anav fin-tab" onclick="aTab('fin-analytics')">📊 Fin Analytics</div>
+        <div class="anav" onclick="aTab('finance')">💰 Finance</div>
       </nav>
       <div style="position:absolute;bottom:14px;left:0;right:0;padding:0 8px">
         <button onclick="doLogout()" style="width:100%;padding:10px;border-radius:8px;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.18);color:#f87171;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Sign Out</button>
@@ -684,9 +584,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <button onclick="aTab('promos')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Promos</button>
         <button onclick="aTab('broadcast')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Broadcast</button>
         <button onclick="aTab('wallet')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Wallet</button>
-        <button onclick="aTab('fin-loans')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Loans</button>
-        <button onclick="aTab('fin-investments')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Investments</button>
-        <button onclick="aTab('fin-analytics')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Fin Stats</button>
+        <button onclick="aTab('finance')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Finance</button>
       </div>
       <div id="a-content"></div>
     </div>
@@ -820,7 +718,7 @@ function hp(p){let h=0;for(let c of p)h=(h<<5)-h+c.charCodeAt(0)|0;return h.toSt
 
 // NAV
 function goPg(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');}
-function navTo(id,el){document.querySelectorAll('.bni').forEach(n=>n.classList.remove('on'));if(el)el.classList.add('on');goPg(id);if(id==='pg-hist')loadHist();if(id==='pg-notif')loadNotifs();if(id==='pg-profile')chkPinStatus();}
+function navTo(id,el){document.querySelectorAll('.bni').forEach(n=>n.classList.remove('on'));if(el)el.classList.add('on');goPg(id);if(id==='pg-hist')loadHist();if(id==='pg-notif')loadNotifs();if(id==='pg-profile')chkPinStatus();if(id==='pg-finance')loadFinance();if(id==='pg-loan-hist')loadLoanHist();if(id==='pg-inv-hist')loadInvHist();}
 
 // MODALS
 function openM(id){document.getElementById(id).classList.add('open');}
@@ -1321,12 +1219,10 @@ const faqs=[
 function tFaq(i){const a=document.getElementById('fa'+i),ic=document.getElementById('fi'+i);const op=a.classList.toggle('open');ic.textContent=op?'−':'+';}
 
 // ADMIN
-let AD={users:[],txs:[],funds:[],pins:[],loans:[],investments:[]};
+let AD={users:[],txs:[],funds:[],pins:[]};
 async function loadAdmin(){
-  const [us,tx,fn,pn,ls,ivs]=await Promise.all([db.collection('users').get(),db.collection('transactions').orderBy('createdAt','desc').limit(100).get(),db.collection('fundings').orderBy('createdAt','desc').get(),db.collection('pinRequests').where('status','==','pending').get(),db.collection('loans').orderBy('createdAt','desc').get(),db.collection('investments').orderBy('createdAt','desc').get()]);
+  const [us,tx,fn,pn]=await Promise.all([db.collection('users').get(),db.collection('transactions').orderBy('createdAt','desc').limit(100).get(),db.collection('fundings').orderBy('createdAt','desc').get(),db.collection('pinRequests').where('status','==','pending').get()]);
   AD.users=us.docs.map(d=>({id:d.id,...d.data()}));AD.txs=tx.docs.map(d=>({id:d.id,...d.data()}));AD.funds=fn.docs.map(d=>({id:d.id,...d.data()}));AD.pins=pn.docs.map(d=>({id:d.id,...d.data()}));
-  AD.loans=ls.docs.map(d=>({id:d.id,...d.data()}));
-  AD.investments=ivs.docs.map(d=>({id:d.id,...d.data()}));
   aTab('overview');
 }
 function aTab(tab){
@@ -1341,6 +1237,7 @@ function aTab(tab){
   if(tab==='funding')el.innerHTML=`<div class="card" style="overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #f8fafc;font-weight:700;font-size:14px">Funding Requests</div>${AD.funds.filter(f=>f.status==='pending').length?AD.funds.filter(f=>f.status==='pending').map(f=>`<div class="txr" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${f.email||f.userId}</div><div style="font-size:11px;color:var(--g400)">NGN ${fmt(f.amount)} - ${fdate(f.createdAt)}</div></div><div style="display:flex;gap:6px"><button onclick="appFund('${f.id}','${f.userId}',${f.amount})" style="padding:6px 11px;background:#dcfce7;border:1px solid #86efac;color:#15803d;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Approve</button><button onclick="rejFund('${f.id}')" style="padding:6px 11px;background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Reject</button></div></div>`).join(''):'<div style="padding:28px;text-align:center;color:var(--g400);font-size:13px">No pending funding requests</div>'}</div>`;
   if(tab==='pins')el.innerHTML=`<div class="card" style="overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #f8fafc;font-weight:700;font-size:14px">PIN Reset Requests</div><div style="padding:10px 16px;background:var(--green-xl);border-bottom:1px solid #bbf7d0"><p style="font-size:12px;color:var(--green-d)">Approving clears the user's PIN. They will be prompted to set a new PIN from their Profile page immediately.</p></div>${AD.pins.length?AD.pins.map(r=>`<div class="txr" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${r.name||'User'}</div><div style="font-size:11px;color:var(--g400)">${r.email} - ${r.phone||'No phone'} - ${fdate(r.createdAt)}</div></div><div style="display:flex;gap:6px"><button onclick="appPin('${r.id}','${r.userId}')" style="padding:6px 11px;background:#dcfce7;border:1px solid #86efac;color:#15803d;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Approve</button><button onclick="rejPin('${r.id}','${r.userId}')" style="padding:6px 11px;background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Reject</button></div></div>`).join(''):'<div style="padding:28px;text-align:center;color:var(--g400);font-size:13px">No pending PIN requests</div>'}</div>`;
   if(tab==='promos')loadAdminPromos(el);
+  if(tab==='finance')renderAdminFinance(el);
   if(tab==='broadcast')el.innerHTML=`<div class="card" style="padding:18px;max-width:520px"><h3 style="font-weight:700;margin-bottom:13px;font-size:15px">Send Broadcast</h3><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Title</label><input class="inp" id="bc-t" placeholder="Announcement title"/></div><div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Message</label><textarea class="inp" id="bc-m" rows="4" placeholder="Message to all users..." style="resize:vertical"></textarea></div><button onclick="doBc()" class="btn-g" style="padding:12px 24px;border-radius:10px;font-size:14px">Send to All ${AD.users.length} Users</button></div>`;
   if(tab==='wallet')el.innerHTML=`<div class="card" style="padding:18px;max-width:440px"><h3 style="font-weight:700;margin-bottom:13px;font-size:15px">Credit or Debit Wallet</h3><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">User Email</label><input class="inp" id="aw-e" placeholder="user@example.com"/></div><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Amount (NGN)</label><input class="inp" type="number" id="aw-a" placeholder="1000"/></div><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Operation</label><select class="inp" id="aw-o"><option value="credit">Credit (Add funds)</option><option value="debit">Debit (Remove funds)</option></select></div><div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Note (shown to user)</label><input class="inp" id="aw-n" placeholder="Payment confirmed"/></div><button onclick="doWop()" class="btn-g" style="width:100%;padding:12px;border-radius:10px;font-size:14px">Process</button></div>`;
 }
@@ -1394,212 +1291,683 @@ async function rejPin(rid,uid){
   if(uid)await addNotif(uid,'PIN Reset Declined','Your PIN reset request was not approved. Contact support if you need help.');
   toast('PIN request rejected.');loadAdmin();
 }
-
-// ======================================================
-// ============= FINANCE MODULE JS ======================
-// ======================================================
-
-function navToFinance(){goPg('pg-finance');loadFinanceDash();}
-
-async function addFinanceNotif(uid,title,body){
-  await db.collection('financeNotifications').add({userId:uid,title,body,read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-}
-
-async function loadFinanceNotifs(){
-  if(!CU)return;
-  const fnb=document.getElementById('fn-badge');
-  const s=await db.collection('financeNotifications').where('userId','==',CU.uid).orderBy('createdAt','desc').limit(40).get();
-  const unread=s.docs.filter(d=>!d.data().read).length;
-  if(fnb){if(unread>0){fnb.style.display='flex';fnb.textContent=unread;}else fnb.style.display='none';}
-  const el=document.getElementById('fin-notif-list');if(!el)return;
-  if(s.empty){el.innerHTML='<div style="text-align:center;padding:52px 20px;color:var(--g400)"><div style="font-size:40px;margin-bottom:10px">🔔</div><p style="font-size:14px">No finance alerts yet</p></div>';return;}
-  el.innerHTML=s.docs.map(d=>{const n=d.data();return`<div class="nrow${n.read?'':' unread'}" style="border-left-color:#7c3aed" onclick="this.classList.remove('unread')"><div style="font-weight:700;font-size:14px;margin-bottom:4px">${n.title}</div><div style="font-size:13px;color:var(--g600);line-height:1.5">${n.body}</div><div style="font-size:11px;color:var(--g400);margin-top:5px">${fdate(n.createdAt)}</div></div>`;}).join('');
-  s.docs.forEach(d=>d.ref.update({read:true}));
-}
-
-async function loadFinanceDash(){
-  if(!CU)return;
-  const [loans,investments]=await Promise.all([
-    db.collection('loans').where('userId','==',CU.uid).where('status','in',['active','approved']).get(),
-    db.collection('investments').where('userId','==',CU.uid).where('status','in',['active','approved']).get()
-  ]);
-  let totalLoans=0,totalInv=0,totalReturns=0;
-  loans.docs.forEach(d=>{const data=d.data();totalLoans+=data.approvedAmount||data.amount||0;});
-  investments.docs.forEach(d=>{const data=d.data();totalInv+=data.amount||0;totalReturns+=data.expectedReturn||0;});
-  const e1=document.getElementById('fn-active-loans'),e2=document.getElementById('fn-investments'),e3=document.getElementById('fn-returns');
-  if(e1)e1.textContent='NGN '+fmt(totalLoans);
-  if(e2)e2.textContent='NGN '+fmt(totalInv);
-  if(e3)e3.textContent='NGN '+fmt(totalReturns);
-  loadFinanceNotifs();
-  loadFinTab('loans');
-}
-
-function fdateShort(ts){if(!ts)return'—';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'});}
-
-async function loadFinTab(tab){
-  const el=document.getElementById('fin-content');if(!el||!CU)return;
-  document.querySelectorAll('#fin-tabs .chip').forEach(b=>{b.className='chip';b.style.background='var(--g100)';b.style.color='var(--g600)';b.style.padding='7px 14px';b.style.border='none';});
-  const tabMap={loans:0,investments:1,active:2,history:3,analytics:4};
-  const tabs=document.querySelectorAll('#fin-tabs .chip');
-  if(tabs[tabMap[tab]]){tabs[tabMap[tab]].className='chip c-purple';tabs[tabMap[tab]].style.padding='7px 14px';tabs[tabMap[tab]].style.border='none';}
-  el.innerHTML='<div style="padding:28px;text-align:center;color:var(--g400)"><div style="font-size:24px;margin-bottom:8px">⏳</div><p style="font-size:13px">Loading...</p></div>';
-
-  if(tab==='loans'){
-    const s=await db.collection('loans').where('userId','==',CU.uid).orderBy('createdAt','desc').get();
-    if(s.empty){el.innerHTML=`<div class="card" style="padding:32px;text-align:center;color:var(--g400)"><div style="font-size:36px;margin-bottom:10px">🏦</div><p style="font-size:14px;margin-bottom:14px">No loan applications yet</p><button onclick="openM('m-loan-apply')" class="btn-g" style="padding:11px 22px;border-radius:10px;font-size:14px">Apply for Loan</button></div>`;return;}
-    el.innerHTML=s.docs.map(d=>{const ln=d.data();return`<div class="fin-entry"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-size:18px">🏦</div><span class="status-badge sb-${ln.status}">${ln.status}</span></div><div style="font-size:18px;font-weight:800;color:var(--black);margin-bottom:3px">NGN ${fmt(ln.approvedAmount||ln.amount)}</div>${ln.approvedAmount&&ln.approvedAmount!=ln.amount?`<div style="font-size:11px;color:var(--g400)">Requested: NGN ${fmt(ln.amount)} · Approved: NGN ${fmt(ln.approvedAmount)}</div>`:`<div style="font-size:11px;color:var(--g400)">Requested: NGN ${fmt(ln.amount)}</div>`}<div style="font-size:12px;color:var(--g600);margin-top:5px">Purpose: ${ln.purpose}</div><div style="font-size:11px;color:var(--g400);margin-top:3px">Guarantor: ${ln.guarantor?.name||'—'} · ${ln.guarantor?.relationship||'—'}</div><div style="font-size:11px;color:var(--g400)">Applied: ${fdateShort(ln.createdAt)}</div>${ln.adminNote?`<div style="background:var(--green-xl);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:12px;color:var(--green-d)">Admin: ${ln.adminNote}</div>`:''}</div>`;}).join('');
-  }
-  else if(tab==='investments'){
-    const s=await db.collection('investments').where('userId','==',CU.uid).orderBy('createdAt','desc').get();
-    if(s.empty){el.innerHTML=`<div class="card" style="padding:32px;text-align:center;color:var(--g400)"><div style="font-size:36px;margin-bottom:10px">📈</div><p style="font-size:14px;margin-bottom:14px">No investments yet</p><button onclick="openM('m-invest-apply')" style="padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border:none">Start Investing</button></div>`;return;}
-    el.innerHTML=s.docs.map(d=>{const inv=d.data();return`<div class="fin-entry"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-size:18px">📈</div><span class="status-badge sb-${inv.status}">${inv.status}</span></div><div style="font-size:18px;font-weight:800;color:var(--black);margin-bottom:3px">NGN ${fmt(inv.amount)}</div><div style="display:flex;gap:14px;margin-top:5px"><div><div style="font-size:10px;color:var(--g400)">Duration</div><div style="font-size:12px;font-weight:600">${inv.duration}</div></div><div><div style="font-size:10px;color:var(--g400)">Rate</div><div style="font-size:12px;font-weight:600;color:#6d28d9">${inv.interestRate?inv.interestRate+'%':'TBD'}</div></div><div><div style="font-size:10px;color:var(--g400)">Return</div><div style="font-size:12px;font-weight:600;color:var(--ok)">${inv.expectedReturn?'NGN '+fmt(inv.expectedReturn):'TBD'}</div></div></div>${inv.maturityDate?`<div style="font-size:11px;color:var(--g400);margin-top:5px">Matures: ${fdateShort(inv.maturityDate)}</div>`:''}<div style="font-size:11px;color:var(--g400)">Invested: ${fdateShort(inv.createdAt)}</div></div>`;}).join('');
-  }
-  else if(tab==='active'){
-    const [ls,ivs]=await Promise.all([
-      db.collection('loans').where('userId','==',CU.uid).where('status','in',['active','approved']).get(),
-      db.collection('investments').where('userId','==',CU.uid).where('status','in',['active','matured']).get()
-    ]);
-    let html2='';
-    ls.docs.forEach(d=>{const ln=d.data();html2+=`<div class="fin-entry" style="border-left:3px solid var(--err)"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:700">🏦 Active Loan</div><span class="chip c-info">${ln.status}</span></div><div style="font-size:18px;font-weight:800;color:var(--black);margin:6px 0">NGN ${fmt(ln.approvedAmount||ln.amount)}</div><div style="font-size:12px;color:var(--g600)">${ln.purpose}</div><div style="font-size:11px;color:var(--g400);margin-top:3px">Guarantor: ${ln.guarantor?.name||'—'}</div></div>`;});
-    ivs.docs.forEach(d=>{const inv=d.data();html2+=`<div class="fin-entry" style="border-left:3px solid #7c3aed"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:700">📈 ${inv.status==='matured'?'Matured':'Active'} Investment</div><span class="chip ${inv.status==='matured'?'c-purple':'c-info'}">${inv.status}</span></div><div style="font-size:18px;font-weight:800;color:var(--black);margin:6px 0">NGN ${fmt(inv.amount)}</div><div style="font-size:12px;color:var(--g600)">Return: ${inv.expectedReturn?'NGN '+fmt(inv.expectedReturn):inv.interestRate?inv.interestRate+'% interest':'TBD'}</div>${inv.maturityDate?`<div style="font-size:11px;color:var(--g400);margin-top:3px">Matures: ${fdateShort(inv.maturityDate)}</div>`:''}</div>`;});
-    el.innerHTML=html2||`<div class="card" style="padding:32px;text-align:center;color:var(--g400)"><div style="font-size:36px;margin-bottom:10px">⚡</div><p style="font-size:14px">No active loans or investments</p></div>`;
-  }
-  else if(tab==='history'){
-    const [ls,ivs]=await Promise.all([
-      db.collection('loans').where('userId','==',CU.uid).where('status','in',['repaid','rejected']).orderBy('createdAt','desc').get(),
-      db.collection('investments').where('userId','==',CU.uid).where('status','in',['paid','rejected']).orderBy('createdAt','desc').get()
-    ]);
-    let html2='';
-    ls.docs.forEach(d=>{const ln=d.data();html2+=`<div class="fin-entry"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:700">🏦 Loan</div><span class="status-badge sb-${ln.status}">${ln.status}</span></div><div style="font-size:16px;font-weight:800;color:var(--black);margin:5px 0">NGN ${fmt(ln.approvedAmount||ln.amount)}</div><div style="font-size:11px;color:var(--g400)">${fdateShort(ln.createdAt)}</div></div>`;});
-    ivs.docs.forEach(d=>{const inv=d.data();html2+=`<div class="fin-entry"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:700">📈 Investment</div><span class="status-badge sb-${inv.status}">${inv.status}</span></div><div style="font-size:16px;font-weight:800;color:var(--black);margin:5px 0">NGN ${fmt(inv.amount)}</div>${inv.expectedReturn?`<div style="font-size:12px;color:var(--ok)">Earned: NGN ${fmt(inv.expectedReturn)}</div>`:''}<div style="font-size:11px;color:var(--g400)">${fdateShort(inv.createdAt)}</div></div>`;});
-    el.innerHTML=html2||`<div class="card" style="padding:32px;text-align:center;color:var(--g400)"><div style="font-size:36px;margin-bottom:10px">📋</div><p style="font-size:14px">No finance history yet</p></div>`;
-  }
-  else if(tab==='analytics'){
-    const [allL,allI]=await Promise.all([db.collection('loans').where('userId','==',CU.uid).get(),db.collection('investments').where('userId','==',CU.uid).get()]);
-    let tL=0,aL=0,tI=0,aI=0,tE=0;
-    allL.docs.forEach(d=>{const ln=d.data();tL+=ln.approvedAmount||0;if(ln.status==='active'||ln.status==='approved')aL++;});
-    allI.docs.forEach(d=>{const inv=d.data();tI+=inv.amount||0;if(inv.status==='paid')tE+=inv.expectedReturn||0;if(inv.status==='active'||inv.status==='approved')aI++;});
-    el.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"><div class="fin-stat" style="background:linear-gradient(135deg,#1e1b4b,#312e81);color:#fff"><div style="font-size:10px;color:rgba(167,139,250,.6);margin-bottom:5px;position:relative;z-index:1">TOTAL BORROWED</div><div style="font-size:18px;font-weight:800;position:relative;z-index:1">NGN ${fmt(tL)}</div></div><div class="fin-stat" style="background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff"><div style="font-size:10px;color:rgba(167,139,250,.6);margin-bottom:5px;position:relative;z-index:1">TOTAL INVESTED</div><div style="font-size:18px;font-weight:800;position:relative;z-index:1">NGN ${fmt(tI)}</div></div><div class="fin-stat" style="background:linear-gradient(135deg,#15803d,#16a34a);color:#fff"><div style="font-size:10px;color:rgba(167,239,134,.6);margin-bottom:5px;position:relative;z-index:1">TOTAL EARNED</div><div style="font-size:18px;font-weight:800;position:relative;z-index:1">NGN ${fmt(tE)}</div></div><div class="fin-stat" style="background:linear-gradient(135deg,#92400e,#d97706);color:#fff"><div style="font-size:10px;color:rgba(255,237,153,.6);margin-bottom:5px;position:relative;z-index:1">TOTAL LOANS</div><div style="font-size:18px;font-weight:800;position:relative;z-index:1">${allL.size}</div></div></div><div class="card" style="padding:14px"><div style="font-weight:700;font-size:13px;margin-bottom:12px">Summary</div><div style="display:flex;flex-direction:column;gap:8px;font-size:13px"><div style="display:flex;justify-content:space-between"><span style="color:var(--g500)">Total loan applications</span><strong>${allL.size}</strong></div><div style="display:flex;justify-content:space-between"><span style="color:var(--g500)">Active loans</span><strong style="color:var(--blue)">${aL}</strong></div><div style="display:flex;justify-content:space-between"><span style="color:var(--g500)">Total investments</span><strong>${allI.size}</strong></div><div style="display:flex;justify-content:space-between"><span style="color:var(--g500)">Active investments</span><strong style="color:#6d28d9">${aI}</strong></div><div style="display:flex;justify-content:space-between"><span style="color:var(--g500)">Total returns earned</span><strong style="color:var(--ok)">NGN ${fmt(tE)}</strong></div></div></div>`;
-  }
-}
-
-async function submitLoan(){
-  const amt=parseFloat(document.getElementById('ln-amt').value);
-  const purpose=document.getElementById('ln-purpose').value.trim();
-  const duration=document.getElementById('ln-duration').value;
-  const gName=document.getElementById('ln-gname').value.trim();
-  const gPhone=document.getElementById('ln-gphone').value.trim();
-  const gRel=document.getElementById('ln-grel').value;
-  const gAddr=document.getElementById('ln-gaddr').value.trim();
-  const gId=document.getElementById('ln-gid').value;
-  if(!amt||amt<1000){toast('Minimum loan amount is NGN 1,000');return;}
-  if(!purpose){toast('Please state the purpose of the loan');return;}
-  if(!gName||!gPhone||!gRel){toast('Guarantor name, phone and relationship are required');return;}
-  try{
-    await db.collection('loans').add({userId:CU.uid,userEmail:CU.email,userName:UD?.name||'',amount:amt,purpose,duration:duration||'Not specified',guarantor:{name:gName,phone:gPhone,relationship:gRel,address:gAddr||'',idType:gId||''},status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    await addFinanceNotif(CU.uid,'Loan Application Submitted','Your loan request of NGN '+fmt(amt)+' has been submitted. Admin will review your guarantor details and respond within 24 hours.');
-    closeM('m-loan-apply');toast('Loan application submitted! Expect a response within 24 hours.');
-    if(document.getElementById('pg-finance')?.classList.contains('active'))loadFinanceDash();
-  }catch(er){toast('Failed to submit: '+er.message);}
-}
-
-async function submitInvestment(){
-  const amt=parseFloat(document.getElementById('inv-amt').value);
-  const duration=document.getElementById('inv-duration').value;
-  const note=document.getElementById('inv-note').value.trim();
-  if(!amt||amt<1000){toast('Minimum investment is NGN 1,000');return;}
-  try{
-    await db.collection('investments').add({userId:CU.uid,userEmail:CU.email,userName:UD?.name||'',amount:amt,duration,note:note||'',status:'pending',interestRate:null,expectedReturn:null,maturityDate:null,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    await addFinanceNotif(CU.uid,'Investment Request Submitted','Your investment of NGN '+fmt(amt)+' for '+duration+' has been submitted. Admin will set the interest rate and maturity date.');
-    closeM('m-invest-apply');toast('Investment request submitted! Admin will set rates shortly.');
-    if(document.getElementById('pg-finance')?.classList.contains('active'))loadFinanceDash();
-  }catch(er){toast('Failed to submit: '+er.message);}
-}
-
-// ── ADMIN FINANCE ACTIONS ──
-async function approveLoan(loanId,userId){
-  const amt=parseFloat(document.getElementById('ln-appamt-'+loanId)?.value||0);
-  const note=document.getElementById('ln-note-'+loanId)?.value.trim()||'';
-  if(!amt||amt<=0){toast('Enter approved amount');return;}
-  if(!confirm('Approve loan of NGN '+fmt(amt)+' and credit wallet?'))return;
-  await db.collection('loans').doc(loanId).update({status:'active',approvedAmount:amt,adminNote:note,approvedAt:firebase.firestore.FieldValue.serverTimestamp()});
-  await db.collection('users').doc(userId).update({balance:firebase.firestore.FieldValue.increment(amt)});
-  await db.collection('transactions').add({userId,type:'loan',amount:amt,description:'Loan Approved - Wallet Credited',status:'success',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-  await addFinanceNotif(userId,'Loan Approved! 🎉','Your loan of NGN '+fmt(amt)+' has been approved and credited to your wallet.'+(note?' Note: '+note:''));
-  toast('Loan approved and wallet credited!');loadAdmin();
-}
-async function rejectLoan(loanId,userId){
-  const note=document.getElementById('ln-note-'+loanId)?.value.trim()||'Application did not meet requirements.';
-  if(!confirm('Reject this loan application?'))return;
-  await db.collection('loans').doc(loanId).update({status:'rejected',adminNote:note,rejectedAt:firebase.firestore.FieldValue.serverTimestamp()});
-  await addFinanceNotif(userId,'Loan Application Rejected','Your loan application was not approved. Reason: '+note);
-  toast('Loan rejected.');loadAdmin();
-}
-async function markLoanRepaid(loanId,userId,amount){
-  if(!confirm('Mark this loan as repaid?'))return;
-  await db.collection('loans').doc(loanId).update({status:'repaid',repaidAt:firebase.firestore.FieldValue.serverTimestamp()});
-  await addFinanceNotif(userId,'Loan Marked as Repaid','Your loan of NGN '+fmt(amount)+' has been marked as fully repaid. Thank you!');
-  toast('Loan marked as repaid.');loadAdmin();
-}
-async function approveInvestment(invId,userId,amount){
-  const rate=parseFloat(document.getElementById('inv-rate-'+invId)?.value||0);
-  const matDate=document.getElementById('inv-mat-'+invId)?.value;
-  if(!rate||rate<=0){toast('Enter interest rate');return;}
-  if(!matDate){toast('Select maturity date');return;}
-  const expectedReturn=amount+(amount*rate/100);
-  await db.collection('investments').doc(invId).update({status:'active',interestRate:rate,expectedReturn:Math.round(expectedReturn),maturityDate:firebase.firestore.Timestamp.fromDate(new Date(matDate)),approvedAt:firebase.firestore.FieldValue.serverTimestamp()});
-  await addFinanceNotif(userId,'Investment Approved! 📈','Your investment of NGN '+fmt(amount)+' has been approved. Rate: '+rate+'%. Expected return: NGN '+fmt(expectedReturn)+'. Matures: '+matDate);
-  toast('Investment approved!');loadAdmin();
-}
-async function rejectInvestment(invId,userId){
-  if(!confirm('Reject this investment?'))return;
-  await db.collection('investments').doc(invId).update({status:'rejected',rejectedAt:firebase.firestore.FieldValue.serverTimestamp()});
-  await addFinanceNotif(userId,'Investment Request Rejected','Your investment request could not be processed at this time. Contact support for details.');
-  toast('Investment rejected.');loadAdmin();
-}
-async function markInvestmentPaid(invId,userId,returnAmt){
-  if(!confirm('Pay out NGN '+fmt(returnAmt)+' to user wallet?'))return;
-  await db.collection('investments').doc(invId).update({status:'paid',paidAt:firebase.firestore.FieldValue.serverTimestamp()});
-  await db.collection('users').doc(userId).update({balance:firebase.firestore.FieldValue.increment(returnAmt)});
-  await db.collection('transactions').add({userId,type:'invest_return',amount:returnAmt,description:'Investment Return Credited',status:'success',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-  await addFinanceNotif(userId,'Investment Payout! 💰','Your investment return of NGN '+fmt(returnAmt)+' has been credited to your wallet. Thank you for investing with ZMONIE!');
-  toast('Investment paid out!');loadAdmin();
-}
 </script>
 
-<!-- LOAN APPLICATION MODAL -->
-<div class="modal" id="m-loan-apply"><div class="mbox">
+<!-- ======== FINANCE HUB PAGE ======== -->
+<div id="pg-finance" class="page">
+  <div style="max-width:480px;margin:0 auto;background:var(--bg);min-height:100vh;padding-bottom:80px">
+    <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:20px 16px 28px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5);font-weight:500">Finance Center</div>
+          <div style="font-size:17px;font-weight:700;color:#fff" id="fn-name">—</div>
+        </div>
+        <button onclick="goPg('pg-dash')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:7px 14px;border-radius:50px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">VTU Home</button>
+      </div>
+      <!-- Finance stats strip -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div style="background:rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Active Loans</div>
+          <div style="font-size:18px;font-weight:800;color:#fff" id="fn-active-loans">0</div>
+        </div>
+        <div style="background:rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Investments</div>
+          <div style="font-size:18px;font-weight:800;color:#4ade80" id="fn-active-inv">0</div>
+        </div>
+        <div style="background:rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Returns</div>
+          <div style="font-size:15px;font-weight:800;color:#fbbf24" id="fn-returns">NGN 0</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:16px 14px">
+      <!-- Finance Actions -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
+        <button onclick="openM('m-apply-loan')" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:18px 14px;cursor:pointer;text-align:left;font-family:'Inter',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='#e2e8f0'">
+          <div style="width:40px;height:40px;background:#dbeafe;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:10px">🏦</div>
+          <div style="font-weight:700;font-size:14px;color:#0f172a">Apply for Loan</div>
+          <div style="font-size:11px;color:#64748b;margin-top:3px">With guarantor</div>
+        </button>
+        <button onclick="openM('m-invest')" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:18px 14px;cursor:pointer;text-align:left;font-family:'Inter',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='#e2e8f0'">
+          <div style="width:40px;height:40px;background:#dcfce7;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:10px">📈</div>
+          <div style="font-weight:700;font-size:14px;color:#0f172a">Invest and Earn</div>
+          <div style="font-size:11px;color:#64748b;margin-top:3px">Grow your money</div>
+        </button>
+      </div>
+
+      <!-- Active Loans -->
+      <div style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:14px;font-weight:700;color:#334155">Active Loans</div>
+          <button onclick="navTo('pg-loan-hist',null)" style="background:none;border:none;color:var(--green-d);font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif">View All</button>
+        </div>
+        <div id="fn-loans-list" class="card" style="overflow:hidden">
+          <div style="padding:28px;text-align:center;color:#94a3b8"><div style="font-size:28px;margin-bottom:7px">🏦</div><p style="font-size:13px">No active loans</p></div>
+        </div>
+      </div>
+
+      <!-- Active Investments -->
+      <div style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:14px;font-weight:700;color:#334155">Active Investments</div>
+          <button onclick="navTo('pg-inv-hist',null)" style="background:none;border:none;color:var(--green-d);font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif">View All</button>
+        </div>
+        <div id="fn-inv-list" class="card" style="overflow:hidden">
+          <div style="padding:28px;text-align:center;color:#94a3b8"><div style="font-size:28px;margin-bottom:7px">📈</div><p style="font-size:13px">No active investments</p></div>
+        </div>
+      </div>
+
+      <!-- Finance Analytics mini -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;color:#334155;margin-bottom:10px">Finance Summary</div>
+        <div class="card" style="padding:16px" id="fn-analytics">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div style="background:#f0fdf4;border-radius:10px;padding:12px"><div style="font-size:11px;color:#16a34a;font-weight:600;margin-bottom:4px">Total Borrowed</div><div style="font-size:16px;font-weight:800;color:#0f172a" id="fn-total-borrowed">NGN 0</div></div>
+            <div style="background:#eff6ff;border-radius:10px;padding:12px"><div style="font-size:11px;color:#2563eb;font-weight:600;margin-bottom:4px">Total Invested</div><div style="font-size:16px;font-weight:800;color:#0f172a" id="fn-total-invested">NGN 0</div></div>
+            <div style="background:#fefce8;border-radius:10px;padding:12px"><div style="font-size:11px;color:#d97706;font-weight:600;margin-bottom:4px">Expected Returns</div><div style="font-size:16px;font-weight:800;color:#0f172a" id="fn-exp-returns">NGN 0</div></div>
+            <div style="background:#fdf4ff;border-radius:10px;padding:12px"><div style="font-size:11px;color:#9333ea;font-weight:600;margin-bottom:4px">Loan Repaid</div><div style="font-size:16px;font-weight:800;color:#0f172a" id="fn-repaid">NGN 0</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bnav">
+    <div class="bni" onclick="navTo('pg-dash',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></div>
+    <div class="bni" onclick="navTo('pg-hist',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>VTU</span></div>
+    <div class="bni on" onclick="navTo('pg-finance',this)" style="flex:none;padding:0 16px"><div style="width:44px;height:44px;background:linear-gradient(135deg,#1e3a5f,#2563eb);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:-12px;box-shadow:0 4px 14px rgba(37,99,235,.35)"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><span style="margin-top:2px">Finance</span></div>
+    <div class="bni" onclick="navTo('pg-notif',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span>Alerts</span></div>
+    <div class="bni" onclick="navTo('pg-profile',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profile</span></div>
+  </div>
+</div>
+
+<!-- ======== LOAN HISTORY PAGE ======== -->
+<div id="pg-loan-hist" class="page">
+  <div style="max-width:480px;margin:0 auto;padding-bottom:80px">
+    <div class="hdr" style="display:flex;align-items:center;gap:12px">
+      <button onclick="goPg('pg-finance')" style="background:none;border:none;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#dbeafe;color:#2563eb"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <span style="font-size:16px;font-weight:700">Loan History</span>
+    </div>
+    <div style="padding:14px">
+      <div class="sx" style="display:flex;gap:6px;margin-bottom:12px">
+        <button class="chip c-ok" onclick="fltLoans('all',this)" style="cursor:pointer">All</button>
+        <button class="chip" style="background:#f1f5f9;color:#475569;cursor:pointer" onclick="fltLoans('pending',this)">Pending</button>
+        <button class="chip" style="background:#f1f5f9;color:#475569;cursor:pointer" onclick="fltLoans('active',this)">Active</button>
+        <button class="chip" style="background:#f1f5f9;color:#475569;cursor:pointer" onclick="fltLoans('repaid',this)">Repaid</button>
+        <button class="chip" style="background:#f1f5f9;color:#475569;cursor:pointer" onclick="fltLoans('rejected',this)">Rejected</button>
+      </div>
+      <div id="loan-hist-list" class="card" style="overflow:hidden"></div>
+    </div>
+  </div>
+  <div class="bnav">
+    <div class="bni" onclick="navTo('pg-dash',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></div>
+    <div class="bni" onclick="navTo('pg-hist',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>VTU</span></div>
+    <div class="bni" onclick="navTo('pg-finance',this)" style="flex:none;padding:0 16px"><div style="width:44px;height:44px;background:linear-gradient(135deg,#1e3a5f,#2563eb);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:-12px;box-shadow:0 4px 14px rgba(37,99,235,.35)"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><span style="margin-top:2px">Finance</span></div>
+    <div class="bni" onclick="navTo('pg-notif',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span>Alerts</span></div>
+    <div class="bni" onclick="navTo('pg-profile',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profile</span></div>
+  </div>
+</div>
+
+<!-- ======== INVESTMENT HISTORY PAGE ======== -->
+<div id="pg-inv-hist" class="page">
+  <div style="max-width:480px;margin:0 auto;padding-bottom:80px">
+    <div class="hdr" style="display:flex;align-items:center;gap:12px">
+      <button onclick="goPg('pg-finance')" style="background:none;border:none;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#dcfce7;color:#15803d"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <span style="font-size:16px;font-weight:700">Investment History</span>
+    </div>
+    <div style="padding:14px">
+      <div class="sx" style="display:flex;gap:6px;margin-bottom:12px">
+        <button class="chip c-ok" onclick="fltInv('all',this)" style="cursor:pointer">All</button>
+        <button class="chip" style="background:#f1f5f9;color:#475569;cursor:pointer" onclick="fltInv('pending',this)">Pending</button>
+        <button class="chip" style="background:#f1f5f9;color:#475569;cursor:pointer" onclick="fltInv('active',this)">Active</button>
+        <button class="chip" style="background:#f1f5f9;color:#475569;cursor:pointer" onclick="fltInv('matured',this)">Matured</button>
+        <button class="chip" style="background:#f1f5f9;color:#475569;cursor:pointer" onclick="fltInv('paid',this)">Paid</button>
+      </div>
+      <div id="inv-hist-list" class="card" style="overflow:hidden"></div>
+    </div>
+  </div>
+  <div class="bnav">
+    <div class="bni" onclick="navTo('pg-dash',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></div>
+    <div class="bni" onclick="navTo('pg-hist',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>VTU</span></div>
+    <div class="bni" onclick="navTo('pg-finance',this)" style="flex:none;padding:0 16px"><div style="width:44px;height:44px;background:linear-gradient(135deg,#1e3a5f,#2563eb);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:-12px;box-shadow:0 4px 14px rgba(37,99,235,.35)"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><span style="margin-top:2px">Finance</span></div>
+    <div class="bni" onclick="navTo('pg-notif',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span>Alerts</span></div>
+    <div class="bni" onclick="navTo('pg-profile',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profile</span></div>
+  </div>
+</div>
+
+<!-- ===== LOAN APPLICATION MODAL ===== -->
+<div class="modal" id="m-apply-loan"><div class="mbox">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <div><h3 style="font-size:17px;font-weight:700">Apply for Loan</h3><p style="font-size:11px;color:var(--g400);margin-top:2px">Guarantor required for approval</p></div>
-    <button onclick="closeM('m-loan-apply')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600)">&#10005;</button>
+    <h3 style="font-size:17px;font-weight:700">Apply for Loan</h3>
+    <button onclick="closeM('m-apply-loan')" style="background:#f1f5f9;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:#475569">✕</button>
   </div>
-  <div class="info-box"><p style="font-size:12px;color:var(--green-d);line-height:1.6">Loans processed within 24 hours. Admin verifies your guarantor before approval. If approved, funds are credited directly to your wallet.</p></div>
-  <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Loan Amount (NGN)</label><input class="inp" type="number" id="ln-amt" placeholder="e.g. 50000" min="1000"/></div>
-  <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Purpose of Loan</label><input class="inp" id="ln-purpose" placeholder="e.g. Business capital, School fees..."/></div>
-  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Repayment Duration (optional)</label><select class="inp" id="ln-duration"><option value="">Not specified</option><option>1 Month</option><option>2 Months</option><option>3 Months</option><option>6 Months</option><option>12 Months</option></select></div>
-  <div style="background:#faf5ff;border:1px solid #c4b5fd;border-radius:12px;padding:14px;margin-bottom:14px">
-    <div style="font-size:13px;font-weight:700;color:#5b21b6;margin-bottom:12px">&#128100; Guarantor Details (Required)</div>
-    <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Guarantor Full Name</label><input class="inp" id="ln-gname" placeholder="Full legal name"/></div>
-    <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Guarantor Phone Number</label><input class="inp" type="tel" id="ln-gphone" placeholder="080XXXXXXXX"/></div>
-    <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Relationship to Guarantor</label><select class="inp" id="ln-grel"><option value="">Select relationship</option><option>Family Member</option><option>Friend</option><option>Colleague</option><option>Employer</option><option>Business Partner</option><option>Other</option></select></div>
-    <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Guarantor Address (optional)</label><input class="inp" id="ln-gaddr" placeholder="Street, City, State"/></div>
-    <div><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Guarantor ID Type (optional)</label><select class="inp" id="ln-gid"><option value="">None provided</option><option>NIN</option><option>BVN</option><option>Driver's License</option><option>International Passport</option><option>Voter's Card</option></select></div>
+  <!-- Step indicator -->
+  <div style="display:flex;gap:0;margin-bottom:20px;border-radius:10px;overflow:hidden;background:#f1f5f9">
+    <div id="lstep1" style="flex:1;padding:8px;text-align:center;font-size:12px;font-weight:700;background:var(--green);color:#fff;border-radius:10px 0 0 10px">1. Loan Details</div>
+    <div id="lstep2" style="flex:1;padding:8px;text-align:center;font-size:12px;font-weight:600;color:#94a3b8">2. Guarantor Info</div>
+    <div id="lstep3" style="flex:1;padding:8px;text-align:center;font-size:12px;font-weight:600;color:#94a3b8;border-radius:0 10px 10px 0">3. Review</div>
   </div>
-  <button onclick="submitLoan()" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Submit Loan Application</button>
+
+  <!-- Step 1: Loan Details -->
+  <div id="loan-step1">
+    <div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;display:block">Loan Amount (NGN)</label>
+      <select class="inp" id="ln-amount">
+        <option value="">Select amount</option>
+        <option value="5000">NGN 5,000</option><option value="10000">NGN 10,000</option>
+        <option value="20000">NGN 20,000</option><option value="50000">NGN 50,000</option>
+        <option value="100000">NGN 100,000</option><option value="200000">NGN 200,000</option>
+        <option value="500000">NGN 500,000</option>
+      </select>
+    </div>
+    <div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;display:block">Purpose of Loan</label><textarea class="inp" id="ln-purpose" rows="2" placeholder="e.g. Business expansion, medical bills, school fees..." style="resize:none"></textarea></div>
+    <div style="margin-bottom:18px"><label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;display:block">Repayment Duration</label>
+      <select class="inp" id="ln-duration">
+        <option value="30">30 Days</option><option value="60">60 Days</option>
+        <option value="90">90 Days</option><option value="180">6 Months</option>
+        <option value="365">1 Year</option>
+      </select>
+    </div>
+    <button onclick="loanStep(2)" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Next: Guarantor Info</button>
+  </div>
+
+  <!-- Step 2: Guarantor -->
+  <div id="loan-step2" style="display:none">
+    <div style="background:#fefce8;border:1px solid #fde047;border-radius:10px;padding:11px 13px;margin-bottom:14px"><p style="font-size:12px;color:#78350f;line-height:1.6">A guarantor is required for all loans. They will be contacted by our team for verification before loan approval.</p></div>
+    <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;display:block">Guarantor Full Name</label><input class="inp" id="g-name" placeholder="Full legal name"/></div>
+    <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;display:block">Guarantor Phone Number</label><input class="inp" type="tel" id="g-phone" placeholder="080XXXXXXXX"/></div>
+    <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;display:block">Relationship to You</label>
+      <select class="inp" id="g-rel">
+        <option value="">Select relationship</option>
+        <option>Parent</option><option>Sibling</option><option>Spouse</option>
+        <option>Friend</option><option>Colleague</option><option>Employer</option><option>Other</option>
+      </select>
+    </div>
+    <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;display:block">Guarantor Address (optional)</label><input class="inp" id="g-addr" placeholder="House no, street, city"/></div>
+    <div style="margin-bottom:18px"><label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;display:block">Guarantor ID Type (optional)</label>
+      <select class="inp" id="g-id">
+        <option value="">Select ID type</option>
+        <option>NIN</option><option>BVN</option><option>Voter Card</option>
+        <option>Driver's Licence</option><option>International Passport</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button onclick="loanStep(1)" style="flex:1;padding:12px;border-radius:11px;background:#f1f5f9;border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:#475569">Back</button>
+      <button onclick="loanStep(3)" class="btn-g" style="flex:2;padding:12px;border-radius:11px;font-size:14px">Next: Review</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Review & Submit -->
+  <div id="loan-step3" style="display:none">
+    <div class="card" style="padding:14px;margin-bottom:14px;border-left:3px solid var(--green)">
+      <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Loan Details</div>
+      <div id="ln-review" style="font-size:13px;color:#334155;line-height:2"></div>
+    </div>
+    <div class="card" style="padding:14px;margin-bottom:18px;border-left:3px solid #2563eb">
+      <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Guarantor Details</div>
+      <div id="g-review" style="font-size:13px;color:#334155;line-height:2"></div>
+    </div>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:11px 13px;margin-bottom:16px"><p style="font-size:12px;color:#15803d;line-height:1.6">By submitting, you confirm that all information is correct and you consent to ZMONIE contacting your guarantor for verification.</p></div>
+    <div style="display:flex;gap:10px">
+      <button onclick="loanStep(2)" style="flex:1;padding:12px;border-radius:11px;background:#f1f5f9;border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:#475569">Back</button>
+      <button onclick="submitLoan()" class="btn-g" style="flex:2;padding:12px;border-radius:11px;font-size:14px">Submit Application</button>
+    </div>
+  </div>
 </div></div>
 
-<!-- INVESTMENT MODAL -->
-<div class="modal" id="m-invest-apply"><div class="mbox">
+<!-- ===== INVESTMENT MODAL ===== -->
+<div class="modal" id="m-invest"><div class="mbox">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <div><h3 style="font-size:17px;font-weight:700">Invest &amp; Earn</h3><p style="font-size:11px;color:var(--g400);margin-top:2px">Grow your money with ZMONIE</p></div>
-    <button onclick="closeM('m-invest-apply')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600)">&#10005;</button>
+    <h3 style="font-size:17px;font-weight:700">Invest and Earn</h3>
+    <button onclick="closeM('m-invest')" style="background:#f1f5f9;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:#475569">✕</button>
   </div>
-  <div style="background:#faf5ff;border:1px solid #c4b5fd;border-radius:11px;padding:13px;margin-bottom:14px"><p style="font-size:12px;color:#6d28d9;line-height:1.6">Your request is reviewed by admin who sets the interest rate and maturity date. Returns are credited to your wallet on maturity.</p></div>
-  <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Investment Amount (NGN)</label><input class="inp" type="number" id="inv-amt" placeholder="e.g. 10000" min="1000"/></div>
-  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Preferred Duration</label><select class="inp" id="inv-duration"><option>1 Month</option><option>3 Months</option><option>6 Months</option><option>12 Months</option><option>Flexible</option></select></div>
-  <div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Additional Notes (optional)</label><textarea class="inp" id="inv-note" placeholder="Any special instructions or goals..."></textarea></div>
-  <button onclick="submitInvestment()" style="width:100%;padding:13px;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border:none;box-shadow:0 3px 12px rgba(109,40,217,.3)">Submit Investment Request</button>
+  <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:12px;padding:14px;margin-bottom:16px">
+    <div style="font-size:12px;font-weight:600;color:#15803d;margin-bottom:4px">How it works</div>
+    <div style="font-size:12px;color:#166534;line-height:1.7">Invest your money for a fixed period and earn interest. Admin sets the interest rate after reviewing your investment. Returns are credited to your wallet at maturity.</div>
+  </div>
+  <div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;display:block">Investment Amount (NGN)</label>
+    <select class="inp" id="inv-amount" onchange="updateInvCalc()">
+      <option value="">Select amount</option>
+      <option value="5000">NGN 5,000</option><option value="10000">NGN 10,000</option>
+      <option value="25000">NGN 25,000</option><option value="50000">NGN 50,000</option>
+      <option value="100000">NGN 100,000</option><option value="250000">NGN 250,000</option>
+      <option value="500000">NGN 500,000</option><option value="1000000">NGN 1,000,000</option>
+    </select>
+  </div>
+  <div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;display:block">Investment Duration</label>
+    <select class="inp" id="inv-duration" onchange="updateInvCalc()">
+      <option value="30">30 Days</option><option value="60">60 Days</option>
+      <option value="90">90 Days</option><option value="180">6 Months</option>
+      <option value="365">1 Year</option>
+    </select>
+  </div>
+  <div id="inv-calc" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:#475569">Principal</span><span style="font-size:13px;font-weight:700;color:#0f172a" id="inv-principal">—</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:#475569">Est. Interest (admin confirms)</span><span style="font-size:13px;font-weight:700;color:#16a34a" id="inv-interest">—</span></div>
+    <div style="border-top:1px dashed #bbf7d0;padding-top:8px;display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:600;color:#475569">Est. Return at Maturity</span><span style="font-size:14px;font-weight:800;color:#15803d" id="inv-return">—</span></div>
+  </div>
+  <div style="margin-bottom:18px"><label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;display:block">Additional Notes (optional)</label><textarea class="inp" id="inv-notes" rows="2" placeholder="Any specific instructions or goals..." style="resize:none"></textarea></div>
+  <button onclick="submitInvestment()" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Submit Investment</button>
 </div></div>
+
+<!-- ===== ADMIN FINANCE MODAL (loan detail view) ===== -->
+<div class="modal" id="m-loan-detail"><div class="mbox">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <h3 style="font-size:17px;font-weight:700">Loan Application</h3>
+    <button onclick="closeM('m-loan-detail')" style="background:#f1f5f9;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:#475569">✕</button>
+  </div>
+  <div id="loan-detail-body"></div>
+</div></div>
+
+<!-- ===== ADMIN INVESTMENT MODAL ===== -->
+<div class="modal" id="m-inv-detail"><div class="mbox">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <h3 style="font-size:17px;font-weight:700">Investment Application</h3>
+    <button onclick="closeM('m-inv-detail')" style="background:#f1f5f9;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:#475569">✕</button>
+  </div>
+  <div id="inv-detail-body"></div>
+</div></div>
+
+<script>
+// ===== FINANCE MODULE JAVASCRIPT =====
+
+let allLoans=[], allInvs=[];
+
+// ===== LOAD FINANCE DASHBOARD =====
+async function loadFinance(){
+  if(!CU)return;
+  const s=await db.collection('users').doc(CU.uid).get();
+  UD=s.data();
+  const nm=UD.name||'User';
+  const el=document.getElementById('fn-name');if(el)el.textContent=nm;
+
+  const [lSnap,iSnap]=await Promise.all([
+    db.collection('loans').where('userId','==',CU.uid).orderBy('createdAt','desc').get(),
+    db.collection('investments').where('userId','==',CU.uid).orderBy('createdAt','desc').get()
+  ]);
+  allLoans=lSnap.docs.map(d=>({id:d.id,...d.data()}));
+  allInvs=iSnap.docs.map(d=>({id:d.id,...d.data()}));
+
+  // Stats
+  const activeLoans=allLoans.filter(l=>l.status==='active');
+  const activeInvs=allInvs.filter(i=>i.status==='active');
+  const expReturns=activeInvs.reduce((s,i)=>s+(i.expectedReturn||0),0);
+  const totalBorrowed=allLoans.filter(l=>['active','repaid'].includes(l.status)).reduce((s,l)=>s+(l.approvedAmount||l.amount||0),0);
+  const totalInvested=allInvs.filter(i=>['active','matured','paid'].includes(i.status)).reduce((s,i)=>s+(i.amount||0),0);
+  const totalRepaid=allLoans.filter(l=>l.status==='repaid').reduce((s,l)=>s+(l.approvedAmount||l.amount||0),0);
+
+  setTxt('fn-active-loans',activeLoans.length);
+  setTxt('fn-active-inv',activeInvs.length);
+  setTxt('fn-returns','NGN '+fmt(expReturns));
+  setTxt('fn-total-borrowed','NGN '+fmt(totalBorrowed));
+  setTxt('fn-total-invested','NGN '+fmt(totalInvested));
+  setTxt('fn-exp-returns','NGN '+fmt(expReturns));
+  setTxt('fn-repaid','NGN '+fmt(totalRepaid));
+
+  // Render active loans
+  renderLoanCards(activeLoans,'fn-loans-list');
+  // Render active investments
+  renderInvCards(activeInvs,'fn-inv-list');
+}
+
+function setTxt(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+
+function loanStatusColor(s){
+  const m={pending:'#fef3c7:#92400e',approved:'#dcfce7:#15803d',rejected:'#fee2e2:#dc2626',active:'#dbeafe:#1d4ed8',repaid:'#f0fdf4:#16a34a'};
+  const v=m[s]||'#f1f5f9:#475569';return v.split(':');
+}
+function invStatusColor(s){
+  const m={pending:'#fef3c7:#92400e',active:'#dbeafe:#1d4ed8',matured:'#fae8ff:#9333ea',paid:'#dcfce7:#15803d'};
+  const v=m[s]||'#f1f5f9:#475569';return v.split(':');
+}
+
+function renderLoanCards(loans,containerId){
+  const el=document.getElementById(containerId);if(!el)return;
+  if(!loans.length){el.innerHTML='<div style="padding:28px;text-align:center;color:#94a3b8"><div style="font-size:28px;margin-bottom:7px">🏦</div><p style="font-size:13px">No loans found</p></div>';return;}
+  el.innerHTML=loans.map(l=>{
+    const [bg,col]=loanStatusColor(l.status);
+    const due=l.dueDate?'Due: '+fdate(l.dueDate):'';
+    return`<div class="txr" onclick="viewLoanDetail('${l.id}')">
+      <div style="width:38px;height:38px;background:#dbeafe;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🏦</div>
+      <div style="flex:1;min-width:0;margin-left:10px">
+        <div style="font-weight:600;font-size:13px">${l.purpose||'Loan'}</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px">${fdate(l.createdAt)}${due?' · '+due:''}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:8px">
+        <div style="font-weight:700;font-size:13px;color:#0f172a">NGN ${fmt(l.approvedAmount||l.amount||0)}</div>
+        <div style="display:inline-flex;padding:3px 8px;border-radius:50px;font-size:10px;font-weight:700;background:${bg};color:${col};margin-top:2px">${l.status}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderInvCards(invs,containerId){
+  const el=document.getElementById(containerId);if(!el)return;
+  if(!invs.length){el.innerHTML='<div style="padding:28px;text-align:center;color:#94a3b8"><div style="font-size:28px;margin-bottom:7px">📈</div><p style="font-size:13px">No investments found</p></div>';return;}
+  el.innerHTML=invs.map(i=>{
+    const [bg,col]=invStatusColor(i.status);
+    const ret=i.expectedReturn?'Return: NGN '+fmt(i.expectedReturn):'';
+    return`<div class="txr" onclick="viewInvDetail('${i.id}')">
+      <div style="width:38px;height:38px;background:#dcfce7;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">📈</div>
+      <div style="flex:1;min-width:0;margin-left:10px">
+        <div style="font-weight:600;font-size:13px">Investment – ${i.duration||'—'} days</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px">${fdate(i.createdAt)}${ret?' · '+ret:''}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:8px">
+        <div style="font-weight:700;font-size:13px;color:#0f172a">NGN ${fmt(i.amount||0)}</div>
+        <div style="display:inline-flex;padding:3px 8px;border-radius:50px;font-size:10px;font-weight:700;background:${bg};color:${col};margin-top:2px">${i.status}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== LOAN HISTORY PAGE =====
+async function loadLoanHist(){
+  if(!CU)return;
+  const s=await db.collection('loans').where('userId','==',CU.uid).orderBy('createdAt','desc').get();
+  allLoans=s.docs.map(d=>({id:d.id,...d.data()}));
+  renderLoanCards(allLoans,'loan-hist-list');
+}
+function fltLoans(status,btn){
+  document.querySelectorAll('#pg-loan-hist .chip').forEach(b=>{b.className='chip';b.style.background='#f1f5f9';b.style.color='#475569';});
+  btn.className='chip c-ok';
+  renderLoanCards(status==='all'?allLoans:allLoans.filter(l=>l.status===status),'loan-hist-list');
+}
+
+// ===== INVESTMENT HISTORY PAGE =====
+async function loadInvHist(){
+  if(!CU)return;
+  const s=await db.collection('investments').where('userId','==',CU.uid).orderBy('createdAt','desc').get();
+  allInvs=s.docs.map(d=>({id:d.id,...d.data()}));
+  renderInvCards(allInvs,'inv-hist-list');
+}
+function fltInv(status,btn){
+  document.querySelectorAll('#pg-inv-hist .chip').forEach(b=>{b.className='chip';b.style.background='#f1f5f9';b.style.color='#475569';});
+  btn.className='chip c-ok';
+  renderInvCards(status==='all'?allInvs:allInvs.filter(i=>i.status===status),'inv-hist-list');
+}
+
+// ===== LOAN STEPS =====
+function loanStep(n){
+  if(n===2){
+    const amt=document.getElementById('ln-amount')?.value;
+    const pur=document.getElementById('ln-purpose')?.value?.trim();
+    if(!amt){toast('Please select a loan amount');return;}
+    if(!pur){toast('Please enter the purpose of the loan');return;}
+  }
+  if(n===3){
+    const gName=document.getElementById('g-name')?.value?.trim();
+    const gPhone=document.getElementById('g-phone')?.value?.trim();
+    const gRel=document.getElementById('g-rel')?.value;
+    if(!gName){toast('Please enter guarantor full name');return;}
+    if(!gPhone||gPhone.length<10){toast('Enter a valid guarantor phone number');return;}
+    if(!gRel){toast('Please select your relationship with the guarantor');return;}
+    // Populate review
+    const amt=document.getElementById('ln-amount')?.value;
+    const pur=document.getElementById('ln-purpose')?.value;
+    const dur=document.getElementById('ln-duration')?.value;
+    const gAddr=document.getElementById('g-addr')?.value||'—';
+    const gId=document.getElementById('g-id')?.value||'—';
+    setTxt('ln-review',`Amount: NGN ${fmt(parseFloat(amt))}<br>Purpose: ${pur}<br>Duration: ${dur} days`);
+    setTxt('g-review',`Name: ${gName}<br>Phone: ${gPhone}<br>Relationship: ${gRel}<br>Address: ${gAddr}<br>ID Type: ${gId}`);
+  }
+  [1,2,3].forEach(i=>{
+    const el=document.getElementById('loan-step'+i);
+    if(el)el.style.display=i===n?'block':'none';
+    const si=document.getElementById('lstep'+i);
+    if(si){si.style.background=i<=n?'var(--green)':'transparent';si.style.color=i<=n?'#fff':'#94a3b8';}
+  });
+}
+
+// ===== SUBMIT LOAN =====
+async function submitLoan(){
+  if(!CU){toast('Please log in first');return;}
+  const amount=parseFloat(document.getElementById('ln-amount')?.value||0);
+  const purpose=document.getElementById('ln-purpose')?.value?.trim();
+  const duration=parseInt(document.getElementById('ln-duration')?.value||30);
+  const guarantor={
+    name:document.getElementById('g-name')?.value?.trim(),
+    phone:document.getElementById('g-phone')?.value?.trim(),
+    relationship:document.getElementById('g-rel')?.value,
+    address:document.getElementById('g-addr')?.value?.trim()||'',
+    idType:document.getElementById('g-id')?.value||''
+  };
+  try{
+    await db.collection('loans').add({
+      userId:CU.uid,email:CU.email,name:UD?.name||'',phone:UD?.phone||'',
+      amount,purpose,duration,guarantor,
+      status:'pending',approvedAmount:0,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await addNotif(CU.uid,'Loan Application Submitted','Your loan application for NGN '+fmt(amount)+' has been submitted. We will verify your guarantor and respond within 24 hours.');
+    closeM('m-apply-loan');toast('Loan application submitted! We will contact you within 24 hours.');
+    loadFinance();
+  }catch(er){toast('Error submitting loan: '+er.message);}
+}
+
+// ===== INVESTMENT CALC =====
+function updateInvCalc(){
+  const amt=parseFloat(document.getElementById('inv-amount')?.value||0);
+  const dur=parseInt(document.getElementById('inv-duration')?.value||30);
+  const calcEl=document.getElementById('inv-calc');
+  if(!amt||!calcEl){if(calcEl)calcEl.style.display='none';return;}
+  // Estimated rate: 5-15% depending on duration (admin confirms actual)
+  const estRate=dur<=30?0.05:dur<=60?0.08:dur<=90?0.10:dur<=180?0.12:0.15;
+  const interest=amt*estRate*(dur/365);
+  const total=amt+interest;
+  calcEl.style.display='block';
+  setTxt('inv-principal','NGN '+fmt(amt));
+  setTxt('inv-interest','NGN '+fmt(interest)+' (est. '+Math.round(estRate*100)+'%/yr)');
+  setTxt('inv-return','NGN '+fmt(total));
+}
+
+// ===== SUBMIT INVESTMENT =====
+async function submitInvestment(){
+  if(!CU){toast('Please log in first');return;}
+  const amount=parseFloat(document.getElementById('inv-amount')?.value||0);
+  const duration=parseInt(document.getElementById('inv-duration')?.value||30);
+  const notes=document.getElementById('inv-notes')?.value?.trim()||'';
+  if(!amount){toast('Please select an investment amount');return;}
+  // Check wallet balance
+  const s=await db.collection('users').doc(CU.uid).get();
+  const bal=s.data().balance||0;
+  if(bal<amount){toast('Insufficient wallet balance. Fund your wallet first.');return;}
+  try{
+    await db.collection('investments').add({
+      userId:CU.uid,email:CU.email,name:UD?.name||'',
+      amount,duration,notes,
+      status:'pending',interestRate:0,expectedReturn:0,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await addNotif(CU.uid,'Investment Application Submitted','Your investment of NGN '+fmt(amount)+' for '+duration+' days has been submitted. Admin will review and set your interest rate within 24 hours.');
+    closeM('m-invest');toast('Investment submitted! Admin will review within 24 hours.');
+    loadFinance();
+  }catch(er){toast('Error submitting investment: '+er.message);}
+}
+
+// ===== LOAN / INV DETAIL MODALS (user view) =====
+async function viewLoanDetail(loanId){
+  const loan=allLoans.find(l=>l.id===loanId);if(!loan)return;
+  const [bg,col]=loanStatusColor(loan.status);
+  const g=loan.guarantor||{};
+  document.getElementById('loan-detail-body').innerHTML=`
+    <div style="display:inline-flex;padding:4px 12px;border-radius:50px;font-size:11px;font-weight:700;background:${bg};color:${col};margin-bottom:14px">${loan.status.toUpperCase()}</div>
+    <div class="card" style="padding:14px;margin-bottom:11px;border-left:3px solid #2563eb">
+      <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Loan Details</div>
+      <div style="font-size:13px;color:#334155;line-height:2.2">
+        <div>Requested: <strong>NGN ${fmt(loan.amount)}</strong></div>
+        ${loan.approvedAmount?'<div>Approved: <strong style="color:#16a34a">NGN '+fmt(loan.approvedAmount)+'</strong></div>':''}
+        <div>Purpose: <strong>${loan.purpose||'—'}</strong></div>
+        <div>Duration: <strong>${loan.duration||'—'} days</strong></div>
+        <div>Applied: <strong>${fdate(loan.createdAt)}</strong></div>
+        ${loan.dueDate?'<div>Due Date: <strong>'+fdate(loan.dueDate)+'</strong></div>':''}
+        ${loan.adminNote?'<div style="color:#dc2626">Admin Note: <strong>'+loan.adminNote+'</strong></div>':''}
+      </div>
+    </div>
+    <div class="card" style="padding:14px;border-left:3px solid var(--green)">
+      <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Guarantor Details</div>
+      <div style="font-size:13px;color:#334155;line-height:2.2">
+        <div>Name: <strong>${g.name||'—'}</strong></div>
+        <div>Phone: <strong>${g.phone||'—'}</strong></div>
+        <div>Relationship: <strong>${g.relationship||'—'}</strong></div>
+        ${g.address?'<div>Address: <strong>'+g.address+'</strong></div>':''}
+        ${g.idType?'<div>ID Type: <strong>'+g.idType+'</strong></div>':''}
+      </div>
+    </div>`;
+  openM('m-loan-detail');
+}
+
+async function viewInvDetail(invId){
+  const inv=allInvs.find(i=>i.id===invId);if(!inv)return;
+  const [bg,col]=invStatusColor(inv.status);
+  document.getElementById('inv-detail-body').innerHTML=`
+    <div style="display:inline-flex;padding:4px 12px;border-radius:50px;font-size:11px;font-weight:700;background:${bg};color:${col};margin-bottom:14px">${inv.status.toUpperCase()}</div>
+    <div class="card" style="padding:14px;border-left:3px solid var(--green)">
+      <div style="font-size:13px;color:#334155;line-height:2.3">
+        <div>Amount Invested: <strong>NGN ${fmt(inv.amount)}</strong></div>
+        <div>Duration: <strong>${inv.duration} days</strong></div>
+        ${inv.interestRate?'<div>Interest Rate: <strong style="color:#16a34a">'+inv.interestRate+'% per annum</strong></div>':''}
+        ${inv.expectedReturn?'<div>Expected Return: <strong style="color:#16a34a">NGN '+fmt(inv.expectedReturn)+'</strong></div>':''}
+        ${inv.maturityDate?'<div>Maturity Date: <strong>'+fdate(inv.maturityDate)+'</strong></div>':''}
+        <div>Applied: <strong>${fdate(inv.createdAt)}</strong></div>
+        ${inv.notes?'<div>Notes: <strong>'+inv.notes+'</strong></div>':''}
+        ${inv.adminNote?'<div style="color:#dc2626">Admin Note: <strong>'+inv.adminNote+'</strong></div>':''}
+      </div>
+    </div>`;
+  openM('m-inv-detail');
+}
+
+// ===== ADMIN FINANCE TABS =====
+async function loadAdminFinance(){
+  const [ls,is]=await Promise.all([
+    db.collection('loans').orderBy('createdAt','desc').get(),
+    db.collection('investments').orderBy('createdAt','desc').get()
+  ]);
+  const loans=ls.docs.map(d=>({id:d.id,...d.data()}));
+  const invs=is.docs.map(d=>({id:d.id,...d.data()}));
+  return{loans,invs};
+}
+
+async function renderAdminFinance(el){
+  const {loans,invs}=await loadAdminFinance();
+  const totalLoaned=loans.filter(l=>['active','repaid'].includes(l.status)).reduce((s,l)=>s+(l.approvedAmount||0),0);
+  const activeLoans=loans.filter(l=>l.status==='active').length;
+  const totalInvested=invs.filter(i=>['active','matured','paid'].includes(i.status)).reduce((s,i)=>s+(i.amount||0),0);
+  const activeInvs=invs.filter(i=>i.status==='active').length;
+
+  el.innerHTML=`
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px;margin-bottom:16px">
+    <div class="statc" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)"><div style="font-size:20px;margin-bottom:3px">🏦</div><div style="font-size:22px;font-weight:800">NGN ${fmt(totalLoaned)}</div><div style="opacity:.65;font-size:12px">Total Loans Issued</div></div>
+    <div class="statc" style="background:linear-gradient(135deg,#15803d,#16a34a)"><div style="font-size:20px;margin-bottom:3px">📈</div><div style="font-size:22px;font-weight:800">NGN ${fmt(totalInvested)}</div><div style="opacity:.65;font-size:12px">Total Invested</div></div>
+    <div class="statc" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)"><div style="font-size:20px;margin-bottom:3px">⚡</div><div style="font-size:22px;font-weight:800">${activeLoans}</div><div style="opacity:.65;font-size:12px">Active Loans</div></div>
+    <div class="statc" style="background:linear-gradient(135deg,#b45309,#d97706)"><div style="font-size:20px;margin-bottom:3px">💹</div><div style="font-size:22px;font-weight:800">${activeInvs}</div><div style="opacity:.65;font-size:12px">Active Investments</div></div>
+  </div>
+  <!-- Loan Requests -->
+  <div style="font-size:14px;font-weight:700;color:#334155;margin-bottom:10px">Loan Applications</div>
+  <div class="card" style="overflow:hidden;margin-bottom:16px">
+    ${loans.filter(l=>l.status==='pending').length===0?'<div style="padding:20px;text-align:center;color:#94a3b8;font-size:13px">No pending loan applications</div>':''}
+    ${loans.filter(l=>l.status==='pending').map(l=>`
+      <div class="txr" style="flex-wrap:wrap;gap:8px">
+        <div style="flex:1;min-width:180px">
+          <div style="font-weight:600;font-size:13px">${l.name||l.email} — NGN ${fmt(l.amount)}</div>
+          <div style="font-size:11px;color:#94a3b8">${l.purpose||'—'} · ${l.duration||'—'} days</div>
+          <div style="font-size:11px;color:#2563eb;margin-top:2px">Guarantor: ${l.guarantor?.name||'—'} (${l.guarantor?.phone||'—'}) · ${l.guarantor?.relationship||'—'}</div>
+          ${l.guarantor?.address?'<div style="font-size:11px;color:#64748b">Addr: '+l.guarantor.address+'</div>':''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
+          <input id="al-amt-${l.id}" style="width:130px;padding:6px 9px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:12px;font-family:'Inter',sans-serif;outline:none" placeholder="Approve amount" type="number"/>
+          <input id="al-note-${l.id}" style="width:130px;padding:6px 9px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:12px;font-family:'Inter',sans-serif;outline:none" placeholder="Note to user"/>
+          <div style="display:flex;gap:5px">
+            <button onclick="appLoan('${l.id}','${l.userId}')" style="flex:1;padding:6px;background:#dcfce7;border:1px solid #86efac;color:#15803d;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Approve</button>
+            <button onclick="rejLoan('${l.id}','${l.userId}')" style="flex:1;padding:6px;background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Reject</button>
+          </div>
+        </div>
+      </div>`).join('')}
+    ${loans.filter(l=>l.status!=='pending').slice(0,5).map(l=>{
+      const [bg,col]=loanStatusColor(l.status);
+      return`<div class="txr"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${l.name||l.email} — NGN ${fmt(l.approvedAmount||l.amount||0)}</div><div style="font-size:11px;color:#94a3b8">${l.purpose||'—'} · ${fdate(l.createdAt)}</div></div><div style="display:inline-flex;padding:3px 9px;border-radius:50px;font-size:10px;font-weight:700;background:${bg};color:${col}">${l.status}</div></div>`;
+    }).join('')}
+  </div>
+  <!-- Investment Requests -->
+  <div style="font-size:14px;font-weight:700;color:#334155;margin-bottom:10px">Investment Applications</div>
+  <div class="card" style="overflow:hidden">
+    ${invs.filter(i=>i.status==='pending').length===0?'<div style="padding:20px;text-align:center;color:#94a3b8;font-size:13px">No pending investment applications</div>':''}
+    ${invs.filter(i=>i.status==='pending').map(i=>`
+      <div class="txr" style="flex-wrap:wrap;gap:8px">
+        <div style="flex:1;min-width:180px">
+          <div style="font-weight:600;font-size:13px">${i.name||i.email} — NGN ${fmt(i.amount)}</div>
+          <div style="font-size:11px;color:#94a3b8">${i.duration} days · ${fdate(i.createdAt)}</div>
+          ${i.notes?'<div style="font-size:11px;color:#64748b">Note: '+i.notes+'</div>':''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
+          <input id="ai-rate-${i.id}" style="width:130px;padding:6px 9px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:12px;font-family:'Inter',sans-serif;outline:none" placeholder="Interest rate %" type="number" step="0.1"/>
+          <input id="ai-note-${i.id}" style="width:130px;padding:6px 9px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:12px;font-family:'Inter',sans-serif;outline:none" placeholder="Note to user"/>
+          <div style="display:flex;gap:5px">
+            <button onclick="appInv('${i.id}','${i.userId}',${i.amount},${i.duration})" style="flex:1;padding:6px;background:#dcfce7;border:1px solid #86efac;color:#15803d;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Approve</button>
+            <button onclick="rejInv('${i.id}','${i.userId}')" style="flex:1;padding:6px;background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Reject</button>
+          </div>
+          ${i.status==='active'?'<button onclick="markInvPaid(\''+i.id+'\',\''+i.userId+'\','+i.amount+')" style="padding:6px;background:#fae8ff;border:1px solid #d8b4fe;color:#9333ea;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif">Mark Paid</button>':''}
+        </div>
+      </div>`).join('')}
+    ${invs.filter(i=>i.status!=='pending').slice(0,5).map(i=>{
+      const [bg,col]=invStatusColor(i.status);
+      return`<div class="txr"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${i.name||i.email} — NGN ${fmt(i.amount)}</div><div style="font-size:11px;color:#94a3b8">${i.duration} days · ${fdate(i.createdAt)}</div></div><div style="display:inline-flex;padding:3px 9px;border-radius:50px;font-size:10px;font-weight:700;background:${bg};color:${col}">${i.status}</div></div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ===== ADMIN LOAN ACTIONS =====
+async function appLoan(lid,uid){
+  const amtEl=document.getElementById('al-amt-'+lid);
+  const noteEl=document.getElementById('al-note-'+lid);
+  const amt=parseFloat(amtEl?.value||0);
+  const note=noteEl?.value?.trim()||'';
+  if(!amt||amt<=0){toast('Enter the approved loan amount');return;}
+  const dueTs=new Date(Date.now()+30*24*60*60*1000);
+  await db.collection('loans').doc(lid).update({status:'active',approvedAmount:amt,adminNote:note,approvedAt:firebase.firestore.FieldValue.serverTimestamp(),dueDate:firebase.firestore.Timestamp.fromDate(dueTs)});
+  await db.collection('users').doc(uid).update({balance:firebase.firestore.FieldValue.increment(amt)});
+  await db.collection('transactions').add({userId:uid,type:'credit',amount:amt,description:'Loan Credit – NGN '+fmt(amt),status:'success',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+  await addNotif(uid,'Loan Approved and Credited','Your loan of NGN '+fmt(amt)+' has been approved and credited to your wallet.'+(note?' Note: '+note:''));
+  toast('Loan approved and NGN '+fmt(amt)+' credited to user wallet!');renderAdminFinance(document.getElementById('a-content'));
+}
+async function rejLoan(lid,uid){
+  const note=document.getElementById('al-note-'+lid)?.value?.trim()||'';
+  await db.collection('loans').doc(lid).update({status:'rejected',adminNote:note,rejectedAt:firebase.firestore.FieldValue.serverTimestamp()});
+  await addNotif(uid,'Loan Application Rejected','Your loan application was not approved.'+(note?' Reason: '+note:''));
+  toast('Loan rejected.');renderAdminFinance(document.getElementById('a-content'));
+}
+
+// ===== ADMIN INVESTMENT ACTIONS =====
+async function appInv(iid,uid,amount,duration){
+  const rateEl=document.getElementById('ai-rate-'+iid);
+  const noteEl=document.getElementById('ai-note-'+iid);
+  const rate=parseFloat(rateEl?.value||0);
+  const note=noteEl?.value?.trim()||'';
+  if(!rate||rate<=0){toast('Enter the interest rate percentage');return;}
+  const interest=amount*(rate/100)*(duration/365);
+  const expectedReturn=amount+interest;
+  const matTs=new Date(Date.now()+duration*24*60*60*1000);
+  await db.collection('investments').doc(iid).update({status:'active',interestRate:rate,expectedReturn,adminNote:note,approvedAt:firebase.firestore.FieldValue.serverTimestamp(),maturityDate:firebase.firestore.Timestamp.fromDate(matTs)});
+  // Deduct from wallet
+  await db.collection('users').doc(uid).update({balance:firebase.firestore.FieldValue.increment(-amount)});
+  await addNotif(uid,'Investment Approved','Your investment of NGN '+fmt(amount)+' has been approved at '+rate+'% per annum. Expected return: NGN '+fmt(expectedReturn)+'. Maturity: '+matTs.toLocaleDateString('en-NG')+'.'+(note?' Note: '+note:''));
+  toast('Investment approved!');renderAdminFinance(document.getElementById('a-content'));
+}
+async function rejInv(iid,uid){
+  const note=document.getElementById('ai-note-'+iid)?.value?.trim()||'';
+  await db.collection('investments').doc(iid).update({status:'rejected',adminNote:note});
+  await addNotif(uid,'Investment Application Rejected','Your investment application was not approved.'+(note?' Reason: '+note:''));
+  toast('Investment rejected.');renderAdminFinance(document.getElementById('a-content'));
+}
+async function markInvPaid(iid,uid,amount){
+  const inv=(await db.collection('investments').doc(iid).get()).data();
+  const payout=inv.expectedReturn||amount;
+  await db.collection('investments').doc(iid).update({status:'paid',paidAt:firebase.firestore.FieldValue.serverTimestamp()});
+  await db.collection('users').doc(uid).update({balance:firebase.firestore.FieldValue.increment(payout)});
+  await db.collection('transactions').add({userId:uid,type:'credit',amount:payout,description:'Investment Return – NGN '+fmt(payout),status:'success',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+  await addNotif(uid,'Investment Return Paid','Your investment matured! NGN '+fmt(payout)+' has been credited to your wallet.');
+  toast('Investment return of NGN '+fmt(payout)+' paid to user!');renderAdminFinance(document.getElementById('a-content'));
+}
+</script>
 
 </body>
 </html>
