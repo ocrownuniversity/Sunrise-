@@ -856,7 +856,7 @@ function svcForm(t){
   const nbtns=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:13px">${nets.map(n=>`<button onclick="selNet(this)" style="padding:9px 2px;border:1.5px solid var(--g200);border-radius:9px;background:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s">${n}</button>`).join('')}</div>`;
   const qk=(amts)=>`<div style="display:flex;gap:6px;margin-top:8px">${amts.map(a=>`<button onclick="document.getElementById('s-amt').value=${a}" style="flex:1;padding:7px 2px;border:1.5px solid var(--g200);border-radius:8px;background:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--g200)'">NGN ${a>=1000?(a/1000)+'K':a}</button>`).join('')}</div>`;
   if(t==='airtime')return`${nbtns}<div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Phone Number</label><input class="inp" id="s-phone" type="tel" placeholder="080XXXXXXXX"/></div><div style="margin-bottom:20px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Amount</label><input class="inp" id="s-amt" type="number" placeholder="100"/>${qk([100,200,500,1000])}</div><button onclick="procSvc('airtime')" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Buy Airtime</button>`;
-  if(t==='data')return`${nbtns}<div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Phone Number</label><input class="inp" id="s-phone" type="tel" placeholder="080XXXXXXXX"/></div><div style="margin-bottom:20px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Data Plan</label><select class="inp" id="s-amt"><option value="100">500MB - NGN 100</option><option value="200">1GB - NGN 200</option><option value="350">2GB - NGN 350</option><option value="500">5GB - NGN 500</option><option value="1000">10GB - NGN 1,000</option><option value="2000">20GB - NGN 2,000</option></select></div><button onclick="procSvc('data')" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Buy Data</button>`;
+  if(t==='data')return`${nbtns}<div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Phone Number</label><input class="inp" id="s-phone" type="tel" placeholder="080XXXXXXXX" oninput="fetchDataPlans()"/></div><div style="margin-bottom:4px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Data Plan</label><select class="inp" id="s-amt" onchange="updateDataAmt(this)"><option value="">-- Select network first --</option></select></div><div id="data-loading" style="display:none;font-size:12px;color:var(--g500);padding:6px 2px;margin-bottom:8px">Fetching plans...</div><div id="data-info" style="display:none;background:var(--green-xl);border:1px solid #bbf7d0;border-radius:9px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--green-d)"></div><button onclick="procSvc('data')" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px;margin-top:6px">Buy Data</button>`;
   if(t==='cable')return`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:13px">${['DSTV','GOTV','StarTimes'].map(p=>`<button onclick="selNet(this)" style="padding:9px 2px;border:1.5px solid var(--g200);border-radius:9px;background:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">${p}</button>`).join('')}</div><div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Smart Card Number</label><input class="inp" id="s-phone" placeholder="Card number"/></div><div style="margin-bottom:20px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Package</label><select class="inp" id="s-amt"><option value="2150">DStv Padi - NGN 2,150</option><option value="4000">DStv Yanga - NGN 4,000</option><option value="7900">DStv Compact - NGN 7,900</option><option value="14250">DStv Compact+ - NGN 14,250</option><option value="21000">DStv Premium - NGN 21,000</option><option value="1900">GOtv Lite - NGN 1,900</option><option value="3000">GOtv Value - NGN 3,000</option><option value="4850">GOtv Plus - NGN 4,850</option></select></div><button onclick="procSvc('cable')" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Pay Subscription</button>`;
   if(t==='electricity')return`<div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Distribution Company</label><select class="inp" id="s-phone"><option>EKEDC - Eko Electric</option><option>IKEDC - Ikeja Electric</option><option>AEDC - Abuja Electric</option><option>IBEDC - Ibadan Electric</option><option>PHEDC - Port Harcourt Electric</option><option>EEDC - Enugu Electric</option><option>KEDC - Kano Electric</option><option>JED - Jos Electric</option></select></div><div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Meter Number</label><input class="inp" id="s-meter" placeholder="Meter number"/></div><div style="margin-bottom:20px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Amount</label><input class="inp" id="s-amt" type="number" placeholder="1000"/>${qk([1000,2000,5000,10000])}</div><button onclick="procSvc('electricity')" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Pay Electricity</button>`;
   if(t==='loan')return`<div class="info-box"><p style="font-size:13px;color:var(--green-d);line-height:1.6">Quick loans reviewed within 24 hours. Amount credited to wallet on approval.</p></div><div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Loan Amount</label><select class="inp" id="s-amt"><option value="5000">NGN 5,000</option><option value="10000">NGN 10,000</option><option value="20000">NGN 20,000</option><option value="50000">NGN 50,000</option><option value="100000">NGN 100,000</option><option value="200000">NGN 200,000</option><option value="500000">NGN 500,000</option></select></div><div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Purpose</label><input class="inp" id="s-phone" placeholder="Brief purpose of loan"/></div><div style="margin-bottom:20px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Repayment Period</label><select class="inp" id="s-meter"><option>7 days</option><option>14 days</option><option>30 days</option></select></div><button onclick="procLoan()" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Apply for Loan</button>`;
@@ -874,30 +874,244 @@ async function procLoan(){
 }
 
 function procSvc(type){
-  const amt=parseFloat(document.getElementById('s-amt')?.value||'0');
-  if(!amt||amt<=0){toast('Enter a valid amount');return;}
+  const amtEl=document.getElementById('s-amt');
+  const amt=parseFloat(amtEl?.value||'0');
+  if(!amt||amt<=0){toast('Select a valid plan or enter an amount');return;}
   if(!UD?.pin){toast('Please set a transaction PIN in Profile first');closeM('m-svc');goPg('pg-profile');return;}
-  pSvc={type,amt};closeM('m-svc');
+  // Build extra payload for VTPass
+  let extra={};
+  if(type==='airtime'){
+    const phone=document.getElementById('s-phone')?.value?.trim();
+    if(!phone||phone.length<11){toast('Enter a valid 11-digit phone number');return;}
+    const netBtn=document.querySelector('#svc-body div button[style*="green-xl"]');
+    const netName=netBtn?netBtn.textContent.trim():'MTN';
+    extra={phone,networkId:NET_MAP[netName]||'mtn',planName:netName+' Airtime NGN '+fmt(amt)};
+  }else if(type==='data'){
+    const phone=document.getElementById('s-phone')?.value?.trim();
+    if(!phone||phone.length<11){toast('Enter a valid 11-digit phone number');return;}
+    const opt=amtEl?.options[amtEl.selectedIndex];
+    const code=opt?.dataset?.code||'';
+    const planName=opt?.dataset?.name||'Data';
+    const validity=opt?.dataset?.validity||'';
+    if(!code){toast('Please select a data plan');return;}
+    const netBtn=document.querySelector('#svc-body div button[style*="green-xl"]');
+    const netName=netBtn?netBtn.textContent.trim():'MTN';
+    extra={phone,networkId:NET_MAP[netName]||'mtn-data',variationCode:code,planName:netName+' '+planName+(validity?' ('+validity+')':'')};
+  }else if(type==='cable'){
+    const smartcard=document.getElementById('s-phone')?.value?.trim();
+    if(!smartcard){toast('Enter your smart card number');return;}
+    const opt=amtEl?.options[amtEl.selectedIndex];
+    const code=opt?.dataset?.code||opt?.value||'';
+    const netBtn=document.querySelector('#svc-body div button[style*="green-xl"]');
+    const provider=(netBtn?netBtn.textContent.trim():'DSTV').toLowerCase();
+    const svcMap={'dstv':'dstv','gotv':'gotv','startimes':'startimes'};
+    extra={smartcard,serviceId:svcMap[provider]||'dstv',variationCode:code,planName:opt?.text||'Cable TV'};
+  }else if(type==='electricity'){
+    const meter=document.getElementById('s-meter')?.value?.trim();
+    if(!meter){toast('Enter your meter number');return;}
+    const disco=document.getElementById('s-phone')?.value||'';
+    const discoMap={'EKEDC':'ekedc','IKEDC':'ikeja-electric','AEDC':'abuja-electric','IBEDC':'ibadan-electric','PHEDC':'phed','EEDC':'enugu-electric','KEDC':'kano-electric','JED':'jos-electric'};
+    const svcId=Object.keys(discoMap).find(k=>disco.includes(k));
+    extra={meter,serviceId:discoMap[svcId]||'ikeja-electric',meterType:'prepaid',planName:disco+' NGN '+fmt(amt)};
+  }else if(type==='result'){
+    const exam=document.getElementById('s-phone')?.value||'';
+    const examMap={'WAEC':'waec','NECO':'neco','JAMB':'jamb','NABTEB':'nabteb'};
+    const svcId=Object.keys(examMap).find(k=>exam.includes(k));
+    const opt=amtEl?.options[amtEl.selectedIndex];
+    extra={serviceId:examMap[svcId]||'waec',variationCode:'waecdirect',planName:exam+' Checker'};
+  }
+  pSvc={type,amt,extra};
+  closeM('m-svc');
   ['vp1','vp2','vp3','vp4'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   openM('m-pin');setTimeout(()=>document.getElementById('vp1')?.focus(),300);
 }
 async function verPin(){
   const pin=[1,2,3,4].map(i=>document.getElementById('vp'+i).value).join('');
   if(pin.length!==4){toast('Enter 4-digit PIN');return;}
-  if(hp(pin)!==UD?.pin){toast('Incorrect PIN. Try again.');return;}
-  closeM('m-pin');if(pSvc)await execSvc(pSvc);
+  if(hp(pin)!==UD?.pin){toast('Incorrect PIN. Try again.');['vp1','vp2','vp3','vp4'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('vp1')?.focus();return;}
+  closeM('m-pin');
+  if(pSvc){
+    toast('Processing...');
+    await execSvc(pSvc);
+  }
 }
-async function execSvc({type,amt}){
+// ===== VTPASS CONFIG =====
+const VTP={
+  base:'https://sandbox.vtpass.com/api',
+  apiKey:'03f401bf628bf9bc9013a324f3865c4a',
+  pubKey:'PK_510dca003bdefc29d919142e5a66452fefd459dcea3',
+  secKey:'SK_3602c9fce88b8bd84978e1bc3dfd411ca3e87100193'
+};
+// Switch to live when ready: base:'https://api-service.vtpass.com/api'
+
+function vtpHeaders(useBasic=false){
+  if(useBasic){
+    const creds=btoa(VTP.pubKey+':'+VTP.secKey);
+    return{'Authorization':'Basic '+creds,'Content-Type':'application/json'};
+  }
+  return{'api-key':VTP.apiKey,'public-key':VTP.pubKey,'Content-Type':'application/json'};
+}
+
+// Map network names to VTPass service IDs
+const NET_MAP={
+  'MTN':'mtn-data','Airtel':'airtel-data','Glo':'glo-data','9mobile':'etisalat-data'
+};
+
+// Cache plans per network
+const planCache={};
+let currentNetworkId=null;
+let currentPlanMeta={};
+
+async function fetchDataPlans(){
+  // Called when network button selected
+}
+
+async function fetchPlansForNetwork(networkId){
+  if(!networkId)return;
+  currentNetworkId=networkId;
+  const sel=document.getElementById('s-amt');
+  const loadEl=document.getElementById('data-loading');
+  const infoEl=document.getElementById('data-info');
+  if(!sel)return;
+  if(planCache[networkId]){renderPlans(planCache[networkId],sel,infoEl);return;}
+  if(loadEl)loadEl.style.display='block';
+  sel.innerHTML='<option value="">Loading plans...</option>';
+  try{
+    const res=await fetch(VTP.base+'/service-variations?serviceID='+networkId,{headers:vtpHeaders()});
+    const json=await res.json();
+    if(loadEl)loadEl.style.display='none';
+    if(json.content&&json.content.varations&&json.content.varations.length){
+      planCache[networkId]=json.content.varations;
+      renderPlans(json.content.varations,sel,infoEl);
+    }else if(json.content&&json.content.variations&&json.content.variations.length){
+      planCache[networkId]=json.content.variations;
+      renderPlans(json.content.variations,sel,infoEl);
+    }else{
+      sel.innerHTML='<option value="">No plans available</option>';
+    }
+  }catch(e){
+    if(loadEl)loadEl.style.display='none';
+    sel.innerHTML='<option value="">Error loading plans — check connection</option>';
+  }
+}
+
+function renderPlans(plans,sel,infoEl){
+  currentPlanMeta={};
+  sel.innerHTML='<option value="">-- Select a plan --</option>';
+  plans.forEach(p=>{
+    const name=p.name||p.variation_name||'';
+    const price=parseFloat(p.variation_amount||p.price||0);
+    const code=p.variation_code||p.code||'';
+    // Extract validity from name or description
+    let validity='';
+    const src=(name+' '+(p.description||'')).toLowerCase();
+    const dayMatch=src.match(/(\d+)\s*day/i);
+    const monthMatch=src.match(/(\d+)\s*month/i);
+    const hrMatch=src.match(/(\d+)\s*hour/i);
+    if(hrMatch)validity=hrMatch[1]+' Hours';
+    else if(dayMatch)validity=dayMatch[1]+' Days';
+    else if(monthMatch)validity=monthMatch[1]+' Month'+(parseInt(monthMatch[1])>1?'s':'');
+    const label=name+(validity?' ('+validity+')':'')+' — NGN '+fmt(price);
+    const opt=document.createElement('option');
+    opt.value=price;
+    opt.dataset.code=code;
+    opt.dataset.validity=validity;
+    opt.dataset.name=name;
+    opt.textContent=label;
+    sel.appendChild(opt);
+    currentPlanMeta[price+'_'+code]={code,name,validity,price};
+  });
+  if(infoEl){infoEl.style.display='none';}
+}
+
+function updateDataAmt(sel){
+  const opt=sel.options[sel.selectedIndex];
+  const infoEl=document.getElementById('data-info');
+  if(opt&&opt.dataset.name&&infoEl){
+    const v=opt.dataset.validity;
+    infoEl.style.display='block';
+    infoEl.innerHTML='<strong>'+opt.dataset.name+'</strong>'+(v?' &nbsp;|&nbsp; Validity: <strong>'+v+'</strong>':'');
+  }else if(infoEl)infoEl.style.display='none';
+}
+
+function selNet(btn){
+  btn.closest('div').querySelectorAll('button').forEach(b=>{b.style.borderColor='var(--g200)';b.style.background='#fff';});
+  btn.style.borderColor='var(--green)';btn.style.background='var(--green-xl)';
+  const netId=NET_MAP[btn.textContent.trim()];
+  if(netId)fetchPlansForNetwork(netId);
+}
+
+// Generate unique transaction reference
+function txRef(){return 'ZMN'+Date.now()+Math.floor(Math.random()*10000);}
+
+async function execSvc({type,amt,extra}){
   if(!CU)return;
   const s=await db.collection('users').doc(CU.uid).get();
   if((s.data().balance||0)<amt){toast('Insufficient balance. Please fund your wallet.');return;}
   const descs={airtime:'Airtime Purchase',data:'Data Subscription',cable:'Cable TV Subscription',electricity:'Electricity Payment',result:'Result Checker PIN'};
+  const ref=txRef();
+  // Save pending transaction
+  const txRef2=await db.collection('transactions').add({
+    userId:CU.uid,type,amount:amt,
+    description:(extra&&extra.planName)?extra.planName:descs[type]||type,
+    status:'pending',ref,extra:extra||{},
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
   try{
-    await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-amt)});
-    await db.collection('transactions').add({userId:CU.uid,type,amount:amt,description:descs[type]||type,status:'success',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    await addNotif(CU.uid,'Transaction Successful',descs[type]+' of NGN '+fmt(amt)+' was successful.');
-    toast('Transaction successful!');loadDash();pSvc=null;
-  }catch(er){toast('Transaction failed: '+er.message);}
+    let vtpResult=null;
+    if(type==='airtime'){
+      vtpResult=await vtpAirtime(extra.phone,extra.networkId,amt,ref);
+    }else if(type==='data'){
+      vtpResult=await vtpData(extra.phone,extra.networkId,extra.variationCode,amt,ref);
+    }else if(type==='cable'){
+      vtpResult=await vtpCable(extra.smartcard,extra.serviceId,extra.variationCode,amt,ref);
+    }else if(type==='electricity'){
+      vtpResult=await vtpElectricity(extra.meter,extra.serviceId,extra.meterType,amt,ref);
+    }else if(type==='result'){
+      vtpResult=await vtpResult2(extra.serviceId,extra.variationCode,amt,ref);
+    }
+    const success=vtpResult&&(vtpResult.code==='000'||vtpResult.content?.transactions?.status==='delivered');
+    if(success){
+      await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-amt)});
+      await txRef2.update({status:'success',vtpResponse:JSON.stringify(vtpResult).slice(0,500)});
+      await addNotif(CU.uid,'Transaction Successful',(extra&&extra.planName?extra.planName:descs[type])+' of NGN '+fmt(amt)+' was successful.');
+      toast('Transaction successful!');loadDash();pSvc=null;
+    }else{
+      await txRef2.update({status:'failed',vtpResponse:JSON.stringify(vtpResult||{}).slice(0,500)});
+      const errMsg=(vtpResult&&vtpResult.response_description)||'Transaction could not be completed. Please try again.';
+      toast('Failed: '+errMsg);
+    }
+  }catch(er){
+    await txRef2.update({status:'failed',error:er.message});
+    toast('Transaction error: '+er.message);
+  }
+}
+
+// VTPass API calls
+async function vtpAirtime(phone,serviceID,amount,requestRef){
+  const body={request_id:requestRef,serviceID,amount,phone};
+  const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
+  return res.json();
+}
+async function vtpData(phone,serviceID,variation_code,amount,requestRef){
+  const body={request_id:requestRef,serviceID,billersCode:phone,variation_code,amount,phone};
+  const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
+  return res.json();
+}
+async function vtpCable(smartcard,serviceID,variation_code,amount,requestRef){
+  const body={request_id:requestRef,serviceID,billersCode:smartcard,variation_code,amount,subscription_type:'change',quantity:1};
+  const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
+  return res.json();
+}
+async function vtpElectricity(meter,serviceID,meterType,amount,requestRef){
+  const body={request_id:requestRef,serviceID,billersCode:meter,variation_code:meterType,amount,phone:CU?.email||''};
+  const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
+  return res.json();
+}
+async function vtpResult2(serviceID,variation_code,amount,requestRef){
+  const body={request_id:requestRef,serviceID,billersCode:'none',variation_code,amount,phone:CU?.email||''};
+  const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
+  return res.json();
 }
 
 // HISTORY
