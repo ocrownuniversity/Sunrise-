@@ -93,7 +93,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
 .tsw{position:relative;width:44px;height:24px;background:var(--g200);border-radius:50px;cursor:pointer;transition:background .25s;flex-shrink:0}
 .tsw.on{background:var(--green)}.tsw::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.2)}.tsw.on::after{transform:translateX(20px)}
 /* ADMIN */
-.aside{width:220px;background:#0f172a;min-height:100vh;padding:14px 0;position:fixed;left:0;top:0;z-index:100;overflow-y:auto}
+.aside{width:220px;background:#0f172a;min-height:100vh;padding:14px 0;position:fixed;left:0;top:0;z-index:200;overflow-y:auto;transition:transform .3s ease}
+.aside.closed{transform:translateX(-100%)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199}
+.overlay.show{display:block}
+.hamb{display:none;background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;background:var(--green-xl);color:var(--green-d)}
+@media(max-width:700px){.amain{margin-left:0!important;padding:12px}.aside{transform:translateX(-100%)}.aside.open{transform:translateX(0)}.hamb{display:flex;align-items:center;justify-content:center}}
 .amain{margin-left:220px;padding:20px;min-height:100vh;background:var(--bg)}
 @media(max-width:700px){.aside{display:none}.amain{margin-left:0;padding:14px}}
 .anav{display:flex;align-items:center;gap:9px;padding:10px 13px;border-radius:9px;cursor:pointer;margin-bottom:2px;color:rgba(255,255,255,.5);font-size:13px;font-weight:500;transition:all .2s}
@@ -666,16 +671,22 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <div class="anav fin-tab" onclick="aTab('fin-loans')">🏦 Loan Requests</div>
         <div class="anav fin-tab" onclick="aTab('fin-investments')">📈 Investments</div>
         <div class="anav fin-tab" onclick="aTab('fin-analytics')">📊 Fin Analytics</div>
+        <div class="anav fin-tab" onclick="aTab('vtpass')">⚙️ VTPass Settings</div>
       </nav>
       <div style="position:absolute;bottom:14px;left:0;right:0;padding:0 8px">
         <button onclick="doLogout()" style="width:100%;padding:10px;border-radius:8px;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.18);color:#f87171;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Sign Out</button>
       </div>
     </div>
+    <div class="overlay" id="adminOverlay" onclick="closeAdminMenu()"></div>
     <div class="amain" style="flex:1">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <h1 style="font-size:20px;font-weight:800;letter-spacing:-.02em" id="a-title">Overview</h1>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <button class="hamb" onclick="openAdminMenu()" title="Menu">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <h1 style="font-size:20px;font-weight:800;letter-spacing:-.02em;flex:1" id="a-title">Overview</h1>
         <button onclick="doLogout()" style="padding:7px 13px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Logout</button>
       </div>
+
       <div class="sx" style="display:flex;gap:6px;margin-bottom:14px;padding-bottom:2px">
         <button onclick="aTab('overview')" style="padding:7px 13px;border-radius:50px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Overview</button>
         <button onclick="aTab('users')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Users</button>
@@ -687,6 +698,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <button onclick="aTab('fin-loans')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Loans</button>
         <button onclick="aTab('fin-investments')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Investments</button>
         <button onclick="aTab('fin-analytics')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Fin Stats</button>
+        <button onclick="aTab('vtpass')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">VTPass</button>
       </div>
       <div id="a-content"></div>
     </div>
@@ -774,7 +786,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><h3 style="font-size:17px;font-weight:700">Add Promo Slide</h3><button onclick="closeM('m-addpromo')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600)">✕</button></div>
   <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Title</label><input class="inp" id="pm-t" placeholder="e.g. Buy Data at Best Rates"/></div>
   <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Description</label><input class="inp" id="pm-d" placeholder="Short description"/></div>
-  <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Emoji Icon</label><input class="inp" id="pm-i" placeholder="🌐" maxlength="4"/></div>
+  <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Image URL (optional — overrides emoji)</label><input class="inp" id="pm-img" placeholder="https://i.ibb.co/... or Cloudinary URL"/></div>
+  <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Emoji Icon (if no image URL)</label><input class="inp" id="pm-i" placeholder="🌐" maxlength="4"/></div>
   <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Button Text (optional)</label><input class="inp" id="pm-c" placeholder="Learn More"/></div>
   <div style="margin-bottom:18px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Background</label>
     <select class="inp" id="pm-b">
@@ -890,7 +903,7 @@ async function loadDash(){
   const prEl=document.getElementById('pr-av');if(prEl)prEl.textContent=initials;
   document.getElementById('pr-name').textContent=nm;
   document.getElementById('pr-em').textContent=UD.email||'—';
-  loadNBadge();loadDashTx();loadSlider();
+  loadNBadge();loadDashTx();loadSlider();startRealtimeSync();
 }
 
 function togBal(){bHid=!bHid;document.getElementById('d-bal').textContent=bHid?'NGN ****':'NGN '+fmt(UD?.balance||0);}
@@ -927,7 +940,7 @@ function renderSlider(slides){
   if(!tr||!slides.length)return;
   si=0;clearInterval(sTimer);
   tr.style.transition='none';tr.style.transform='translateX(0)';
-  tr.innerHTML=slides.map(s=>`<div class="slide" style="background:${s.bg||'linear-gradient(135deg,#15803d,#16a34a)'};min-width:100%"><div style="display:flex;align-items:center;gap:13px"><div style="font-size:40px;flex-shrink:0">${s.icon||'⭐'}</div><div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:3px;letter-spacing:-.01em">${s.title}</div><div style="font-size:12px;color:rgba(255,255,255,.72);margin-bottom:9px;line-height:1.4">${s.desc}</div>${s.cta?`<button class="btn-g" style="padding:6px 14px;border-radius:8px;font-size:12px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);box-shadow:none;color:#fff">${s.cta}</button>`:''}</div></div></div>`).join('');
+  tr.innerHTML=slides.map(s=>`<div class="slide" style="background:${s.bg||'linear-gradient(135deg,#15803d,#16a34a)'};min-width:100%"><div style="display:flex;align-items:center;gap:13px">${s.imgUrl?`<img src="${s.imgUrl}" style="width:50px;height:50px;border-radius:10px;object-fit:cover;flex-shrink:0;border:2px solid rgba(255,255,255,.2)" onerror="this.style.display='none'"/>`:''}<div style="font-size:40px;flex-shrink:0;${s.imgUrl?'display:none':''}">${s.icon||'⭐'}</div><div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:3px;letter-spacing:-.01em">${s.title}</div><div style="font-size:12px;color:rgba(255,255,255,.72);margin-bottom:9px;line-height:1.4">${s.desc}</div>${s.cta?`<button class="btn-g" style="padding:6px 14px;border-radius:8px;font-size:12px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);box-shadow:none;color:#fff">${s.cta}</button>`:''}</div></div></div>`).join('');
   dt.innerHTML=slides.map((_,i)=>`<div class="dot${i===0?' on':''}" onclick="gSlide(${i},${slides.length})" style="cursor:pointer"></div>`).join('');
   // Touch swipe
   let sx=0;
@@ -1336,6 +1349,21 @@ function aTab(tab){
   const el=document.getElementById('a-content');
   const rev=AD.txs.reduce((s,t)=>s+(t.amount||0),0);
   if(tab==='overview')el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px;margin-bottom:16px"><div class="statc" style="background:linear-gradient(135deg,#15803d,#16a34a)"><div style="font-size:22px;margin-bottom:3px">👥</div><div style="font-size:26px;font-weight:800">${AD.users.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Total Users</div></div><div class="statc" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)"><div style="font-size:22px;margin-bottom:3px">💳</div><div style="font-size:26px;font-weight:800">${AD.txs.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Transactions</div></div><div class="statc" style="background:linear-gradient(135deg,#b45309,#d97706)"><div style="font-size:22px;margin-bottom:3px">💰</div><div style="font-size:20px;font-weight:800">NGN ${fmt(rev)}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Revenue</div></div><div class="statc" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)"><div style="font-size:22px;margin-bottom:3px">🔒</div><div style="font-size:26px;font-weight:800">${AD.pins.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">PIN Requests</div></div></div><div class="card" style="overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #f8fafc;font-weight:700;font-size:14px">Recent Transactions</div>${AD.txs.slice(0,10).map(t=>`<div class="txr"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${t.description||t.type}</div><div style="font-size:11px;color:var(--g400)">${fdate(t.createdAt)}</div></div><div style="color:var(--err);font-weight:700;font-size:13px">NGN ${fmt(t.amount)}</div></div>`).join('')||'<div style="padding:22px;text-align:center;color:var(--g400);font-size:13px">No transactions yet</div>'}</div>`;
+  // Add VTPass quick access to overview
+  if(tab==='overview'){
+    // Add VTPass button to existing overview
+    setTimeout(()=>{
+      const ac=document.getElementById('a-content');
+      if(ac&&!ac.querySelector('#vt-quick-btn')){
+        const vtDiv=document.createElement('div');
+        vtDiv.id='vt-quick-btn';
+        vtDiv.style.cssText='margin-top:14px';
+        vtDiv.innerHTML=`<button onclick="aTab('vtpass')" style="display:flex;align-items:center;gap:10px;width:100%;max-width:360px;padding:14px 16px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;cursor:pointer;font-family:'Inter',sans-serif;text-align:left"><div style="width:36px;height:36px;background:#ede9fe;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚙️</div><div><div style="font-weight:600;font-size:13px">VTPass API Settings</div><div style="font-size:11px;color:var(--g400)">Manage API keys & mode</div></div></button>`;
+        ac.appendChild(vtDiv);
+      }
+    },100);
+  }
+
   if(tab==='users')el.innerHTML=`<div class="card" style="overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #f8fafc;font-weight:700;font-size:14px">${AD.users.length} Users</div>${AD.users.map(u=>`<div class="txr"><div style="width:34px;height:34px;background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0">${(u.name||'U')[0].toUpperCase()}</div><div style="flex:1;min-width:0;margin-left:10px"><div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.name||'—'}</div><div style="font-size:11px;color:var(--g400)">${u.email}</div></div><div style="text-align:right"><div style="font-weight:700;color:var(--green-d);font-size:13px">NGN ${fmt(u.balance)}</div><div class="chip ${u.role==='admin'?'c-warn':'c-ok'}" style="margin-top:2px">${u.role||'user'}</div></div></div>`).join('')}</div>`;
   if(tab==='txs')el.innerHTML=`<div class="card" style="overflow:hidden">${AD.txs.map(t=>`<div class="txr"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${t.description||t.type}</div><div style="font-size:11px;color:var(--g400)">${fdate(t.createdAt)}</div></div><div style="text-align:right"><div style="color:var(--err);font-weight:700;font-size:13px">NGN ${fmt(t.amount)}</div><div class="chip c-ok" style="margin-top:2px">${t.status||'success'}</div></div></div>`).join('')||'<div style="padding:22px;text-align:center;color:var(--g400);font-size:13px">No transactions</div>'}</div>`;
   if(tab==='funding')el.innerHTML=`<div class="card" style="overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #f8fafc;font-weight:700;font-size:14px">Funding Requests</div>${AD.funds.filter(f=>f.status==='pending').length?AD.funds.filter(f=>f.status==='pending').map(f=>`<div class="txr" style="flex-wrap:wrap;gap:8px"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${f.email||f.userId}</div><div style="font-size:11px;color:var(--g400)">NGN ${fmt(f.amount)} - ${fdate(f.createdAt)}</div></div><div style="display:flex;gap:6px"><button onclick="appFund('${f.id}','${f.userId}',${f.amount})" style="padding:6px 11px;background:#dcfce7;border:1px solid #86efac;color:#15803d;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Approve</button><button onclick="rejFund('${f.id}')" style="padding:6px 11px;background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Reject</button></div></div>`).join(''):'<div style="padding:28px;text-align:center;color:var(--g400);font-size:13px">No pending funding requests</div>'}</div>`;
@@ -1343,6 +1371,188 @@ function aTab(tab){
   if(tab==='promos')loadAdminPromos(el);
   if(tab==='broadcast')el.innerHTML=`<div class="card" style="padding:18px;max-width:520px"><h3 style="font-weight:700;margin-bottom:13px;font-size:15px">Send Broadcast</h3><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Title</label><input class="inp" id="bc-t" placeholder="Announcement title"/></div><div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Message</label><textarea class="inp" id="bc-m" rows="4" placeholder="Message to all users..." style="resize:vertical"></textarea></div><button onclick="doBc()" class="btn-g" style="padding:12px 24px;border-radius:10px;font-size:14px">Send to All ${AD.users.length} Users</button></div>`;
   if(tab==='wallet')el.innerHTML=`<div class="card" style="padding:18px;max-width:440px"><h3 style="font-weight:700;margin-bottom:13px;font-size:15px">Credit or Debit Wallet</h3><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">User Email</label><input class="inp" id="aw-e" placeholder="user@example.com"/></div><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Amount (NGN)</label><input class="inp" type="number" id="aw-a" placeholder="1000"/></div><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Operation</label><select class="inp" id="aw-o"><option value="credit">Credit (Add funds)</option><option value="debit">Debit (Remove funds)</option></select></div><div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Note (shown to user)</label><input class="inp" id="aw-n" placeholder="Payment confirmed"/></div><button onclick="doWop()" class="btn-g" style="width:100%;padding:12px;border-radius:10px;font-size:14px">Process</button></div>`;
+  // ── VTPass Settings tab ──
+  if(tab==='vtpass'){
+    loadVtpassConfig();
+    el.innerHTML=`<div class="card" style="padding:20px;max-width:480px">
+      <div style="font-weight:700;font-size:15px;margin-bottom:5px">VTPass API Configuration</div>
+      <div style="font-size:13px;color:var(--g500);margin-bottom:16px">Manage API keys and mode for VTU services</div>
+      <div id="vt-admin-current" style="background:#f1f5f9;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--g600)">Loading...</div>
+      <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Mode</label><select class="inp" id="vt-mode2"><option value="sandbox">Sandbox (Testing)</option><option value="live">Live (Production)</option></select></div>
+      <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Public Key</label><input class="inp" id="vt-pub2" placeholder="VTPass public key"/></div>
+      <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Secret Key</label><input class="inp" type="password" id="vt-sec2" placeholder="VTPass secret key"/></div>
+      <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label><input class="inp" id="vt-url2" value="https://sandbox.vtpass.com" placeholder="API base URL"/></div>
+      <div style="display:flex;gap:8px">
+        <button onclick="testVtpass2()" style="flex:1;padding:11px;border-radius:10px;background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔗 Test</button>
+        <button onclick="saveVtpass2()" class="btn-g" style="flex:1;padding:11px;border-radius:10px;font-size:13px">💾 Save</button>
+      </div>
+      <div id="vt-result2" style="display:none;border-radius:10px;padding:11px;font-size:13px;margin-top:10px"></div>
+    </div>`;
+    loadVtpassConfig2();
+  }
+
+  // ── Finance Admin Tabs ──
+  if(tab==='fin-loans'){
+    el.innerHTML='<div style="padding:20px;text-align:center;color:var(--g400)"><div style="font-size:24px">⏳</div><p style="font-size:13px">Loading loans...</p></div>';
+    db.collection('loans').orderBy('createdAt','desc').get().then(snap=>{
+      AD.loans=snap.docs.map(d=>({id:d.id,...d.data()}));
+      const pending=AD.loans.filter(l=>l.status==='pending');
+      const active=AD.loans.filter(l=>l.status==='active'||l.status==='approved');
+      const closed=AD.loans.filter(l=>l.status==='repaid'||l.status==='rejected');
+      let html='';
+
+      if(pending.length){
+        html+=`<div style="font-weight:700;font-size:14px;color:#d97706;margin-bottom:10px;display:flex;align-items:center;gap:6px"><span style="background:#fef3c7;border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:12px">${pending.length}</span> Pending Loans</div>`;
+        pending.forEach(ln=>{
+          const g1=ln.guarantor1||ln.guarantor||{};
+          const g2=ln.guarantor2||{};
+          html+=`<div class="card" style="padding:16px;margin-bottom:12px;border-left:4px solid #d97706">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+              <div><div style="font-weight:700;font-size:15px">${ln.userName||ln.userEmail||'Unknown'}</div><div style="font-size:11px;color:var(--g400)">${ln.userEmail||''} · ${fdate(ln.createdAt)}</div></div>
+              <span class="status-badge sb-pending">PENDING</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+              <div style="background:#f8fafc;border-radius:9px;padding:10px"><div style="font-size:10px;color:var(--g400);margin-bottom:2px">AMOUNT</div><div style="font-size:18px;font-weight:800;color:var(--black)">NGN ${fmt(ln.amount)}</div></div>
+              <div style="background:#f8fafc;border-radius:9px;padding:10px"><div style="font-size:10px;color:var(--g400);margin-bottom:2px">DURATION</div><div style="font-size:14px;font-weight:700">${ln.duration||'N/A'}</div></div>
+            </div>
+            <div style="font-size:12px;color:var(--g600);margin-bottom:4px"><strong>Purpose:</strong> ${ln.purpose||'—'}</div>
+            <div style="font-size:12px;color:var(--g600);margin-bottom:4px"><strong>Address:</strong> ${ln.address||'—'}</div>
+            <div style="font-size:12px;color:var(--g600);margin-bottom:12px"><strong>Employment:</strong> ${ln.employment||'—'}</div>
+            ${ln.passportUrl?`<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px">📸 Passport Photo</div><div style="display:flex;gap:8px;align-items:center"><img src="${ln.passportUrl}" style="width:64px;height:64px;border-radius:10px;object-fit:cover;border:1px solid #e2e8f0;cursor:pointer" onclick="viewImg('${ln.passportUrl}')"/><a href="${ln.passportUrl}" download style="font-size:12px;color:var(--green-d);font-weight:600;text-decoration:none">⬇ Download</a></div></div>`:'<div style="margin-bottom:12px;padding:10px;background:#fef2f2;border-radius:9px;font-size:12px;color:#dc2626">⚠ No passport photo uploaded</div>'}
+            ${ln.idUrl?`<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px">🪪 ID: ${ln.idType||'Document'}</div><div style="display:flex;gap:8px;align-items:center"><img src="${ln.idUrl}" style="width:80px;height:52px;border-radius:9px;object-fit:cover;border:1px solid #e2e8f0;cursor:pointer" onclick="viewImg('${ln.idUrl}')"/><a href="${ln.idUrl}" download style="font-size:12px;color:var(--green-d);font-weight:600;text-decoration:none">⬇ Download</a></div></div>`:'<div style="margin-bottom:12px;padding:10px;background:#fef2f2;border-radius:9px;font-size:12px;color:#dc2626">⚠ No ID document uploaded</div>'}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+              <div style="background:#faf5ff;border:1px solid #c4b5fd;border-radius:10px;padding:11px"><div style="font-size:11px;font-weight:700;color:#5b21b6;margin-bottom:7px">Guarantor 1</div><div style="font-size:12px;color:var(--g700);line-height:1.7">${g1.name||'—'}<br/>${g1.phone||'—'}<br/>${g1.relationship||'—'}<br/><span style="font-size:11px;color:var(--g400)">${g1.address||''}</span></div></div>
+              <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:11px"><div style="font-size:11px;font-weight:700;color:#c2410c;margin-bottom:7px">Guarantor 2</div><div style="font-size:12px;color:var(--g700);line-height:1.7">${g2.name||'—'}<br/>${g2.phone||'—'}<br/>${g2.relationship||'—'}<br/><span style="font-size:11px;color:var(--g400)">${g2.address||''}</span></div></div>
+            </div>
+            <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Approved Amount (NGN)</label><input class="inp" id="la-amt-${ln.id}" value="${ln.amount}" type="number" style="font-size:14px;font-weight:700"/></div>
+            <div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Admin Note / Reason</label><input class="inp" id="la-note-${ln.id}" placeholder="Optional note for user..."/></div>
+            <div style="display:flex;gap:8px">
+              <button onclick="approveLoan('${ln.id}','${ln.userId}')" style="flex:1;padding:12px;background:#dcfce7;border:1.5px solid #86efac;color:#15803d;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">✅ Approve & Credit Wallet</button>
+              <button onclick="rejectLoan('${ln.id}','${ln.userId}')" style="flex:1;padding:12px;background:#fee2e2;border:1.5px solid #fca5a5;color:#dc2626;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">❌ Reject</button>
+            </div>
+          </div>`;
+        });
+      }
+
+      if(active.length){
+        html+=`<div style="font-weight:700;font-size:14px;color:#2563eb;margin:16px 0 10px;display:flex;align-items:center;gap:6px"><span style="background:#dbeafe;border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:12px">${active.length}</span> Active Loans</div>`;
+        active.forEach(ln=>{
+          html+=`<div class="card" style="padding:14px;margin-bottom:8px;border-left:4px solid var(--blue)">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div><div style="font-weight:600;font-size:13px">${ln.userName||ln.userEmail}</div><div style="font-size:22px;font-weight:800;color:var(--black)">NGN ${fmt(ln.approvedAmount||ln.amount)}</div><div style="font-size:12px;color:var(--g600)">${ln.purpose||'—'}</div></div>
+              <div style="text-align:right"><span class="status-badge sb-active">${ln.status}</span><div style="margin-top:8px"><button onclick="markLoanRepaid('${ln.id}','${ln.userId}',${ln.approvedAmount||ln.amount})" style="padding:7px 12px;background:#dcfce7;border:1px solid #86efac;color:#15803d;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Mark Repaid</button></div></div>
+            </div>
+          </div>`;
+        });
+      }
+
+      if(closed.length){
+        html+=`<div style="font-weight:700;font-size:14px;color:var(--g500);margin:16px 0 10px">History (${closed.length})</div>`;
+        closed.forEach(ln=>{
+          html+=`<div class="card" style="padding:12px;margin-bottom:6px;opacity:.8"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600;font-size:13px">${ln.userName||ln.userEmail}</div><div style="font-size:12px;color:var(--g500)">NGN ${fmt(ln.approvedAmount||ln.amount)} · ${fdateShort(ln.createdAt)}</div></div><span class="status-badge sb-${ln.status}">${ln.status}</span></div></div>`;
+        });
+      }
+
+      if(!html) html='<div class="card" style="padding:32px;text-align:center;color:var(--g400)"><div style="font-size:36px;margin-bottom:10px">🏦</div><p>No loan applications yet</p></div>';
+      el.innerHTML=html;
+    }).catch(e=>{el.innerHTML='<div class="card" style="padding:20px;color:#dc2626">Error loading loans: '+e.message+'</div>';});
+  }
+
+  if(tab==='fin-investments'){
+    el.innerHTML='<div style="padding:20px;text-align:center;color:var(--g400)"><div style="font-size:24px">⏳</div><p style="font-size:13px">Loading investments...</p></div>';
+    db.collection('investments').orderBy('createdAt','desc').get().then(snap=>{
+      AD.investments=snap.docs.map(d=>({id:d.id,...d.data()}));
+      const pending=AD.investments.filter(i=>i.status==='pending');
+      const active=AD.investments.filter(i=>i.status==='active'||i.status==='matured');
+      const paid=AD.investments.filter(i=>i.status==='paid'||i.status==='rejected');
+      let html='';
+
+      if(pending.length){
+        html+=`<div style="font-weight:700;font-size:14px;color:#d97706;margin-bottom:10px">⏳ Pending (${pending.length})</div>`;
+        pending.forEach(inv=>{
+          html+=`<div class="card" style="padding:16px;margin-bottom:10px;border-left:4px solid #7c3aed">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+              <div><div style="font-weight:700;font-size:14px">${inv.userName||inv.userEmail}</div><div style="font-size:11px;color:var(--g400)">${inv.userEmail||''} · ${fdate(inv.createdAt)}</div></div>
+              <span class="status-badge sb-pending">pending</span>
+            </div>
+            <div style="font-size:22px;font-weight:800;color:var(--black);margin-bottom:8px">NGN ${fmt(inv.amount)}</div>
+            <div style="font-size:12px;color:var(--g600);margin-bottom:12px">Duration: ${inv.duration||'—'}${inv.note?' · '+inv.note:''}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+              <div><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Interest Rate (%)</label><input class="inp" type="number" id="iv-rate-${inv.id}" placeholder="e.g. 15"/></div>
+              <div><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Maturity Date</label><input class="inp" type="date" id="iv-mat-${inv.id}"/></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button onclick="approveInvestment('${inv.id}','${inv.userId}',${inv.amount})" style="flex:1;padding:11px;background:#ede9fe;border:1.5px solid #c4b5fd;color:#5b21b6;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">✅ Approve</button>
+              <button onclick="rejectInvestment('${inv.id}','${inv.userId}')" style="flex:1;padding:11px;background:#fee2e2;border:1.5px solid #fca5a5;color:#dc2626;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">❌ Reject</button>
+            </div>
+          </div>`;
+        });
+      }
+
+      if(active.length){
+        html+=`<div style="font-weight:700;font-size:14px;color:#6d28d9;margin:14px 0 10px">📈 Active / Matured (${active.length})</div>`;
+        active.forEach(inv=>{
+          html+=`<div class="card" style="padding:14px;margin-bottom:8px;border-left:4px solid #7c3aed">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div><div style="font-weight:600;font-size:13px">${inv.userName||inv.userEmail}</div><div style="font-size:20px;font-weight:800;color:var(--black)">NGN ${fmt(inv.amount)}</div><div style="font-size:12px;color:var(--g600)">Rate: ${inv.interestRate||'—'}% · Return: ${inv.expectedReturn?'NGN '+fmt(inv.expectedReturn):'—'}</div>${inv.maturityDate?`<div style="font-size:11px;color:var(--g400)">Matures: ${fdateShort(inv.maturityDate)}</div>`:''}</div>
+              <div style="text-align:right"><span class="status-badge sb-${inv.status}">${inv.status}</span>${inv.status==='matured'?`<div style="margin-top:8px"><button onclick="markInvestmentPaid('${inv.id}','${inv.userId}',${inv.expectedReturn||inv.amount})" style="padding:7px 12px;background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Pay Out</button></div>`:''}</div>
+            </div>
+          </div>`;
+        });
+      }
+
+      if(paid.length){
+        html+=`<div style="font-weight:700;font-size:14px;color:var(--g500);margin:14px 0 10px">History (${paid.length})</div>`;
+        paid.forEach(inv=>{html+=`<div class="card" style="padding:12px;margin-bottom:6px;opacity:.8"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600;font-size:13px">${inv.userName||inv.userEmail}</div><div style="font-size:12px;color:var(--g500)">NGN ${fmt(inv.amount)}${inv.expectedReturn?' · Return: NGN '+fmt(inv.expectedReturn):''}</div></div><span class="status-badge sb-${inv.status}">${inv.status}</span></div></div>`;});
+      }
+
+      if(!html) html='<div class="card" style="padding:32px;text-align:center;color:var(--g400)"><div style="font-size:36px;margin-bottom:10px">📈</div><p>No investment requests yet</p></div>';
+      el.innerHTML=html;
+    }).catch(e=>{el.innerHTML='<div class="card" style="padding:20px;color:#dc2626">Error loading investments: '+e.message+'</div>';});
+  }
+
+  if(tab==='fin-analytics'){
+    el.innerHTML='<div style="padding:20px;text-align:center;color:var(--g400)"><div style="font-size:24px">⏳</div><p style="font-size:13px">Loading analytics...</p></div>';
+    Promise.all([
+      db.collection('loans').get(),
+      db.collection('investments').get(),
+      db.collection('transactions').get()
+    ]).then(([lSnap,iSnap,tSnap])=>{
+      const loans=lSnap.docs.map(d=>d.data());
+      const invs=iSnap.docs.map(d=>d.data());
+      const txs=tSnap.docs.map(d=>d.data());
+      const tLA=loans.reduce((s,l)=>s+(l.approvedAmount||0),0);
+      const aL=loans.filter(l=>l.status==='active'||l.status==='approved').length;
+      const pL=loans.filter(l=>l.status==='pending').length;
+      const rL=loans.filter(l=>l.status==='repaid').length;
+      const tI=invs.reduce((s,i)=>s+(i.amount||0),0);
+      const tR=invs.reduce((s,i)=>s+(i.expectedReturn||0),0);
+      const aI=invs.filter(i=>i.status==='active').length;
+      const pI=invs.filter(i=>i.status==='paid').length;
+      const totTx=txs.reduce((s,t)=>s+(t.amount||0),0);
+      el.innerHTML=`
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px">
+          <div class="statc" style="background:linear-gradient(135deg,#1e1b4b,#312e81)"><div style="font-size:10px;opacity:.6;margin-bottom:5px;position:relative;z-index:1">LOANS ISSUED</div><div style="font-size:20px;font-weight:800;position:relative;z-index:1">NGN ${fmt(tLA)}</div></div>
+          <div class="statc" style="background:linear-gradient(135deg,#2563eb,#1d4ed8)"><div style="font-size:10px;opacity:.6;margin-bottom:5px;position:relative;z-index:1">ACTIVE LOANS</div><div style="font-size:24px;font-weight:800;position:relative;z-index:1">${aL}</div></div>
+          <div class="statc" style="background:linear-gradient(135deg,#6d28d9,#7c3aed)"><div style="font-size:10px;opacity:.6;margin-bottom:5px;position:relative;z-index:1">TOTAL INVESTED</div><div style="font-size:20px;font-weight:800;position:relative;z-index:1">NGN ${fmt(tI)}</div></div>
+          <div class="statc" style="background:linear-gradient(135deg,#15803d,#16a34a)"><div style="font-size:10px;opacity:.6;margin-bottom:5px;position:relative;z-index:1">RETURNS SET</div><div style="font-size:20px;font-weight:800;position:relative;z-index:1">NGN ${fmt(tR)}</div></div>
+          <div class="statc" style="background:linear-gradient(135deg,#92400e,#d97706)"><div style="font-size:10px;opacity:.6;margin-bottom:5px;position:relative;z-index:1">TX VOLUME</div><div style="font-size:20px;font-weight:800;position:relative;z-index:1">NGN ${fmt(totTx)}</div></div>
+          <div class="statc" style="background:linear-gradient(135deg,#0f172a,#334155)"><div style="font-size:10px;opacity:.6;margin-bottom:5px;position:relative;z-index:1">TOTAL TX</div><div style="font-size:24px;font-weight:800;position:relative;z-index:1">${txs.length}</div></div>
+        </div>
+        <div class="card" style="padding:16px"><div style="font-weight:700;font-size:14px;margin-bottom:14px">Finance Breakdown</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+            <div style="display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid #f1f5f9"><span style="color:var(--g500)">Total loan applications</span><strong>${loans.length}</strong></div>
+            <div style="display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid #f1f5f9"><span style="color:var(--g500)">Pending loans</span><strong style="color:#d97706">${pL}</strong></div>
+            <div style="display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid #f1f5f9"><span style="color:var(--g500)">Active loans</span><strong style="color:var(--blue)">${aL}</strong></div>
+            <div style="display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid #f1f5f9"><span style="color:var(--g500)">Repaid loans</span><strong style="color:var(--ok)">${rL}</strong></div>
+            <div style="display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid #f1f5f9"><span style="color:var(--g500)">Total investments</span><strong>${invs.length}</strong></div>
+            <div style="display:flex;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid #f1f5f9"><span style="color:var(--g500)">Active investments</span><strong style="color:#6d28d9">${aI}</strong></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--g500)">Paid out investments</span><strong style="color:var(--ok)">${pI}</strong></div>
+          </div>
+        </div>`;
+    }).catch(e=>{el.innerHTML='<div class="card" style="padding:20px;color:#dc2626">Error loading analytics: '+e.message+'</div>';});
+  }
+
 }
 async function loadAdminPromos(el){
   const s=await db.collection('promos').orderBy('order').get();
@@ -1354,7 +1564,8 @@ async function savePromo(){
   const ic=document.getElementById('pm-i').value||'⭐',cta=document.getElementById('pm-c').value.trim(),bg=document.getElementById('pm-b').value;
   if(!t||!d){toast('Title and description are required');return;}
   const s=await db.collection('promos').get();
-  await db.collection('promos').add({title:t,desc:d,icon:ic,cta,bg,active:true,order:s.size,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+  const imgUrl=document.getElementById('pm-img')?.value.trim()||'';
+  await db.collection('promos').add({title:t,desc:d,icon:ic,imgUrl,cta,bg,active:true,order:s.size,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
   closeM('m-addpromo');toast('Slide added! Now live on user dashboards.');aTab('promos');
 }
 async function togP(id,cur){await db.collection('promos').doc(id).update({active:!cur});aTab('promos');}
@@ -1483,24 +1694,72 @@ async function loadFinTab(tab){
   }
 }
 
+function previewImg(inputId,previewId,dropId){
+  const file=document.getElementById(inputId)?.files[0];
+  if(!file)return;
+  if(file.size>2*1024*1024){toast('File too large. Max 2MB.');return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const prev=document.getElementById(previewId);
+    const drop=document.getElementById(dropId);
+    if(prev)prev.innerHTML=`<img src="${e.target.result}" style="width:80px;height:80px;border-radius:10px;object-fit:cover;margin:0 auto;display:block"/><div style="font-size:11px;color:var(--ok);font-weight:600;margin-top:6px;text-align:center">✅ ${file.name}</div>`;
+    if(drop)drop.style.borderColor='#86efac';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function uploadToImgbb(file){
+  const IMGBB_KEY='4b8c2d67a1e34f5b9c2d67a1e34f5b9c'; // Replace with your imgbb key
+  const fd=new FormData();fd.append('image',file);
+  const r=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`,{method:'POST',body:fd});
+  const data=await r.json();
+  if(data.success)return data.data.url;
+  throw new Error('Image upload failed: '+(data.error?.message||'Unknown error'));
+}
+
 async function submitLoan(){
-  const amt=parseFloat(document.getElementById('ln-amt').value);
-  const purpose=document.getElementById('ln-purpose').value.trim();
-  const duration=document.getElementById('ln-duration').value;
-  const gName=document.getElementById('ln-gname').value.trim();
-  const gPhone=document.getElementById('ln-gphone').value.trim();
-  const gRel=document.getElementById('ln-grel').value;
-  const gAddr=document.getElementById('ln-gaddr').value.trim();
-  const gId=document.getElementById('ln-gid').value;
+  const amt=parseFloat(document.getElementById('ln-amt')?.value||0);
+  const purpose=(document.getElementById('ln-purpose')?.value||'').trim();
+  const address=(document.getElementById('ln-address')?.value||'').trim();
+  const employment=(document.getElementById('ln-employment')?.value||'').trim();
+  const duration=document.getElementById('ln-duration')?.value||'';
+  const idType=document.getElementById('ln-idtype')?.value||'';
+  const passportFile=document.getElementById('ln-passport')?.files[0];
+  const idFile=document.getElementById('ln-idimg')?.files[0];
+  const g1={name:(document.getElementById('ln-g1name')?.value||'').trim(),phone:(document.getElementById('ln-g1phone')?.value||'').trim(),relationship:document.getElementById('ln-g1rel')?.value||'',address:(document.getElementById('ln-g1addr')?.value||'').trim()};
+  const g2={name:(document.getElementById('ln-g2name')?.value||'').trim(),phone:(document.getElementById('ln-g2phone')?.value||'').trim(),relationship:document.getElementById('ln-g2rel')?.value||'',address:(document.getElementById('ln-g2addr')?.value||'').trim()};
   if(!amt||amt<1000){toast('Minimum loan amount is NGN 1,000');return;}
-  if(!purpose){toast('Please state the purpose of the loan');return;}
-  if(!gName||!gPhone||!gRel){toast('Guarantor name, phone and relationship are required');return;}
+  if(!purpose){toast('Enter the purpose of loan');return;}
+  if(!address){toast('Enter your home address');return;}
+  if(!employment){toast('Enter your employment/business details');return;}
+  if(!passportFile){toast('Please upload your passport photograph');return;}
+  if(!idType){toast('Select your ID type');return;}
+  if(!idFile){toast('Please upload your means of identification');return;}
+  if(!g1.name||!g1.phone||!g1.relationship){toast('Complete all Guarantor 1 details');return;}
+  if(!g2.name||!g2.phone||!g2.relationship){toast('Complete all Guarantor 2 details');return;}
+  const btn=document.querySelector('#m-loan-apply .btn-g');
+  if(btn){btn.textContent='Uploading documents...';btn.disabled=true;}
   try{
-    await db.collection('loans').add({userId:CU.uid,userEmail:CU.email,userName:UD?.name||'',amount:amt,purpose,duration:duration||'Not specified',guarantor:{name:gName,phone:gPhone,relationship:gRel,address:gAddr||'',idType:gId||''},status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    await addFinanceNotif(CU.uid,'Loan Application Submitted','Your loan request of NGN '+fmt(amt)+' has been submitted. Admin will review your guarantor details and respond within 24 hours.');
-    closeM('m-loan-apply');toast('Loan application submitted! Expect a response within 24 hours.');
+    let passportUrl='',idUrl='';
+    // Convert files to base64 data URLs (works without imgbb key)
+    passportUrl=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(passportFile);});
+    idUrl=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(idFile);});
+    if(btn)btn.textContent='Submitting...';
+    await db.collection('loans').add({
+      userId:CU.uid,userEmail:CU.email,userName:UD?.name||'',
+      amount:amt,purpose,address,employment,duration:duration||'Not specified',
+      idType,passportUrl,idUrl,
+      guarantor1:g1,guarantor2:g2,
+      status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await addFinanceNotif(CU.uid,'Loan Application Submitted','Your loan request of NGN '+fmt(amt)+' has been submitted with 2 guarantors. Admin will review and respond within 24 hours.');
+    closeM('m-loan-apply');
+    toast('Loan application submitted successfully!');
     if(document.getElementById('pg-finance')?.classList.contains('active'))loadFinanceDash();
-  }catch(er){toast('Failed to submit: '+er.message);}
+  }catch(er){
+    toast('Submission failed: '+er.message);
+    if(btn){btn.textContent='Submit Loan Application';btn.disabled=false;}
+  }
 }
 
 async function submitInvestment(){
@@ -1518,8 +1777,8 @@ async function submitInvestment(){
 
 // ── ADMIN FINANCE ACTIONS ──
 async function approveLoan(loanId,userId){
-  const amt=parseFloat(document.getElementById('ln-appamt-'+loanId)?.value||0);
-  const note=document.getElementById('ln-note-'+loanId)?.value.trim()||'';
+  const amt=parseFloat(document.getElementById('la-amt-'+loanId)?.value||document.getElementById('ln-appamt-'+loanId)?.value||0);
+  const note=(document.getElementById('la-note-'+loanId)?.value||document.getElementById('ln-note-'+loanId)?.value||'').trim();
   if(!amt||amt<=0){toast('Enter approved amount');return;}
   if(!confirm('Approve loan of NGN '+fmt(amt)+' and credit wallet?'))return;
   await db.collection('loans').doc(loanId).update({status:'active',approvedAmount:amt,adminNote:note,approvedAt:firebase.firestore.FieldValue.serverTimestamp()});
@@ -1565,26 +1824,161 @@ async function markInvestmentPaid(invId,userId,returnAmt){
   await addFinanceNotif(userId,'Investment Payout! 💰','Your investment return of NGN '+fmt(returnAmt)+' has been credited to your wallet. Thank you for investing with ZMONIE!');
   toast('Investment paid out!');loadAdmin();
 }
+
+// ── Admin Hamburger Menu ──
+function openAdminMenu(){
+  document.querySelector('.aside')?.classList.add('open');
+  document.getElementById('adminOverlay')?.classList.add('show');
+}
+function closeAdminMenu(){
+  document.querySelector('.aside')?.classList.remove('open');
+  document.getElementById('adminOverlay')?.classList.remove('show');
+}
+
+// ── Image Viewer ──
+function viewImg(url){
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;cursor:pointer';
+  ov.onclick=()=>ov.remove();
+  ov.innerHTML=`<img src="${url}" style="max-width:94vw;max-height:80vh;border-radius:12px;object-fit:contain"/><div style="color:rgba(255,255,255,.6);font-size:13px">Tap anywhere to close</div><a href="${url}" download onclick="event.stopPropagation()" style="background:#16a34a;color:#fff;padding:10px 22px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none">⬇ Download</a>`;
+  document.body.appendChild(ov);
+}
+
+// ── VTPass Config ──
+async function loadVtpassConfig(){
+  const el=document.getElementById('vt-current');if(!el)return;
+  try{
+    const s=await db.collection('settings').doc('vtpass').get();
+    if(s.exists){
+      const d=s.data();
+      el.innerHTML=`<div style="font-weight:600;margin-bottom:4px">Current Config</div>Mode: <strong>${d.mode||'sandbox'}</strong> · URL: <strong>${d.baseUrl||'—'}</strong><br/>Public Key: <strong>${d.publicKey?d.publicKey.slice(0,4)+'****'+d.publicKey.slice(-4):'Not set'}</strong>`;
+      document.getElementById('vt-mode').value=d.mode||'sandbox';
+      document.getElementById('vt-url').value=d.baseUrl||'';
+    } else {el.textContent='No config saved yet. Using defaults.';}
+  }catch(e){el.textContent='Error loading config.';}
+}
+async function loadVtpassConfig2(){
+  try{
+    const s=await db.collection('settings').doc('vtpass').get();
+    if(s.exists){
+      const d=s.data();
+      const el=document.getElementById('vt-admin-current');
+      if(el)el.innerHTML=`Mode: <strong>${d.mode||'sandbox'}</strong> · URL: <strong>${d.baseUrl||'—'}</strong><br/>Public Key: <strong>${d.publicKey?d.publicKey.slice(0,4)+'****'+d.publicKey.slice(-4):'Not set'}</strong>`;
+      const m=document.getElementById('vt-mode2');if(m)m.value=d.mode||'sandbox';
+      const u=document.getElementById('vt-url2');if(u)u.value=d.baseUrl||'';
+    }
+  }catch(e){}
+}
+async function saveVtpass(){
+  const mode=document.getElementById('vt-mode')?.value;
+  const pub=document.getElementById('vt-pub')?.value.trim();
+  const sec=document.getElementById('vt-sec')?.value.trim();
+  const url=document.getElementById('vt-url')?.value.trim();
+  if(!pub||!sec||!url){toast('All fields required');return;}
+  await db.collection('settings').doc('vtpass').set({mode,publicKey:pub,secretKey:sec,baseUrl:url,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:CU?.email});
+  toast('VTPass config saved!');closeM('m-vtpass');
+}
+async function saveVtpass2(){
+  const mode=document.getElementById('vt-mode2')?.value;
+  const pub=document.getElementById('vt-pub2')?.value.trim();
+  const sec=document.getElementById('vt-sec2')?.value.trim();
+  const url=document.getElementById('vt-url2')?.value.trim();
+  if(!pub||!sec||!url){toast('All fields required');return;}
+  await db.collection('settings').doc('vtpass').set({mode,publicKey:pub,secretKey:sec,baseUrl:url,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:CU?.email});
+  toast('VTPass config saved!');
+  const r=document.getElementById('vt-result2');if(r){r.style.display='block';r.style.background='#dcfce7';r.style.color='#15803d';r.textContent='✅ Configuration saved successfully!';}
+}
+async function testVtpass(){
+  const r=document.getElementById('vt-result');if(r){r.style.display='block';r.style.background='#f1f5f9';r.style.color='var(--g600)';r.textContent='Testing connection...';}
+  try{
+    const s=await db.collection('settings').doc('vtpass').get();
+    const d=s.exists?s.data():{};
+    const base=document.getElementById('vt-url')?.value||d.baseUrl||'https://sandbox.vtpass.com';
+    const resp=await fetch(base+'/api/service-categories',{headers:{'api-key':document.getElementById('vt-pub')?.value||d.publicKey||''}});
+    if(r){r.style.display='block';r.style.background=resp.ok?'#dcfce7':'#fee2e2';r.style.color=resp.ok?'#15803d':'#dc2626';r.textContent=resp.ok?'✅ Connection successful! Status: '+resp.status:'❌ Connection failed. Status: '+resp.status;}
+  }catch(e){if(r){r.style.display='block';r.style.background='#fee2e2';r.style.color='#dc2626';r.textContent='❌ Error: '+e.message;}}
+}
+async function testVtpass2(){
+  const r=document.getElementById('vt-result2');if(r){r.style.display='block';r.style.background='#f1f5f9';r.style.color='var(--g600)';r.textContent='Testing...';}
+  await testVtpass();
+  const r1=document.getElementById('vt-result');if(r&&r1){r.style.display='block';r.style.background=r1.style.background;r.style.color=r1.style.color;r.textContent=r1.textContent;}
+}
+
+// ── Fetch VTPass config before VTU calls ──
+async function getVtpassConfig(){
+  try{
+    const s=await db.collection('settings').doc('vtpass').get();
+    if(s.exists)return s.data();
+  }catch(e){}
+  return {mode:'sandbox',baseUrl:'https://sandbox.vtpass.com',publicKey:'',secretKey:''};
+}
+
+// ── Real-time transaction sync ──
+function startRealtimeSync(){
+  if(!CU)return;
+  db.collection('transactions').where('userId','==',CU.uid).orderBy('createdAt','desc').limit(10).onSnapshot(snap=>{
+    const el=document.getElementById('d-tx');if(!el)return;
+    if(snap.empty){el.innerHTML='<div style="padding:28px;text-align:center;color:var(--g400)"><div style="font-size:28px;margin-bottom:7px">📋</div><p style="font-size:13px">No transactions yet</p></div>';return;}
+    el.innerHTML=snap.docs.map(d=>txRow(d.data())).join('');
+  });
+  db.collection('users').doc(CU.uid).onSnapshot(snap=>{
+    if(!snap.exists)return;
+    UD=snap.data();
+    const balEl=document.getElementById('d-bal');
+    if(balEl)balEl.textContent=bHid?'NGN ****':'NGN '+fmt(UD.balance||0);
+    const cb=document.getElementById('d-cashback');if(cb)cb.textContent='NGN 0.00';
+  });
+}
 </script>
 
 <!-- LOAN APPLICATION MODAL -->
-<div class="modal" id="m-loan-apply"><div class="mbox">
+<div class="modal" id="m-loan-apply"><div class="mbox" style="max-height:92vh;overflow-y:auto">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <div><h3 style="font-size:17px;font-weight:700">Apply for Loan</h3><p style="font-size:11px;color:var(--g400);margin-top:2px">Guarantor required for approval</p></div>
-    <button onclick="closeM('m-loan-apply')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600)">&#10005;</button>
+    <div><h3 style="font-size:17px;font-weight:700">Apply for Loan</h3><p style="font-size:11px;color:var(--g400);margin-top:2px">2 guarantors + documents required</p></div>
+    <button onclick="closeM('m-loan-apply')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600);flex-shrink:0">&#10005;</button>
   </div>
-  <div class="info-box"><p style="font-size:12px;color:var(--green-d);line-height:1.6">Loans processed within 24 hours. Admin verifies your guarantor before approval. If approved, funds are credited directly to your wallet.</p></div>
-  <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Loan Amount (NGN)</label><input class="inp" type="number" id="ln-amt" placeholder="e.g. 50000" min="1000"/></div>
-  <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Purpose of Loan</label><input class="inp" id="ln-purpose" placeholder="e.g. Business capital, School fees..."/></div>
-  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Repayment Duration (optional)</label><select class="inp" id="ln-duration"><option value="">Not specified</option><option>1 Month</option><option>2 Months</option><option>3 Months</option><option>6 Months</option><option>12 Months</option></select></div>
-  <div style="background:#faf5ff;border:1px solid #c4b5fd;border-radius:12px;padding:14px;margin-bottom:14px">
-    <div style="font-size:13px;font-weight:700;color:#5b21b6;margin-bottom:12px">&#128100; Guarantor Details (Required)</div>
-    <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Guarantor Full Name</label><input class="inp" id="ln-gname" placeholder="Full legal name"/></div>
-    <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Guarantor Phone Number</label><input class="inp" type="tel" id="ln-gphone" placeholder="080XXXXXXXX"/></div>
-    <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Relationship to Guarantor</label><select class="inp" id="ln-grel"><option value="">Select relationship</option><option>Family Member</option><option>Friend</option><option>Colleague</option><option>Employer</option><option>Business Partner</option><option>Other</option></select></div>
-    <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Guarantor Address (optional)</label><input class="inp" id="ln-gaddr" placeholder="Street, City, State"/></div>
-    <div><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Guarantor ID Type (optional)</label><select class="inp" id="ln-gid"><option value="">None provided</option><option>NIN</option><option>BVN</option><option>Driver's License</option><option>International Passport</option><option>Voter's Card</option></select></div>
+  <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--green-d);line-height:1.6">Loans processed within 24h. Guarantor details verified by admin. Wallet credited if approved.</div>
+
+  <div style="font-size:13px;font-weight:700;color:var(--g700);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f1f5f9">📋 Loan Details</div>
+  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Loan Amount (NGN) *</label><input class="inp" type="number" id="ln-amt" placeholder="e.g. 50000" min="1000"/></div>
+  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Purpose of Loan *</label><input class="inp" id="ln-purpose" placeholder="e.g. Business capital, Medical..."/></div>
+  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Home Address *</label><input class="inp" id="ln-address" placeholder="Full home address"/></div>
+  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Employment / Business *</label><input class="inp" id="ln-employment" placeholder="e.g. Teacher at Lagos State, Self-employed..."/></div>
+  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Repayment Duration</label><select class="inp" id="ln-duration"><option value="">Not specified</option><option>1 Month</option><option>2 Months</option><option>3 Months</option><option>6 Months</option><option>12 Months</option></select></div>
+
+  <div style="font-size:13px;font-weight:700;color:var(--g700);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f1f5f9">📸 Documents (Mandatory)</div>
+  <div style="margin-bottom:12px">
+    <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Passport Photograph *</label>
+    <div style="border:2px dashed #d1d5db;border-radius:11px;padding:14px;text-align:center;cursor:pointer;transition:border-color .2s" id="passport-drop" onclick="document.getElementById('ln-passport').click()">
+      <div id="passport-preview"><div style="font-size:28px;margin-bottom:6px">🤳</div><div style="font-size:12px;color:var(--g400)">Tap to upload passport photo</div><div style="font-size:11px;color:var(--g300);margin-top:3px">JPG, PNG • Max 2MB</div></div>
+    </div>
+    <input type="file" id="ln-passport" accept="image/*" style="display:none" onchange="previewImg('ln-passport','passport-preview','passport-drop')"/>
   </div>
+  <div style="margin-bottom:14px">
+    <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Means of Identification *</label>
+    <select class="inp" id="ln-idtype" style="margin-bottom:8px"><option value="">Select ID type</option><option>National ID Card</option><option>Voter's Card</option><option>Driver's License</option><option>International Passport</option></select>
+    <div style="border:2px dashed #d1d5db;border-radius:11px;padding:14px;text-align:center;cursor:pointer;transition:border-color .2s" id="id-drop" onclick="document.getElementById('ln-idimg').click()">
+      <div id="id-preview"><div style="font-size:28px;margin-bottom:6px">🪪</div><div style="font-size:12px;color:var(--g400)">Tap to upload ID document</div><div style="font-size:11px;color:var(--g300);margin-top:3px">JPG, PNG, PDF • Max 2MB</div></div>
+    </div>
+    <input type="file" id="ln-idimg" accept="image/*,.pdf" style="display:none" onchange="previewImg('ln-idimg','id-preview','id-drop')"/>
+  </div>
+
+  <div style="background:#faf5ff;border:1px solid #c4b5fd;border-radius:12px;padding:14px;margin-bottom:12px">
+    <div style="font-size:13px;font-weight:700;color:#5b21b6;margin-bottom:12px">👤 Guarantor 1 (Required)</div>
+    <div style="margin-bottom:9px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:4px;display:block">Full Name *</label><input class="inp" id="ln-g1name" placeholder="Full legal name"/></div>
+    <div style="margin-bottom:9px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:4px;display:block">Phone Number *</label><input class="inp" type="tel" id="ln-g1phone" placeholder="080XXXXXXXX"/></div>
+    <div style="margin-bottom:9px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:4px;display:block">Relationship *</label><select class="inp" id="ln-g1rel"><option value="">Select</option><option>Family Member</option><option>Friend</option><option>Colleague</option><option>Employer</option><option>Business Partner</option><option>Other</option></select></div>
+    <div><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:4px;display:block">Address *</label><input class="inp" id="ln-g1addr" placeholder="Home address"/></div>
+  </div>
+
+  <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:14px;margin-bottom:16px">
+    <div style="font-size:13px;font-weight:700;color:#c2410c;margin-bottom:12px">👤 Guarantor 2 (Required)</div>
+    <div style="margin-bottom:9px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:4px;display:block">Full Name *</label><input class="inp" id="ln-g2name" placeholder="Full legal name"/></div>
+    <div style="margin-bottom:9px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:4px;display:block">Phone Number *</label><input class="inp" type="tel" id="ln-g2phone" placeholder="080XXXXXXXX"/></div>
+    <div style="margin-bottom:9px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:4px;display:block">Relationship *</label><select class="inp" id="ln-g2rel"><option value="">Select</option><option>Family Member</option><option>Friend</option><option>Colleague</option><option>Employer</option><option>Business Partner</option><option>Other</option></select></div>
+    <div><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:4px;display:block">Address *</label><input class="inp" id="ln-g2addr" placeholder="Home address"/></div>
+  </div>
+
   <button onclick="submitLoan()" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Submit Loan Application</button>
 </div></div>
 
@@ -1599,6 +1993,25 @@ async function markInvestmentPaid(invId,userId,returnAmt){
   <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Preferred Duration</label><select class="inp" id="inv-duration"><option>1 Month</option><option>3 Months</option><option>6 Months</option><option>12 Months</option><option>Flexible</option></select></div>
   <div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Additional Notes (optional)</label><textarea class="inp" id="inv-note" placeholder="Any special instructions or goals..."></textarea></div>
   <button onclick="submitInvestment()" style="width:100%;padding:13px;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border:none;box-shadow:0 3px 12px rgba(109,40,217,.3)">Submit Investment Request</button>
+</div></div>
+
+
+<!-- VTPASS SETTINGS MODAL -->
+<div class="modal" id="m-vtpass"><div class="mbox">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div><h3 style="font-size:17px;font-weight:700">VTPass API Settings</h3><p style="font-size:11px;color:var(--g400)">Super Admin Only</p></div>
+    <button onclick="closeM('m-vtpass')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600)">&#10005;</button>
+  </div>
+  <div id="vt-current" style="background:#f1f5f9;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--g600)">Loading current config...</div>
+  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Mode</label><select class="inp" id="vt-mode"><option value="sandbox">Sandbox (Testing)</option><option value="live">Live (Production)</option></select></div>
+  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Public Key</label><input class="inp" id="vt-pub" placeholder="Enter public key"/></div>
+  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Secret Key</label><input class="inp" type="password" id="vt-sec" placeholder="Enter secret key"/></div>
+  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label><input class="inp" id="vt-url" placeholder="https://sandbox.vtpass.com or https://vtpass.com"/></div>
+  <div style="display:flex;gap:8px;margin-bottom:10px">
+    <button onclick="testVtpass()" style="flex:1;padding:11px;border-radius:10px;background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔗 Test Connection</button>
+    <button onclick="saveVtpass()" class="btn-g" style="flex:1;padding:11px;border-radius:10px;font-size:13px">💾 Save Config</button>
+  </div>
+  <div id="vt-result" style="display:none;border-radius:10px;padding:11px;font-size:13px;margin-top:4px"></div>
 </div></div>
 
 </body>
