@@ -801,19 +801,137 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
   <button onclick="savePromo()" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Add Slide</button>
 </div></div>
 
-<div class="modal" id="m-terms"><div class="mbox">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><h3 style="font-size:17px;font-weight:700">Terms and Conditions</h3><button onclick="closeM('m-terms')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600)">✕</button></div>
-  <div style="color:var(--g600);font-size:13px;line-height:1.8">
-    <p style="margin-bottom:10px"><strong>1. Acceptance.</strong> By using ZMONIE, you agree to these terms. ZMONIE is registered in Nigeria (CAC No: 9576761).</p>
-    <p style="margin-bottom:10px"><strong>2. Services.</strong> ZMONIE provides VTU services including airtime, data, cable TV, electricity payments, loans, and result checker services.</p>
-    <p style="margin-bottom:10px"><strong>3. Wallet Funding.</strong> Credits are processed manually after payment proof via WhatsApp within 30 minutes.</p>
-    <p style="margin-bottom:10px"><strong>4. Transaction PIN.</strong> Keep your PIN confidential. ZMONIE will never ask for your PIN.</p>
-    <p style="margin-bottom:10px"><strong>5. Refunds.</strong> Failed transactions are automatically reversed. Contact support for unresolved issues.</p>
-    <p><strong>6. Contact.</strong> zmonieservice@gmail.com | 08068886569</p>
+<div class="modal" id="m-terms"><div class="mbox" style="max-height:92vh;overflow-y:auto">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;position:sticky;top:0;background:#fff;padding-bottom:12px;border-bottom:1px solid #f1f5f9;z-index:1">
+    <div>
+      <h3 style="font-size:17px;font-weight:800;color:var(--black)">Terms &amp; Conditions</h3>
+      <p style="font-size:11px;color:var(--g400);margin-top:2px">ZMONIE Finance — Fixed Investment &amp; Loan Services</p>
+    </div>
+    <button onclick="closeM('m-terms')" style="background:var(--g100);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;color:var(--g600);font-size:16px;flex-shrink:0">&#10005;</button>
   </div>
-</div></div>
 
-<div class="modal" id="m-privacy"><div class="mbox">
+  <!-- Section 1 -->
+  <div style="margin-bottom:18px">
+    <div style="background:linear-gradient(135deg,#16a34a,#15803d);border-radius:11px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:800;color:#fff;letter-spacing:.02em">1. INTRODUCTION</div>
+    </div>
+    <p style="font-size:13px;color:var(--g600);line-height:1.8">These Terms and Conditions govern all financial services offered by <strong>Zmonie</strong>, including Fixed Investment and Loan services. By using the platform, users agree to comply with all terms stated below.</p>
+  </div>
+
+  <!-- Section 2 -->
+  <div style="margin-bottom:18px">
+    <div style="background:linear-gradient(135deg,#6d28d9,#7c3aed);border-radius:11px;padding:12px 14px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:800;color:#fff;letter-spacing:.02em">2. FIXED INVESTMENT TERMS</div>
+    </div>
+    <div style="font-size:13px;font-weight:700;color:var(--g700);margin-bottom:8px">2.1 Investment Overview</div>
+    <p style="font-size:13px;color:var(--g600);line-height:1.8;margin-bottom:14px">Zmonie Fixed Investment allows users to invest funds for a fixed period and earn monthly returns at a fixed interest rate.</p>
+
+    <div style="font-size:13px;font-weight:700;color:var(--g700);margin-bottom:10px">2.2 Investment Plans</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:13px;padding:14px">
+        <div style="font-size:11px;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Plan 1</div>
+        <div style="font-size:11px;color:var(--g600);line-height:1.9">
+          <div>💰 <strong>₦10,000 – ₦500,000</strong></div>
+          <div>📈 <strong>5% monthly</strong></div>
+          <div>⏱ <strong>6 months</strong></div>
+          <div>🔓 Capital after 6 months</div>
+        </div>
+      </div>
+      <div style="background:linear-gradient(135deg,#faf5ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:13px;padding:14px">
+        <div style="font-size:11px;font-weight:800;color:#6d28d9;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Plan 2</div>
+        <div style="font-size:11px;color:var(--g600);line-height:1.9">
+          <div>💰 <strong>₦600,000+</strong></div>
+          <div>📈 <strong>5% monthly</strong></div>
+          <div>⏱ <strong>1 year+</strong></div>
+          <div>🔓 Capital after 1 year</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#f8fafc;border-radius:11px;padding:13px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--g700);margin-bottom:7px">2.3 Interest Payment</div>
+      <p style="font-size:12px;color:var(--g600);line-height:1.7;margin:0">Investors earn <strong>5% monthly interest</strong> on their investment. Interest payment schedule may be monthly or as agreed by the platform.</p>
+    </div>
+    <div style="background:#f8fafc;border-radius:11px;padding:13px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--g700);margin-bottom:7px">2.4 Investment Extension</div>
+      <p style="font-size:12px;color:var(--g600);line-height:1.7;margin:0">Investors may extend their investment beyond the initial duration. Extension terms must be agreed before maturity.</p>
+    </div>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:11px;padding:13px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:7px">⚠ 2.5 Capital Withdrawal</div>
+      <p style="font-size:12px;color:var(--g600);line-height:1.7;margin:0"><strong>Early withdrawal before maturity is not allowed</strong> except under special agreement. Early withdrawal may result in loss of interest or penalties.</p>
+    </div>
+    <div style="background:#f8fafc;border-radius:11px;padding:13px">
+      <div style="font-size:12px;font-weight:700;color:var(--g700);margin-bottom:7px">2.6 Next of Kin Policy</div>
+      <ul style="font-size:12px;color:var(--g600);line-height:1.9;margin:0;padding-left:16px">
+        <li>Every investor must provide a next of kin.</li>
+        <li>Next of kin must be at least <strong>18 years old</strong> to access funds.</li>
+        <li>Next of kin must provide a <strong>verification code</strong> before claiming funds.</li>
+        <li>Physical presence may be required for identity verification.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Section 3 -->
+  <div style="margin-bottom:18px">
+    <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:11px;padding:12px 14px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:800;color:#fff;letter-spacing:.02em">3. LOAN TERMS</div>
+    </div>
+    <div style="background:#f8fafc;border-radius:11px;padding:13px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--g700);margin-bottom:7px">3.1 Eligibility</div>
+      <ul style="font-size:12px;color:var(--g600);line-height:1.9;margin:0;padding-left:16px">
+        <li>Applicants must be <strong>registered users</strong> of the platform.</li>
+        <li>Must provide a valid <strong>social media account</strong> (Facebook or identifiable online profile) for verification.</li>
+        <li>All provided information must be <strong>accurate and verifiable</strong>.</li>
+      </ul>
+    </div>
+    <div style="background:#f8fafc;border-radius:11px;padding:13px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--g700);margin-bottom:7px">3.2 Loan Requirements</div>
+      <p style="font-size:12px;color:var(--g600);line-height:1.7;margin:0">Applicants must provide <strong>two guarantors</strong>. Additional verification documents may be requested before approval.</p>
+    </div>
+    <div style="background:#f8fafc;border-radius:11px;padding:13px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--g700);margin-bottom:7px">3.3 Loan Approval</div>
+      <p style="font-size:12px;color:var(--g600);line-height:1.7;margin:0">All applications are subject to approval. The platform reserves the right to approve or reject any application without explanation.</p>
+    </div>
+    <div style="background:#f8fafc;border-radius:11px;padding:13px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--g700);margin-bottom:7px">3.4 Repayment Terms</div>
+      <p style="font-size:12px;color:var(--g600);line-height:1.7;margin:0">Repayment terms are agreed before disbursement. Borrowers must repay <strong>principal + agreed interest</strong> within the specified period.</p>
+    </div>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:11px;padding:13px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:#15803d;margin-bottom:7px">3.5 Grace Period</div>
+      <p style="font-size:12px;color:var(--g600);line-height:1.7;margin:0">Borrowers are entitled to a grace period of <strong>3 to 5 days</strong> after due date without penalty where applicable.</p>
+    </div>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:11px;padding:13px">
+      <div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:7px">⚠ 3.6 Default &amp; Recovery</div>
+      <p style="font-size:12px;color:var(--g600);line-height:1.7;margin-bottom:8px">Failure to repay after grace period results in <strong>loan default</strong>. Recovery actions include:</p>
+      <ul style="font-size:12px;color:var(--g600);line-height:1.9;margin:0;padding-left:16px">
+        <li>Contacting borrower and guarantor</li>
+        <li>Debt recovery procedures</li>
+        <li>Engagement of authorized recovery agents</li>
+        <li>Reporting to relevant financial or credit monitoring systems</li>
+      </ul>
+      <p style="font-size:12px;color:var(--g600);line-height:1.7;margin-top:8px;margin-bottom:0">All recovery actions comply with applicable laws.</p>
+    </div>
+  </div>
+
+  <!-- Section 4 -->
+  <div style="margin-bottom:10px">
+    <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:11px;padding:12px 14px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:800;color:#fff;letter-spacing:.02em">4. GENERAL TERMS</div>
+    </div>
+    <ul style="font-size:13px;color:var(--g600);line-height:2;padding-left:16px;margin:0">
+      <li>Zmonie reserves the right to update or modify these Terms at any time.</li>
+      <li>Users are responsible for reading and understanding all terms before use.</li>
+      <li>Misuse of services may lead to suspension or restriction of access.</li>
+      <li>All disputes handled in accordance with applicable financial services law.</li>
+      <li><strong>By using Zmonie services, users agree to all terms in this document.</strong></li>
+    </ul>
+  </div>
+
+  <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:11px;padding:13px;margin-top:16px;text-align:center">
+    <div style="font-size:12px;color:#15803d;font-weight:700">ZMONIE FINANCE — CAC No: 9576761</div>
+    <div style="font-size:11px;color:var(--g400);margin-top:3px">zmonieservice@gmail.com · 08068886569</div>
+  </div>
+</div></div><div class="modal" id="m-privacy"><div class="mbox">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><h3 style="font-size:17px;font-weight:700">Privacy Policy</h3><button onclick="closeM('m-privacy')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600)">✕</button></div>
   <div style="color:var(--g600);font-size:13px;line-height:1.8">
     <p style="margin-bottom:10px"><strong>Data Collection.</strong> We collect name, email, phone number, and transaction data to provide our services.</p>
