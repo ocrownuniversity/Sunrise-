@@ -1881,19 +1881,47 @@ async function submitLoan(){
 }
 
 async function submitInvestment(){
-  const amt=parseFloat(document.getElementById('inv-amt').value);
-  const duration=document.getElementById('inv-duration').value;
-  const note=document.getElementById('inv-note').value.trim();
-  if(!amt||amt<1000){toast('Minimum investment is NGN 1,000');return;}
+  const amt=parseFloat(document.getElementById('inv-amt')?.value||0);
+  const duration=document.getElementById('inv-duration')?.value||'';
+  const note=(document.getElementById('inv-note')?.value||'').trim();
+  const nokName=(document.getElementById('inv-nok-name')?.value||'').trim();
+  const nokPhone=(document.getElementById('inv-nok-phone')?.value||'').trim();
+  const nokRel=document.getElementById('inv-nok-rel')?.value||'';
+  const nokAddr=(document.getElementById('inv-nok-addr')?.value||'').trim();
+  const passportFile=document.getElementById('inv-passport')?.files[0];
+  const nokPhotoFile=document.getElementById('inv-nok-photo')?.files[0];
+
+  if(!amt||amt<10000){toast('Minimum investment is NGN 10,000');return;}
+  if(!duration){toast('Please select investment duration');return;}
+  if(!passportFile){toast('Please upload your passport photo');return;}
+  if(!nokName||!nokPhone||!nokRel||!nokAddr){toast('Please complete all Next of Kin details');return;}
+  if(!nokPhotoFile){toast('Please upload Next of Kin photo');return;}
+
+  const btn=document.getElementById('inv-submit-btn');
+  if(btn){btn.textContent='Uploading photos...';btn.disabled=true;}
   try{
-    await db.collection('investments').add({userId:CU.uid,userEmail:CU.email,userName:UD?.name||'',amount:amt,duration,note:note||'',status:'pending',interestRate:null,expectedReturn:null,maturityDate:null,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    await addFinanceNotif(CU.uid,'Investment Request Submitted','Your investment of NGN '+fmt(amt)+' for '+duration+' has been submitted. Admin will set the interest rate and maturity date.');
-    closeM('m-invest-apply');toast('Investment request submitted! Admin will set rates shortly.');
+    // Convert images to base64
+    const toBase64=file=>new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(file);});
+    const [passportUrl,nokPhotoUrl]=await Promise.all([toBase64(passportFile),toBase64(nokPhotoFile)]);
+    if(btn)btn.textContent='Submitting...';
+    await db.collection('investments').add({
+      userId:CU.uid,userEmail:CU.email,userName:UD?.name||'',
+      amount:amt,duration,note,passportUrl,
+      nextOfKin:{name:nokName,phone:nokPhone,relationship:nokRel,address:nokAddr,photoUrl:nokPhotoUrl},
+      status:'pending',interestRate:null,expectedReturn:null,maturityDate:null,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await addFinanceNotif(CU.uid,'Investment Request Submitted','Your investment of NGN '+fmt(amt)+' for '+duration+' has been submitted with next of kin details. Admin will set the interest rate and maturity date.');
+    closeM('m-invest-apply');
+    toast('Investment request submitted successfully!');
     if(document.getElementById('pg-finance')?.classList.contains('active'))loadFinanceDash();
-  }catch(er){toast('Failed to submit: '+er.message);}
+  }catch(er){
+    toast('Submission failed: '+er.message);
+    if(btn){btn.textContent='Submit Investment Request';btn.disabled=false;}
+  }
 }
 
-// ── ADMIN FINANCE ACTIONS ──
+
 async function approveLoan(loanId,userId){
   const amt=parseFloat(document.getElementById('la-amt-'+loanId)?.value||document.getElementById('ln-appamt-'+loanId)?.value||0);
   const note=(document.getElementById('la-note-'+loanId)?.value||document.getElementById('ln-note-'+loanId)?.value||'').trim();
@@ -2047,6 +2075,20 @@ function startRealtimeSync(){
     const cb=document.getElementById('d-cashback');if(cb)cb.textContent='NGN 0.00';
   });
 }
+
+function previewInvImg(inputId,previewId,dropId){
+  const file=document.getElementById(inputId)?.files[0];
+  if(!file)return;
+  if(file.size>3*1024*1024){toast('File too large. Max 3MB.');return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const prev=document.getElementById(previewId);
+    const drop=document.getElementById(dropId);
+    if(prev)prev.innerHTML=`<img src="${e.target.result}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;margin:0 auto 8px;display:block;border:3px solid #86efac"/><div style="font-size:11px;color:var(--ok);font-weight:600;text-align:center">✅ Photo uploaded</div>`;
+    if(drop){drop.style.borderColor='#86efac';drop.style.background='#f0fdf4';}
+  };
+  reader.readAsDataURL(file);
+}
 </script>
 
 <!-- LOAN APPLICATION MODAL -->
@@ -2101,17 +2143,67 @@ function startRealtimeSync(){
 </div></div>
 
 <!-- INVESTMENT MODAL -->
-<div class="modal" id="m-invest-apply"><div class="mbox">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <div><h3 style="font-size:17px;font-weight:700">Invest &amp; Earn</h3><p style="font-size:11px;color:var(--g400);margin-top:2px">Grow your money with ZMONIE</p></div>
-    <button onclick="closeM('m-invest-apply')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600)">&#10005;</button>
+<div class="modal" id="m-invest-apply"><div class="mbox" style="max-height:92vh;overflow-y:auto">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;position:sticky;top:0;background:#fff;padding-bottom:12px;border-bottom:1px solid #f1f5f9;z-index:1">
+    <div><h3 style="font-size:17px;font-weight:700">Invest &amp; Earn</h3><p style="font-size:11px;color:var(--g400);margin-top:2px">Complete all sections to submit</p></div>
+    <button onclick="closeM('m-invest-apply')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600);flex-shrink:0">&#10005;</button>
   </div>
-  <div style="background:#faf5ff;border:1px solid #c4b5fd;border-radius:11px;padding:13px;margin-bottom:14px"><p style="font-size:12px;color:#6d28d9;line-height:1.6">Your request is reviewed by admin who sets the interest rate and maturity date. Returns are credited to your wallet on maturity.</p></div>
-  <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Investment Amount (NGN)</label><input class="inp" type="number" id="inv-amt" placeholder="e.g. 10000" min="1000"/></div>
-  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Preferred Duration</label><select class="inp" id="inv-duration"><option>1 Month</option><option>3 Months</option><option>6 Months</option><option>12 Months</option><option>Flexible</option></select></div>
-  <div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Additional Notes (optional)</label><textarea class="inp" id="inv-note" placeholder="Any special instructions or goals..."></textarea></div>
-  <button onclick="submitInvestment()" style="width:100%;padding:13px;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border:none;box-shadow:0 3px 12px rgba(109,40,217,.3)">Submit Investment Request</button>
-</div></div>
+
+  <!-- Plans info -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+    <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:12px;padding:12px">
+      <div style="font-size:10px;font-weight:800;color:#15803d;margin-bottom:6px;text-transform:uppercase">Plan 1</div>
+      <div style="font-size:11px;color:var(--g700);line-height:1.8">₦10,000–₦500,000<br/><strong>5% monthly</strong><br/>6 months</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#faf5ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:12px;padding:12px">
+      <div style="font-size:10px;font-weight:800;color:#6d28d9;margin-bottom:6px;text-transform:uppercase">Plan 2</div>
+      <div style="font-size:11px;color:var(--g700);line-height:1.8">₦600,000+<br/><strong>5% monthly</strong><br/>1 year+</div>
+    </div>
+  </div>
+
+  <!-- Section: Investment Details -->
+  <div style="font-size:13px;font-weight:700;color:var(--g700);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f1f5f9">📋 Investment Details</div>
+  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Investment Amount (NGN) *</label><input class="inp" type="number" id="inv-amt" placeholder="e.g. 50000" min="10000"/></div>
+  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Preferred Duration *</label><select class="inp" id="inv-duration"><option value="">Select duration</option><option>6 Months (Plan 1)</option><option>1 Year (Plan 2)</option><option>1 Year+ (by agreement)</option><option>Flexible (Admin decides)</option></select></div>
+  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Additional Notes (optional)</label><textarea class="inp" id="inv-note" placeholder="Any special instructions..."></textarea></div>
+
+  <!-- Section: Investor Photo -->
+  <div style="font-size:13px;font-weight:700;color:var(--g700);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f1f5f9">📸 Investor Passport Photo *</div>
+  <div style="margin-bottom:16px">
+    <div style="border:2px dashed #d1d5db;border-radius:12px;padding:18px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa" id="inv-passport-drop" onclick="document.getElementById('inv-passport').click()">
+      <div id="inv-passport-preview">
+        <div style="font-size:36px;margin-bottom:8px">🤳</div>
+        <div style="font-size:13px;font-weight:600;color:var(--g600)">Tap to upload your photo</div>
+        <div style="font-size:11px;color:var(--g400);margin-top:4px">Clear face photo • JPG, PNG • Max 3MB</div>
+      </div>
+    </div>
+    <input type="file" id="inv-passport" accept="image/*" capture="user" style="display:none" onchange="previewInvImg('inv-passport','inv-passport-preview','inv-passport-drop')"/>
+  </div>
+
+  <!-- Section: Next of Kin -->
+  <div style="font-size:13px;font-weight:700;color:var(--g700);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f1f5f9">👪 Next of Kin (Required)</div>
+  <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:13px;padding:14px;margin-bottom:16px">
+    <div style="font-size:11px;color:#92400e;background:#fef3c7;border-radius:8px;padding:8px 10px;margin-bottom:12px;line-height:1.6">Per ZMONIE policy, all investors must provide a next of kin aged 18+ who may be contacted in case of emergency or account claim.</div>
+    <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Full Name *</label><input class="inp" id="inv-nok-name" placeholder="Next of kin full name"/></div>
+    <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Phone Number *</label><input class="inp" type="tel" id="inv-nok-phone" placeholder="080XXXXXXXX"/></div>
+    <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Relationship *</label><select class="inp" id="inv-nok-rel"><option value="">Select relationship</option><option>Spouse</option><option>Parent</option><option>Child</option><option>Sibling</option><option>Friend</option><option>Other</option></select></div>
+    <div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Home Address *</label><input class="inp" id="inv-nok-addr" placeholder="Next of kin home address"/></div>
+    <!-- Next of kin photo -->
+    <div>
+      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Next of Kin Photo *</label>
+      <div style="border:2px dashed #fed7aa;border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:#fffbf5" id="inv-nok-drop" onclick="document.getElementById('inv-nok-photo').click()">
+        <div id="inv-nok-preview">
+          <div style="font-size:32px;margin-bottom:6px">👤</div>
+          <div style="font-size:12px;font-weight:600;color:var(--g600)">Tap to upload next of kin photo</div>
+          <div style="font-size:11px;color:var(--g400);margin-top:3px">Clear face photo • JPG, PNG • Max 3MB</div>
+        </div>
+      </div>
+      <input type="file" id="inv-nok-photo" accept="image/*" capture="user" style="display:none" onchange="previewInvImg('inv-nok-photo','inv-nok-preview','inv-nok-drop')"/>
+    </div>
+  </div>
+
+  <button onclick="submitInvestment()" id="inv-submit-btn" style="width:100%;padding:14px;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border:none;box-shadow:0 3px 12px rgba(109,40,217,.3)">Submit Investment Request</button>
+</div></div></div>
 
 
 <!-- VTPASS SETTINGS MODAL -->
