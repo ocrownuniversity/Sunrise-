@@ -358,16 +358,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
       </div>
     </div>
 
-    <!-- Promo Slider -->
+    <!-- Wallet Card (Finance Dashboard) -->
     <div style="padding:14px 14px 0">
-      <div class="slider-wrap" id="sliderWrap" style="background:#e2e8f0;min-height:90px">
-        <div class="slider-track" id="sliderTrack"></div>
-      </div>
-      <div style="display:flex;gap:4px;justify-content:center;padding:8px 0" id="sliderDots"></div>
-    </div>
-
-    <!-- Wallet Card -->
-    <div style="padding:0 14px 14px">
       <div class="wallet-card">
         <div style="position:relative;z-index:1">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
@@ -394,6 +386,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Promo Slider (directly below Finance Dashboard) -->
+    <div style="padding:12px 14px 0">
+      <div class="slider-wrap" id="sliderWrap" style="background:#e2e8f0;min-height:90px">
+        <div class="slider-track" id="sliderTrack"></div>
+      </div>
+      <div style="display:flex;gap:4px;justify-content:center;padding:6px 0" id="sliderDots"></div>
     </div>
 
     <!-- Services Grid (Moniepoint style) -->
@@ -2117,50 +2117,7 @@ async function uploadToImgbb(file){
   throw new Error('Image upload failed: '+(data.error?.message||'Unknown error'));
 }
 
-async function submitLoan(){
-  const amt=parseFloat(document.getElementById('ln-amt')?.value||0);
-  const purpose=(document.getElementById('ln-purpose')?.value||'').trim();
-  const address=(document.getElementById('ln-address')?.value||'').trim();
-  const employment=(document.getElementById('ln-employment')?.value||'').trim();
-  const duration=document.getElementById('ln-duration')?.value||'';
-  const idType=document.getElementById('ln-idtype')?.value||'';
-  const passportFile=document.getElementById('ln-passport')?.files[0];
-  const idFile=document.getElementById('ln-idimg')?.files[0];
-  const g1={name:(document.getElementById('ln-g1name')?.value||'').trim(),phone:(document.getElementById('ln-g1phone')?.value||'').trim(),relationship:document.getElementById('ln-g1rel')?.value||'',address:(document.getElementById('ln-g1addr')?.value||'').trim()};
-  const g2={name:(document.getElementById('ln-g2name')?.value||'').trim(),phone:(document.getElementById('ln-g2phone')?.value||'').trim(),relationship:document.getElementById('ln-g2rel')?.value||'',address:(document.getElementById('ln-g2addr')?.value||'').trim()};
-  if(!amt||amt<1000){toast('Minimum loan amount is NGN 1,000');return;}
-  if(!purpose){toast('Enter the purpose of loan');return;}
-  if(!address){toast('Enter your home address');return;}
-  if(!employment){toast('Enter your employment/business details');return;}
-  if(!passportFile){toast('Please upload your passport photograph');return;}
-  if(!idType){toast('Select your ID type');return;}
-  if(!idFile){toast('Please upload your means of identification');return;}
-  if(!g1.name||!g1.phone||!g1.relationship){toast('Complete all Guarantor 1 details');return;}
-  if(!g2.name||!g2.phone||!g2.relationship){toast('Complete all Guarantor 2 details');return;}
-  const btn=document.querySelector('#m-loan-apply .btn-g');
-  if(btn){btn.textContent='Uploading documents...';btn.disabled=true;}
-  try{
-    let passportUrl='',idUrl='';
-    // Convert files to base64 data URLs (works without imgbb key)
-    passportUrl=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(passportFile);});
-    idUrl=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(idFile);});
-    if(btn)btn.textContent='Submitting...';
-    await db.collection('loans').add({
-      userId:CU.uid,userEmail:CU.email,userName:UD?.name||'',
-      amount:amt,purpose,address,employment,duration:duration||'Not specified',
-      idType,passportUrl,idUrl,
-      guarantor1:g1,guarantor2:g2,
-      status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-    await addFinanceNotif(CU.uid,'Loan Application Submitted','Your loan request of NGN '+fmt(amt)+' has been submitted with 2 guarantors. Admin will review and respond within 24 hours.');
-    closeM('m-loan-apply');
-    toast('Loan application submitted successfully!');
-    if(document.getElementById('pg-finance')?.classList.contains('active'))loadFinanceDash();
-  }catch(er){
-    toast('Submission failed: '+er.message);
-    if(btn){btn.textContent='Submit Loan Application';btn.disabled=false;}
-  }
-}
+// submitLoan is defined below (single authoritative version)
 
 async function submitInvestment(){
   // Collect all fields
@@ -2206,8 +2163,24 @@ async function submitInvestment(){
   const btn=document.getElementById('inv-submit-btn');
   if(btn){btn.textContent='Uploading photos...';btn.disabled=true;}
   try{
-    const toBase64=file=>new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(file);});
-    const [passportUrl,nokPhotoUrl]=await Promise.all([toBase64(passportFile),toBase64(nokPhotoFile)]);
+    // Compress images to stay within Firestore 1MB document limit
+    const compressImg=file=>new Promise((res,rej)=>{
+      const img=new Image();
+      const url=URL.createObjectURL(file);
+      img.onload=()=>{
+        const MAX=600;
+        let w=img.width,h=img.height;
+        if(w>MAX||h>MAX){const r=Math.min(MAX/w,MAX/h);w=Math.round(w*r);h=Math.round(h*r);}
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        const ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);
+        URL.revokeObjectURL(url);
+        res(c.toDataURL('image/jpeg',0.7));
+      };
+      img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('Could not read image file'));};
+      img.src=url;
+    });
+    if(btn)btn.textContent='Compressing photos...';
+    const [passportUrl,nokPhotoUrl]=await Promise.all([compressImg(passportFile),compressImg(nokPhotoFile)]);
     if(btn)btn.textContent='Submitting...';
 
     // Generate unique security code: ZMN + 4 random uppercase letters + 4 random digits
@@ -2243,8 +2216,13 @@ async function submitInvestment(){
 
     if(document.getElementById('pg-finance')?.classList.contains('active'))loadFinanceDash();
   }catch(er){
-    toast('Submission failed: '+er.message);
-    if(btn){btn.textContent='Submit Investment Request';btn.disabled=false;}
+    let errMsg = er.message||'Unknown error';
+    if(errMsg.includes('permission') || errMsg.includes('PERMISSION_DENIED')) errMsg = 'Permission denied. Please log out and log back in, then try again.';
+    else if(errMsg.includes('network') || errMsg.includes('unavailable')) errMsg = 'Network error. Check your internet connection and try again.';
+    else if(errMsg.includes('quota')) errMsg = 'Service temporarily busy. Please try again in a moment.';
+    else if(errMsg.includes('passportUrl') || errMsg.includes('nokPhotoUrl')) errMsg = 'Photo upload failed — please re-select your passport or Next of Kin photo and try again.';
+    toast('❌ Submission failed: '+errMsg);
+    if(btn){btn.textContent='🚀 Submit Investment Request';btn.disabled=false;}
   }
 }
 function invGenderStyle(){
@@ -2472,9 +2450,8 @@ function generateRepaymentSchedule(approvedDate, totalRepay){
   return schedule;
 }
 
-/* OLD DUPLICATE SUBMITLOAN - REMOVED
 async function submitLoan(){
-  if(!CU){toast('Please login first');return;}
+  if(!CU){toast('Please log in first');return;}
   const amt = parseFloat(document.getElementById('ln-amt')?.value||'0');
   const purpose = document.getElementById('ln-purpose')?.value.trim();
   const address = document.getElementById('ln-address')?.value.trim();
@@ -2518,12 +2495,29 @@ async function submitLoan(){
   if(!existing.empty){toast('You already have an active/pending loan. Complete it before applying for another.');return;}
 
   const btn = document.getElementById('ln-submit-btn');
-  if(btn){btn.disabled=true;btn.textContent='Submitting...';}
 
   try{
-    // Convert photos to base64
-    const passportB64 = await fileToB64(passportFile);
-    const idB64 = await fileToB64(idFile);
+    // Compress photos to stay within Firestore 1MB document limit
+    const compressImg=file=>new Promise((res,rej)=>{
+      if(!file.type.startsWith('image/')){
+        // For PDFs, just do base64 but warn if large
+        const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=()=>rej(new Error('File read failed'));r.readAsDataURL(file);return;
+      }
+      const img=new Image();const url=URL.createObjectURL(file);
+      img.onload=()=>{
+        const MAX=600;let w=img.width,h=img.height;
+        if(w>MAX||h>MAX){const ratio=Math.min(MAX/w,MAX/h);w=Math.round(w*ratio);h=Math.round(h*ratio);}
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        const ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);
+        URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',0.72));
+      };
+      img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('Could not read image file. Please re-select the photo.'));};
+      img.src=url;
+    });
+    if(btn){btn.disabled=true;btn.textContent='Compressing photos...';}
+    const passportB64 = await compressImg(passportFile);
+    const idB64 = await compressImg(idFile);
+    if(btn)btn.textContent='Submitting...';
     const details = calcLoanDetails(amt);
 
     await db.collection('loans').add({
@@ -2557,7 +2551,12 @@ async function submitLoan(){
       alert(msg);
     }, 800);
   }catch(er){
-    toast('Submission failed: '+er.message);
+    let errMsg = er.message||'Unknown error';
+    if(errMsg.includes('permission') || errMsg.includes('PERMISSION_DENIED')) errMsg = 'Permission denied. Please log out and log back in, then try again.';
+    else if(errMsg.includes('network') || errMsg.includes('unavailable')) errMsg = 'Network error. Check your internet connection and try again.';
+    else if(errMsg.includes('quota')) errMsg = 'Service temporarily busy. Please try again in a moment.';
+    else if(errMsg.includes('passportUrl') || errMsg.includes('idUrl')) errMsg = 'Photo upload failed — please re-select your passport and ID photos, then try again.';
+    toast('❌ Submission failed: '+errMsg);
   }finally{
     if(btn){btn.disabled=false;btn.textContent='Submit Loan Application';}
   }
