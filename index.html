@@ -444,21 +444,26 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
 
     <!-- Rewards Section -->
     <div style="margin:0 14px 14px">
-      <div style="font-size:14px;font-weight:700;color:var(--g700);margin-bottom:10px">Rewards</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:14px;font-weight:700;color:var(--g700)">Rewards Balance</div>
+        <button onclick="goPg('pg-rewards')" style="background:none;border:none;color:var(--green-d);font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif">View All →</button>
+      </div>
       <div style="display:flex;gap:10px">
-        <div class="rwcard card" style="cursor:pointer" onclick="toast('Cashback feature coming soon!')">
+        <div class="rwcard card" style="cursor:pointer" onclick="goPg('pg-rewards')">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
             <div style="font-size:22px">🎖</div>
             <div style="font-size:13px;font-weight:600;color:var(--g700)">Cashback</div>
           </div>
           <div style="font-size:18px;font-weight:800;color:var(--green-d)" id="d-cashback">NGN 0.00</div>
+          <div style="font-size:10px;color:var(--g400);margin-top:3px">1% per VTU transaction</div>
         </div>
-        <div class="rwcard card" style="cursor:pointer" onclick="toast('Referral feature coming soon!')">
+        <div class="rwcard card" style="cursor:pointer" onclick="goPg('pg-rewards')">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
             <div style="font-size:22px">🎯</div>
             <div style="font-size:13px;font-weight:600;color:var(--g700)">Referrals</div>
           </div>
-          <div style="font-size:18px;font-weight:800;color:var(--green-d)">NGN 0.00</div>
+          <div style="font-size:18px;font-weight:800;color:var(--green-d)" id="d-refearnings">NGN 0.00</div>
+          <div style="font-size:10px;color:var(--g400);margin-top:3px">₦100 per referral</div>
         </div>
       </div>
     </div>
@@ -696,6 +701,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <div class="anav fin-tab" onclick="aTab('fin-investments')">📈 Investments</div>
         <div class="anav fin-tab" onclick="aTab('fin-analytics')">📊 Fin Analytics</div>
         <div class="anav fin-tab" onclick="aTab('vtpass')">⚙️ VTPass Settings</div>
+        <div style="font-size:10px;font-weight:700;color:rgba(74,222,128,.3);padding:10px 6px 4px;text-transform:uppercase;letter-spacing:.8px">Rewards</div>
+        <div class="anav" onclick="aTab('rewards-settings')">🎁 Rewards Settings</div>
+        <div class="anav" onclick="aTab('rewards-history')">📊 Rewards History</div>
       </nav>
       <div style="position:absolute;bottom:14px;left:0;right:0;padding:0 8px">
         <button onclick="doLogout()" style="width:100%;padding:10px;border-radius:8px;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.18);color:#f87171;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Sign Out</button>
@@ -723,6 +731,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <button onclick="aTab('fin-investments')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Investments</button>
         <button onclick="aTab('fin-analytics')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Fin Stats</button>
         <button onclick="aTab('vtpass')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">VTPass</button>
+        <button onclick="aTab('rewards-settings')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #86efac;background:#f0fdf4;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#15803d">🎁 Rewards</button>
       </div>
       <div id="a-content"></div>
     </div>
@@ -769,6 +778,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
     <input class="pbox" type="password" maxlength="1" id="vp2" oninput="pn('vp2','vp3')"/>
     <input class="pbox" type="password" maxlength="1" id="vp3" oninput="pn('vp3','vp4')"/>
     <input class="pbox" type="password" maxlength="1" id="vp4"/>
+  </div>
+  <!-- Rewards balance option (shown only when user has enough rewards) -->
+  <div id="pin-rw-note" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:11px;padding:12px;margin-bottom:14px;align-items:center;gap:10px">
+    <div style="flex:1">
+      <div style="font-size:12px;font-weight:700;color:var(--green-d)">🎖 Use Rewards Balance</div>
+      <div style="font-size:11px;color:var(--green);margin-top:2px">Balance: <strong id="pin-rw-bal">NGN 0.00</strong></div>
+    </div>
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+      <input type="checkbox" id="use-rewards-chk" style="accent-color:var(--green);width:16px;height:16px"/>
+      <span style="font-size:12px;font-weight:600;color:var(--green-d)">Pay with rewards</span>
+    </label>
   </div>
   <button onclick="verPin()" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px;margin-bottom:9px">Confirm</button>
   <button onclick="closeM('m-pin')" style="width:100%;padding:12px;border-radius:11px;background:var(--g100);border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:var(--g600)">Cancel</button>
@@ -974,7 +994,18 @@ const isAdmin=e=>ADMINS.includes((e||'').toLowerCase());
 function hp(p){let h=0;for(let c of p)h=(h<<5)-h+c.charCodeAt(0)|0;return h.toString(36);}
 
 // NAV
-function goPg(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');}
+function goPg(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById(id);if(el)el.classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='pg-dash')loadDash();
+  if(id==='pg-hist')loadHist();
+  if(id==='pg-notif')loadNotifs();
+  if(id==='pg-profile'){loadProfile();chkPinStatus();}
+  if(id==='pg-finance')loadFinanceDash();
+  if(id==='pg-fin-notif')loadFinanceNotifs();
+  if(id==='pg-rewards')loadRewardsPage();
+}
 function navTo(id,el){document.querySelectorAll('.bni').forEach(n=>n.classList.remove('on'));if(el)el.classList.add('on');goPg(id);if(id==='pg-hist')loadHist();if(id==='pg-notif')loadNotifs();if(id==='pg-profile')chkPinStatus();}
 
 // MODALS
@@ -1020,8 +1051,16 @@ async function doReg(){
       photoURL=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(photoFile);});
     }
     const cr=await auth.createUserWithEmailAndPassword(em,pw);
-    await db.collection('users').doc(cr.user.uid).set({name:fn+' '+ln,email:em,phone:ph,balance:0,pin:hp(pin),role:'user',photoURL,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    await addNotif(cr.user.uid,'Welcome to ZMONIE!','Your account has been created. Fund your wallet to get started.');
+    // Check for referral code in URL
+    const urlRef=new URLSearchParams(window.location.search).get('ref')||sessionStorage.getItem('zmonie_ref')||'';
+    const refCode='ZM'+cr.user.uid.slice(0,8).toUpperCase();
+    await db.collection('users').doc(cr.user.uid).set({
+      name:fn+' '+ln,email:em,phone:ph,balance:0,rewardsBalance:0,cashbackEarned:0,referralEarned:0,
+      pin:hp(pin),role:'user',photoURL,referralCode:refCode,referredBy:urlRef,hasFundedFirst:false,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await addNotif(cr.user.uid,'Welcome to ZMONIE! 🎉','Your account has been created. Share your referral link and earn ₦100 for every friend who joins and funds their wallet!');
+    sessionStorage.removeItem('zmonie_ref');
   }catch(er){toast('Registration failed: '+er.message);}
 }
 function previewRegPhoto(event){
@@ -1063,6 +1102,10 @@ async function loadDash(){
   document.getElementById('pr-em').textContent=UD.email||'—';
   // Show profile photo if saved
   if(UD.photoURL)updateAvatarUI(UD.photoURL);
+  // Update rewards display
+  const rwBal=UD.rewardsBalance||0;const cbEarned=UD.cashbackEarned||0;const rfEarned=UD.referralEarned||0;
+  const cbEl=document.getElementById('d-cashback');if(cbEl)cbEl.textContent='NGN '+fmt(cbEarned);
+  const rfEl=document.getElementById('d-refearnings');if(rfEl)rfEl.textContent='NGN '+fmt(rfEarned);
   loadNBadge();loadDashTx();loadSlider();startRealtimeSync();
 }
 
@@ -1083,9 +1126,10 @@ async function loadDashTx(){
 }
 
 function txRow(tx){
-  const ic={airtime:'📱',data:'🌐',cable:'📺',electricity:'💡',loan:'💰',result:'📋',credit:'👛',wallet:'👛'};
-  const cr=tx.type==='credit'||tx.type==='wallet';
-  return`<div class="txr"><div style="width:36px;height:36px;background:${cr?'var(--green-xl)':'var(--g100)'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${ic[tx.type]||'💳'}</div><div style="flex:1;min-width:0;margin-left:10px"><div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${tx.description||tx.type}</div><div style="font-size:11px;color:var(--g400);margin-top:2px">${fdate(tx.createdAt)}</div></div><div style="text-align:right;flex-shrink:0;margin-left:8px"><div style="font-weight:700;font-size:13px;color:${cr?'var(--ok)':'var(--err)'}">${cr?'+':'-'}NGN ${fmt(tx.amount)}</div><div class="chip ${tx.status==='success'?'c-ok':'c-warn'}" style="margin-top:2px">${tx.status||'pending'}</div></div></div>`;
+  const ic={airtime:'📱',data:'🌐',cable:'📺',electricity:'💡',loan:'💰',result:'📋',credit:'👛',wallet:'👛',cashback:'🎖',referral:'🎯'};
+  const cr=tx.type==='credit'||tx.type==='wallet'||tx.type==='cashback'||tx.type==='referral';
+  const txJson=JSON.stringify(tx).replace(/'/g,"\'");
+  return`<div class="txr" onclick="openTxReceipt('${btoa(unescape(encodeURIComponent(JSON.stringify(tx))))}')"><div style="width:36px;height:36px;background:${cr?'var(--green-xl)':'var(--g100)'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${ic[tx.type]||'💳'}</div><div style="flex:1;min-width:0;margin-left:10px"><div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${tx.description||tx.type}</div><div style="font-size:11px;color:var(--g400);margin-top:2px">${fdate(tx.createdAt)}</div></div><div style="text-align:right;flex-shrink:0;margin-left:8px"><div style="font-weight:700;font-size:13px;color:${cr?'var(--ok)':'var(--err)'}">${cr?'+':'-'}NGN ${fmt(tx.amount)}</div><div class="chip ${tx.status==='success'?'c-ok':'c-warn'}" style="margin-top:2px">${tx.status||'pending'}</div><div style="font-size:10px;color:var(--g400);margin-top:1px">📄 receipt</div></div></div>`;
 }
 
 // SLIDER — real-time Firestore listener so admin slides show instantly
@@ -1157,6 +1201,16 @@ function procSvc(type){
   const amt=parseFloat(amtEl?.value||'0');
   if(!amt||amt<=0){toast('Select a valid plan or enter an amount');return;}
   if(!UD?.pin){toast('Please set a transaction PIN in Profile first');closeM('m-svc');goPg('pg-profile');return;}
+  // Show rewards balance option if user has rewards
+  const rwBal=UD?.rewardsBalance||0;
+  if(rwBal>=amt){
+    // Inject rewards option into PIN modal
+    const rwNote=document.getElementById('pin-rw-note');
+    if(rwNote){rwNote.style.display='flex';rwNote.querySelector('#pin-rw-bal').textContent='NGN '+fmt(rwBal);}
+  }else{
+    const rwNote=document.getElementById('pin-rw-note');
+    if(rwNote)rwNote.style.display='none';
+  }
   // Build extra payload for VTPass
   let extra={};
   if(type==='airtime'){
@@ -1210,8 +1264,9 @@ async function verPin(){
   if(hp(pin)!==UD?.pin){toast('Incorrect PIN. Try again.');['vp1','vp2','vp3','vp4'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('vp1')?.focus();return;}
   closeM('m-pin');
   if(pSvc){
+    const useRewards=document.getElementById('use-rewards-chk')?.checked||false;
     toast('Processing...');
-    await execSvc(pSvc);
+    await execSvc({...pSvc,useRewards});
   }
 }
 // ===== VTPASS CONFIG =====
@@ -1323,10 +1378,16 @@ function selNet(btn){
 // Generate unique transaction reference
 function txRef(){return 'ZMN'+Date.now()+Math.floor(Math.random()*10000);}
 
-async function execSvc({type,amt,extra}){
+async function execSvc({type,amt,extra,useRewards}){
   if(!CU)return;
   const s=await db.collection('users').doc(CU.uid).get();
-  if((s.data().balance||0)<amt){toast('Insufficient balance. Please fund your wallet.');return;}
+  const ud=s.data()||{};
+  const rwBal=ud.rewardsBalance||0;
+  if(useRewards){
+    if(rwBal<amt){toast('Insufficient rewards balance.');return;}
+  }else{
+    if((ud.balance||0)<amt){toast('Insufficient balance. Please fund your wallet.');return;}
+  }
   const descs={airtime:'Airtime Purchase',data:'Data Subscription',cable:'Cable TV Subscription',electricity:'Electricity Payment',result:'Result Checker PIN'};
   const ref=txRef();
   // Save pending transaction
@@ -1351,10 +1412,38 @@ async function execSvc({type,amt,extra}){
     }
     const success=vtpResult&&(vtpResult.code==='000'||vtpResult.content?.transactions?.status==='delivered');
     if(success){
-      await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-amt)});
+      if(useRewards){
+        await db.collection('users').doc(CU.uid).update({rewardsBalance:firebase.firestore.FieldValue.increment(-amt)});
+      }else{
+        await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-amt)});
+      }
       await txRef2.update({status:'success',vtpResponse:JSON.stringify(vtpResult).slice(0,500)});
+      // ── Cashback reward ──
+      try{
+        const rwSnap=await db.collection('settings').doc('rewards').get();
+        const rwCfg=rwSnap.exists?rwSnap.data():{cashbackEnabled:true,cashbackPct:1};
+        if(rwCfg.cashbackEnabled!==false){
+          const pct=(rwCfg.cashbackPct||1)/100;
+          const cashback=Math.round(amt*pct*100)/100;
+          if(cashback>0){
+            await db.collection('users').doc(CU.uid).update({
+              rewardsBalance:firebase.firestore.FieldValue.increment(cashback),
+              cashbackEarned:firebase.firestore.FieldValue.increment(cashback)
+            });
+            await db.collection('rewards').add({
+              userId:CU.uid,type:'cashback',amount:cashback,txId:txRef2.id,
+              description:'1% cashback on '+((extra&&extra.planName)?extra.planName:descs[type]),
+              createdAt:firebase.firestore.FieldValue.serverTimestamp()
+            });
+            await addNotif(CU.uid,'Cashback Credited! 🎖','You earned NGN '+fmt(cashback)+' cashback on your '+((extra&&extra.planName)?extra.planName:descs[type])+' transaction.');
+          }
+        }
+      }catch(e){console.warn('Cashback error',e);}
       await addNotif(CU.uid,'Transaction Successful',(extra&&extra.planName?extra.planName:descs[type])+' of NGN '+fmt(amt)+' was successful.');
-      toast('Transaction successful!');loadDash();pSvc=null;
+      toast('Transaction successful!');
+      // Show receipt
+      showReceipt({type,amt,extra,ref,descs,vtpResult,cashback:0});
+      loadDash();pSvc=null;
     }else{
       await txRef2.update({status:'failed',vtpResponse:JSON.stringify(vtpResult||{}).slice(0,500)});
       const errMsg=(vtpResult&&vtpResult.response_description)||'Transaction could not be completed. Please try again.';
@@ -1557,6 +1646,8 @@ function aTab(tab){
   if(tab==='broadcast')el.innerHTML=`<div class="card" style="padding:18px;max-width:520px"><h3 style="font-weight:700;margin-bottom:13px;font-size:15px">Send Broadcast</h3><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Title</label><input class="inp" id="bc-t" placeholder="Announcement title"/></div><div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Message</label><textarea class="inp" id="bc-m" rows="4" placeholder="Message to all users..." style="resize:vertical"></textarea></div><button onclick="doBc()" class="btn-g" style="padding:12px 24px;border-radius:10px;font-size:14px">Send to All ${AD.users.length} Users</button></div>`;
   if(tab==='wallet')el.innerHTML=`<div class="card" style="padding:18px;max-width:440px"><h3 style="font-weight:700;margin-bottom:13px;font-size:15px">Credit or Debit Wallet</h3><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">User Email</label><input class="inp" id="aw-e" placeholder="user@example.com"/></div><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Amount (NGN)</label><input class="inp" type="number" id="aw-a" placeholder="1000"/></div><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Operation</label><select class="inp" id="aw-o"><option value="credit">Credit (Add funds)</option><option value="debit">Debit (Remove funds)</option></select></div><div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Note (shown to user)</label><input class="inp" id="aw-n" placeholder="Payment confirmed"/></div><button onclick="doWop()" class="btn-g" style="width:100%;padding:12px;border-radius:10px;font-size:14px">Process</button></div>`;
   // ── VTPass Settings tab ──
+  if(tab==='rewards-settings'){loadRewardsSettings(el);}
+  if(tab==='rewards-history'){loadRewardsHistoryAdmin(el);}
   if(tab==='recovery'){
     el.innerHTML='<div style="padding:20px;text-align:center;color:var(--g400)">Loading...</div>';
     db.collection('recoveryLog').orderBy('createdAt','desc').get().then(snap=>{
@@ -1843,7 +1934,38 @@ async function doWop(){
 async function appFund(fid,uid,amt){
   await db.collection('users').doc(uid).update({balance:firebase.firestore.FieldValue.increment(amt)});
   await db.collection('fundings').doc(fid).update({status:'approved'});
+  await db.collection('transactions').add({userId:uid,type:'credit',amount:amt,description:'Wallet Funding',status:'success',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
   await addNotif(uid,'Wallet Funded','NGN '+fmt(amt)+' has been credited to your wallet.');
+  // ── Referral reward on first funding ──
+  try{
+    const uSnap=await db.collection('users').doc(uid).get();
+    const ud=uSnap.data()||{};
+    if(!ud.hasFundedFirst&&ud.referredBy){
+      const refQ=await db.collection('users').where('referralCode','==',ud.referredBy).get();
+      if(!refQ.empty){
+        const rwSnap=await db.collection('settings').doc('rewards').get();
+        const rwCfg=rwSnap.exists?rwSnap.data():{referralEnabled:true,referralAmt:100};
+        if(rwCfg.referralEnabled!==false){
+          const refAmt=rwCfg.referralAmt||100;
+          const refDoc=refQ.docs[0];
+          await db.collection('users').doc(refDoc.id).update({
+            rewardsBalance:firebase.firestore.FieldValue.increment(refAmt),
+            referralEarned:firebase.firestore.FieldValue.increment(refAmt)
+          });
+          await db.collection('rewards').add({
+            userId:refDoc.id,type:'referral',amount:refAmt,referredUserId:uid,
+            referredUserName:ud.name||ud.email||'',
+            description:'Referral reward — '+(ud.name||ud.email||'New user')+' funded wallet',
+            createdAt:firebase.firestore.FieldValue.serverTimestamp()
+          });
+          await addNotif(refDoc.id,'Referral Reward! 🎯','You earned NGN '+fmt(refAmt)+' because '+(ud.name||'a friend')+' funded their wallet for the first time!');
+        }
+      }
+      await db.collection('users').doc(uid).update({hasFundedFirst:true});
+    }else if(!ud.hasFundedFirst){
+      await db.collection('users').doc(uid).update({hasFundedFirst:true});
+    }
+  }catch(e){console.warn('Referral reward error',e);}
   toast('Wallet credited!');loadAdmin();
 }
 async function rejFund(fid){await db.collection('fundings').doc(fid).update({status:'rejected'});toast('Rejected.');loadAdmin();}
@@ -2785,6 +2907,119 @@ async function showAdminSchedule(loanId){
     `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:12px">${schedule.map((s,i)=>`<button onclick="recordDailyPayment('${loanId}','${ln.userId||''}',${i});this.closest('.modal').remove()" style="padding:6px 2px;border-radius:7px;background:${s.paid?'#dcfce7':'#f1f5f9'};border:1px solid ${s.paid?'#86efac':'#e2e8f0'};font-size:10px;font-weight:700;cursor:pointer;color:${s.paid?'#15803d':'var(--g600)'};font-family:'Inter',sans-serif">Day ${s.day}</button>`).join('')}</div>`;
   showScheduleModal(html);
 }
+
+// ══════════════════════════════════════════════
+//  REWARDS SYSTEM
+// ══════════════════════════════════════════════
+
+async function loadRewardsPage(){
+  if(!CU||!UD)return;
+  let rwCfg={cashbackEnabled:true,cashbackPct:1,referralEnabled:true,referralAmt:100};
+  try{const s=await db.collection('settings').doc('rewards').get();if(s.exists)rwCfg={...rwCfg,...s.data()};}catch(e){}
+  const rwBal=UD.rewardsBalance||0,cbEarned=UD.cashbackEarned||0,rfEarned=UD.referralEarned||0;
+  const el=id=>document.getElementById(id);
+  if(el('rw-total'))el('rw-total').textContent='NGN '+fmt(rwBal);
+  if(el('rw-cashback-bal'))el('rw-cashback-bal').textContent='NGN '+fmt(cbEarned);
+  if(el('rw-referral-bal'))el('rw-referral-bal').textContent='NGN '+fmt(rfEarned);
+  if(el('rw-cb-rate'))el('rw-cb-rate').textContent=(rwCfg.cashbackPct||1)+'%';
+  if(el('rw-ref-amt'))el('rw-ref-amt').textContent='NGN '+(rwCfg.referralAmt||100);
+  const refCode=UD.referralCode||('ZM'+CU.uid.slice(0,8).toUpperCase());
+  const refLink=window.location.origin+window.location.pathname+'?ref='+refCode;
+  if(el('rw-ref-link'))el('rw-ref-link').textContent=refLink;
+  try{const rq=await db.collection('users').where('referredBy','==',refCode).get();if(el('rw-ref-count'))el('rw-ref-count').textContent=rq.size+' user'+(rq.size!==1?'s':'');}catch(e){}
+  try{
+    const tq=await db.collection('transactions').where('userId','==',CU.uid).get();
+    const vtuTypes=['airtime','data','cable','electricity','result'];
+    const vtuCount=tq.docs.filter(d=>vtuTypes.includes(d.data().type)).length;
+    if(el('rw-tx-count'))el('rw-tx-count').textContent=vtuCount;
+  }catch(e){}
+  loadRewardsHistory();
+}
+async function loadRewardsHistory(){
+  const el=document.getElementById('rw-history');if(!el)return;
+  try{
+    const s=await db.collection('rewards').where('userId','==',CU.uid).get();
+    if(s.empty){el.innerHTML='<div style="padding:28px;text-align:center;color:var(--g400)"><div style="font-size:28px;margin-bottom:7px">🎁</div><p style="font-size:13px">No rewards yet. Make a VTU transaction or refer a friend!</p></div>';return;}
+    const docs=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>{const ta=a.createdAt?.toDate?a.createdAt.toDate():new Date(a.createdAt||0);const tb=b.createdAt?.toDate?b.createdAt.toDate():new Date(b.createdAt||0);return tb-ta;});
+    el.innerHTML=docs.map(r=>{const cb=r.type==='cashback';return`<div class="txr"><div style="width:36px;height:36px;background:${cb?'#dcfce7':'#dbeafe'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${cb?'🎖':'🎯'}</div><div style="flex:1;min-width:0;margin-left:10px"><div style="font-weight:600;font-size:13px">${r.description||r.type}</div><div style="font-size:11px;color:var(--g400);margin-top:2px">${fdate(r.createdAt)}</div></div><div style="text-align:right;flex-shrink:0"><div style="font-weight:700;font-size:13px;color:var(--ok)">+NGN ${fmt(r.amount)}</div><div class="chip c-ok" style="margin-top:2px">${r.type}</div></div></div>`;}).join('');
+  }catch(e){el.innerHTML='<div style="padding:28px;text-align:center;color:var(--g400)"><p>Could not load rewards</p></div>';}
+}
+function copyRefLink(){
+  const link=document.getElementById('rw-ref-link')?.textContent||'';
+  if(navigator.clipboard)navigator.clipboard.writeText(link).then(()=>toast('Referral link copied!'));
+  else{const ta=document.createElement('textarea');ta.value=link;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Link copied!');}
+}
+function shareRefLink(via){
+  const link=document.getElementById('rw-ref-link')?.textContent||window.location.href;
+  const msg='Join ZMONIE and get bonus rewards! Use my link: '+link;
+  if(via==='whatsapp')window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+  else if(navigator.share)navigator.share({title:'Join ZMONIE',text:msg,url:link}).catch(()=>copyRefLink());
+  else copyRefLink();
+}
+(function captureRef(){const ref=new URLSearchParams(window.location.search).get('ref');if(ref)sessionStorage.setItem('zmonie_ref',ref);})();
+
+// ── RECEIPT ──
+let lastTxData=null;
+function showReceipt(txData){
+  lastTxData=txData;
+  const {type,amt,extra,ref,descs}=txData;
+  const desc=(extra&&extra.planName)?extra.planName:(descs&&descs[type])||type;
+  const now=new Date();
+  const el=document.getElementById('receipt-content');if(!el)return;
+  el.innerHTML=`<div id="receipt-printable" style="background:#fff;padding:24px;font-family:'Inter',sans-serif"><div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:2px dashed #e2e8f0"><div style="width:56px;height:56px;background:linear-gradient(135deg,#16a34a,#15803d);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:26px">✅</div><div style="font-size:18px;font-weight:900">Transaction Successful</div><div style="font-size:12px;color:var(--g400);margin-top:4px">${now.toLocaleDateString('en-NG',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div></div><div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:12px;color:var(--g500)">Amount Paid</span><span style="font-size:20px;font-weight:900;color:var(--err)">NGN ${fmt(amt)}</span></div>${[['Service',desc],['Reference',ref||'—'],['Status','✅ Successful'],['Time',now.toLocaleTimeString('en-NG')],['Account',UD?.name||'—'],['Phone/ID',(extra?.phone||extra?.smartcard||extra?.meter||'')]].filter(r=>r[1]&&r[1]!=='—').map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f1f5f9"><span style="font-size:12px;color:var(--g500)">${k}</span><span style="font-size:12px;font-weight:600;max-width:60%;text-align:right">${v}</span></div>`).join('')}</div><div style="background:#f0fdf4;border-radius:12px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--green-d);font-weight:600">Powered by ZMONIE</div><div style="font-size:10px;color:var(--g400);margin-top:2px">zmonieservice@gmail.com · 08068886569</div></div></div>`;
+  openM('m-receipt');
+}
+async function shareReceipt(via){
+  const printable=document.getElementById('receipt-printable');
+  if(!printable){toast('Receipt not ready');return;}
+  const txt='*ZMONIE Receipt*\nService: '+(lastTxData?.extra?.planName||lastTxData?.type||'VTU')+'\nAmount: NGN '+fmt(lastTxData?.amt||0)+'\nRef: '+(lastTxData?.ref||'—')+'\nStatus: Successful\nDate: '+new Date().toLocaleString('en-NG')+'\n\nPowered by ZMONIE | 08068886569';
+  if(via==='whatsapp'){window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');return;}
+  if(via==='share'&&navigator.share){navigator.share({title:'ZMONIE Receipt',text:txt}).catch(()=>{});return;}
+  // Download as PNG using canvas
+  try{
+    const script=document.createElement('script');
+    script.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    script.onload=async()=>{
+      const canvas=await html2canvas(printable,{scale:2,backgroundColor:'#ffffff'});
+      if(via==='download'){const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='ZMONIE_Receipt_'+Date.now()+'.png';a.click();toast('Receipt saved!');}
+      else{canvas.toBlob(async blob=>{const file=new File([blob],'ZMONIE_Receipt.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[file]}))await navigator.share({files:[file],title:'ZMONIE Receipt'});else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ZMONIE_Receipt.png';a.click();}});}
+    };
+    if(!window.html2canvas)document.head.appendChild(script);
+    else script.onload();
+  }catch(e){toast('Saved as text instead');const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(txt);a.download='receipt.txt';a.click();}
+}
+function openTxReceipt(b64){
+  try{
+    const tx=JSON.parse(decodeURIComponent(escape(atob(b64))));
+    showReceipt({type:tx.type,amt:tx.amount,extra:tx.extra||{planName:tx.description},ref:tx.ref||tx.id||'',descs:{}});
+  }catch(e){toast('Could not open receipt');}
+}
+
+// ── ADMIN REWARDS ──
+const rwToggles={};
+async function loadRewardsSettings(el){
+  let cfg={cashbackEnabled:true,cashbackPct:1,referralEnabled:true,referralAmt:100};
+  try{const s=await db.collection('settings').doc('rewards').get();if(s.exists)cfg={...cfg,...s.data()};}catch(e){}
+  el.innerHTML=`<div style="max-width:520px"><div class="card" style="padding:20px;margin-bottom:14px"><div style="font-size:15px;font-weight:800;margin-bottom:16px">🎖 Cashback Settings</div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><div><div style="font-weight:600;font-size:14px">Enable Cashback</div><div style="font-size:12px;color:var(--g400)">Users earn % back on every VTU transaction</div></div><div class="tsw ${cfg.cashbackEnabled!==false?'on':''}" id="rw-cb-toggle" onclick="this.classList.toggle('on')"></div></div><div style="margin-bottom:6px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Cashback Percentage (%)</label><input class="inp" type="number" id="rw-cb-pct" value="${cfg.cashbackPct||1}" min="0.1" max="10" step="0.1"/></div><div style="font-size:11px;color:var(--g400)">Default: 1%</div></div><div class="card" style="padding:20px;margin-bottom:14px"><div style="font-size:15px;font-weight:800;margin-bottom:16px">🎯 Referral Settings</div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><div><div style="font-weight:600;font-size:14px">Enable Referral Rewards</div><div style="font-size:12px;color:var(--g400)">Pay referrer when referred user first funds wallet</div></div><div class="tsw ${cfg.referralEnabled!==false?'on':''}" id="rw-ref-toggle" onclick="this.classList.toggle('on')"></div></div><div style="margin-bottom:6px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Referral Reward Amount (NGN)</label><input class="inp" type="number" id="rw-ref-amt-inp" value="${cfg.referralAmt||100}" min="10" step="10"/></div><div style="font-size:11px;color:var(--g400)">Default: NGN 100 per referral</div></div><button onclick="saveRewardsSettings()" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">💾 Save — Takes Effect Instantly</button><div id="rw-save-msg" style="display:none;margin-top:10px;padding:10px;background:#dcfce7;border-radius:10px;text-align:center;font-size:13px;font-weight:600;color:#15803d">✅ Settings saved and live!</div></div>`;
+}
+async function saveRewardsSettings(){
+  const pct=parseFloat(document.getElementById('rw-cb-pct')?.value||1);
+  const amt=parseFloat(document.getElementById('rw-ref-amt-inp')?.value||100);
+  const cbOn=document.getElementById('rw-cb-toggle')?.classList.contains('on');
+  const rfOn=document.getElementById('rw-ref-toggle')?.classList.contains('on');
+  await db.collection('settings').doc('rewards').set({cashbackEnabled:cbOn,cashbackPct:pct||1,referralEnabled:rfOn,referralAmt:amt||100,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+  const msg=document.getElementById('rw-save-msg');if(msg){msg.style.display='block';setTimeout(()=>msg.style.display='none',3000);}
+  toast('Rewards settings saved!');
+}
+async function loadRewardsHistoryAdmin(el){
+  try{
+    const s=await db.collection('rewards').get();
+    const docs=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>{const ta=a.createdAt?.toDate?a.createdAt.toDate():new Date(a.createdAt||0);const tb=b.createdAt?.toDate?b.createdAt.toDate():new Date(b.createdAt||0);return tb-ta;});
+    const totalCb=docs.filter(r=>r.type==='cashback').reduce((s,r)=>s+r.amount,0);
+    const totalRef=docs.filter(r=>r.type==='referral').reduce((s,r)=>s+r.amount,0);
+    el.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"><div class="statc" style="background:linear-gradient(135deg,#15803d,#16a34a)"><div style="font-size:20px;margin-bottom:3px">🎖</div><div style="font-size:20px;font-weight:800">NGN ${fmt(totalCb)}</div><div style="opacity:.65;font-size:12px">Cashback Paid</div></div><div class="statc" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)"><div style="font-size:20px;margin-bottom:3px">🎯</div><div style="font-size:20px;font-weight:800">NGN ${fmt(totalRef)}</div><div style="opacity:.65;font-size:12px">Referrals Paid</div></div></div><div class="card" style="overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #f8fafc;font-weight:700;font-size:14px">All Rewards (${docs.length})</div>${docs.slice(0,100).map(r=>`<div class="txr"><div style="width:32px;height:32px;background:${r.type==='cashback'?'#dcfce7':'#dbeafe'};border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${r.type==='cashback'?'🎖':'🎯'}</div><div style="flex:1;min-width:0;margin-left:10px"><div style="font-weight:600;font-size:13px">${r.description||r.type}</div><div style="font-size:11px;color:var(--g400)">${fdate(r.createdAt)}</div></div><div style="text-align:right"><div style="font-weight:700;font-size:13px;color:var(--ok)">+NGN ${fmt(r.amount)}</div><div class="chip c-ok" style="margin-top:2px">${r.type}</div></div></div>`).join('')||'<div style="padding:22px;text-align:center;color:var(--g400);font-size:13px">No rewards yet</div>'}</div>`;
+  }catch(e){el.innerHTML='<div style="padding:22px;text-align:center;color:var(--g400);font-size:13px">Could not load</div>';}
+}
 </script>
 
 <!-- LOAN APPLICATION MODAL -->
@@ -3039,5 +3274,122 @@ async function showAdminSchedule(loanId){
   <div id="vt-result" style="display:none;border-radius:10px;padding:11px;font-size:13px;margin-top:4px"></div>
 </div></div>
 
+
+<!-- ======== REWARDS PAGE ======== -->
+<div id="pg-rewards" class="page">
+  <div style="max-width:480px;margin:0 auto;background:var(--bg);min-height:100vh;padding-bottom:80px">
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#15803d,#16a34a);padding:13px 16px;display:flex;align-items:center;gap:12px">
+      <button onclick="goPg('pg-dash')" style="background:rgba(255,255,255,.15);border:none;width:32px;height:32px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div><div style="font-size:11px;color:rgba(255,255,255,.6)">ZMONIE</div><div style="font-size:16px;font-weight:800;color:#fff">Rewards Center</div></div>
+    </div>
+    <!-- Total Rewards Balance Card -->
+    <div style="padding:14px">
+      <div style="background:linear-gradient(135deg,#0f172a,#15803d);border-radius:20px;padding:20px;color:#fff;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:rgba(34,197,94,.08);border-radius:50%"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Total Rewards Balance</div>
+        <div style="font-size:32px;font-weight:900;color:#4ade80;letter-spacing:-.02em;margin-bottom:4px" id="rw-total">NGN 0.00</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:18px">Can be used for VTU purchases only</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:rgba(255,255,255,.08);border-radius:12px;padding:12px">
+            <div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:4px">🎖 Cashback Earned</div>
+            <div style="font-size:16px;font-weight:800;color:#fff" id="rw-cashback-bal">NGN 0.00</div>
+          </div>
+          <div style="background:rgba(255,255,255,.08);border-radius:12px;padding:12px">
+            <div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:4px">🎯 Referral Earned</div>
+            <div style="font-size:16px;font-weight:800;color:#fff" id="rw-referral-bal">NGN 0.00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Notice -->
+    <div style="margin:0 14px 14px;background:#fefce8;border:1px solid #fde047;border-radius:12px;padding:12px">
+      <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:3px">💡 How Rewards Work</div>
+      <div style="font-size:11px;color:#a16207;line-height:1.7">Your rewards balance is credited automatically. It can only be used to pay for VTU services (Airtime, Data, Bills). It cannot be withdrawn.</div>
+    </div>
+    <!-- Referral Section -->
+    <div style="margin:0 14px 14px">
+      <div class="card" style="padding:16px">
+        <div style="font-size:14px;font-weight:700;color:var(--black);margin-bottom:12px">🎯 Your Referral Link</div>
+        <div style="font-size:12px;color:var(--g600);margin-bottom:8px">Share this link. Earn <strong style="color:var(--green-d)" id="rw-ref-amt">₦100</strong> when a referred user funds their wallet for the first time.</div>
+        <div style="background:var(--green-xl);border:1.5px solid #86efac;border-radius:11px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="font-size:12px;color:var(--green-d);font-weight:600;flex:1;word-break:break-all" id="rw-ref-link">Loading...</div>
+          <button onclick="copyRefLink()" style="background:var(--green);border:none;color:#fff;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;flex-shrink:0">Copy</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button onclick="shareRefLink('whatsapp')" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;background:#dcfce7;border:1px solid #86efac;border-radius:10px;color:#15803d;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a5.051 5.051 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp
+          </button>
+          <button onclick="shareRefLink('other')" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;background:#dbeafe;border:1px solid #93c5fd;border-radius:10px;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share Link
+          </button>
+        </div>
+        <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--g100);border-radius:10px">
+          <div style="font-size:12px;color:var(--g600)">Total referrals made</div>
+          <div style="font-size:14px;font-weight:800;color:var(--green-d)" id="rw-ref-count">0 users</div>
+        </div>
+      </div>
+    </div>
+    <!-- Cashback Stats -->
+    <div style="margin:0 14px 14px">
+      <div class="card" style="padding:16px">
+        <div style="font-size:14px;font-weight:700;color:var(--black);margin-bottom:12px">🎖 Cashback Stats</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+          <div style="background:var(--green-xl);border-radius:11px;padding:12px">
+            <div style="font-size:10px;color:var(--green-d);font-weight:600;margin-bottom:4px">Rate</div>
+            <div style="font-size:18px;font-weight:800;color:var(--green-d)" id="rw-cb-rate">1%</div>
+            <div style="font-size:10px;color:var(--g400)">per VTU transaction</div>
+          </div>
+          <div style="background:#f0f9ff;border-radius:11px;padding:12px">
+            <div style="font-size:10px;color:#0369a1;font-weight:600;margin-bottom:4px">Total Transactions</div>
+            <div style="font-size:18px;font-weight:800;color:#0369a1" id="rw-tx-count">0</div>
+            <div style="font-size:10px;color:var(--g400)">VTU services used</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Rewards History -->
+    <div style="margin:0 14px 14px">
+      <div style="font-size:14px;font-weight:700;color:var(--g700);margin-bottom:10px">Rewards History</div>
+      <div class="card" id="rw-history" style="overflow:hidden">
+        <div style="padding:28px;text-align:center;color:var(--g400)"><div style="font-size:28px;margin-bottom:7px">🎁</div><p style="font-size:13px">Loading rewards...</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="bnav">
+    <div class="bni" onclick="goPg('pg-dash')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></div>
+    <div class="bni" onclick="goPg('pg-hist')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>History</span></div>
+    <div class="bni on" style="flex:none;padding:0 16px"><div style="width:44px;height:44px;background:linear-gradient(135deg,#15803d,#16a34a);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:-12px;box-shadow:0 4px 14px rgba(22,163,74,.35)"><span style="font-size:20px">🎁</span></div><span style="margin-top:2px;font-size:10px;font-weight:600;color:var(--green)">Rewards</span></div>
+    <div class="bni" onclick="goPg('pg-notif')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span>Alerts</span></div>
+    <div class="bni" onclick="goPg('pg-profile')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profile</span></div>
+  </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="modal" id="m-receipt"><div class="mbox" style="max-height:92vh;overflow-y:auto">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="font-size:16px;font-weight:800">Transaction Receipt</div>
+    <button onclick="closeM('m-receipt')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600)">✕</button>
+  </div>
+  <div id="receipt-content" style="background:#fff;border-radius:16px;overflow:hidden">
+    <!-- Filled by JS -->
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+    <button onclick="shareReceipt('whatsapp')" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:13px;background:#dcfce7;border:1px solid #86efac;border-radius:11px;color:#15803d;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">
+      <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a5.051 5.051 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      WhatsApp
+    </button>
+    <button onclick="shareReceipt('download')" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:13px;background:#dbeafe;border:1px solid #93c5fd;border-radius:11px;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Save Image
+    </button>
+  </div>
+  <button onclick="shareReceipt('share')" style="width:100%;margin-top:8px;padding:13px;background:var(--g100);border:1px solid var(--g200);border-radius:11px;color:var(--g700);font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    Share to Other Apps
+  </button>
+</div></div>
 </body>
 </html>
