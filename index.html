@@ -1893,8 +1893,9 @@ function aTab(tab){
       <div style="font-size:13px;color:var(--g500);margin-bottom:16px">Manage API keys and mode for VTU services</div>
       <div id="vt-admin-current" style="background:#f1f5f9;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--g600)">Loading...</div>
       <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Mode</label><select class="inp" id="vt-mode2"><option value="sandbox">Sandbox (Testing)</option><option value="live">Live (Production)</option></select></div>
-      <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Public Key</label><input class="inp" id="vt-pub2" placeholder="VTPass public key"/></div>
-      <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Secret Key</label><input class="inp" type="password" id="vt-sec2" placeholder="VTPass secret key"/></div>
+      <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Key <span style='color:#dc2626;font-size:10px;font-weight:400'>(static key from VTPass profile)</span></label><input class="inp" id="vt-api2" placeholder="e.g. 03f401bf628bf9bc9013..."/></div>
+      <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Public Key <span style='color:#64748b;font-size:10px;font-weight:400'>(PK_...)</span></label><input class="inp" id="vt-pub2" placeholder="PK_510dca003b..."/></div>
+      <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Secret Key <span style='color:#64748b;font-size:10px;font-weight:400'>(SK_...)</span></label><input class="inp" type="password" id="vt-sec2" placeholder="SK_..."/></div>
       <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label><input class="inp" id="vt-url2" value="https://sandbox.vtpass.com" placeholder="API base URL"/></div>
       <div style="display:flex;gap:8px">
         <button onclick="testVtpass2()" style="flex:1;padding:11px;border-radius:10px;background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔗 Test</button>
@@ -2562,9 +2563,11 @@ async function loadVtpassConfig(){
     const s=await db.collection('settings').doc('vtpass').get();
     if(s.exists){
       const d=s.data();
-      el.innerHTML=`<div style="font-weight:600;margin-bottom:4px">Current Config</div>Mode: <strong>${d.mode||'sandbox'}</strong> · URL: <strong>${d.baseUrl||'—'}</strong><br/>Public Key: <strong>${d.publicKey?d.publicKey.slice(0,4)+'****'+d.publicKey.slice(-4):'Not set'}</strong>`;
+      el.innerHTML=`<div style="font-weight:600;margin-bottom:4px">Current Config</div>Mode: <strong>${d.mode||'sandbox'}</strong> · URL: <strong>${d.baseUrl||'—'}</strong><br/>API Key: <strong>${d.apiKey?d.apiKey.slice(0,6)+'****':'⚠ Not set'}</strong> · Public Key: <strong>${d.publicKey?d.publicKey.slice(0,6)+'****'+d.publicKey.slice(-4):'⚠ Not set'}</strong>`;
       document.getElementById('vt-mode').value=d.mode||'sandbox';
       document.getElementById('vt-url').value=d.baseUrl||'';
+      const apiEl=document.getElementById('vt-api');if(apiEl)apiEl.value=d.apiKey||'';
+      const pubEl=document.getElementById('vt-pub');if(pubEl)pubEl.value=d.publicKey||'';
     } else {el.textContent='No config saved yet. Using defaults.';}
   }catch(e){el.textContent='Error loading config.';}
 }
@@ -2574,28 +2577,32 @@ async function loadVtpassConfig2(){
     if(s.exists){
       const d=s.data();
       const el=document.getElementById('vt-admin-current');
-      if(el)el.innerHTML=`Mode: <strong>${d.mode||'sandbox'}</strong> · URL: <strong>${d.baseUrl||'—'}</strong><br/>Public Key: <strong>${d.publicKey?d.publicKey.slice(0,4)+'****'+d.publicKey.slice(-4):'Not set'}</strong>`;
+      if(el)el.innerHTML=`Mode: <strong>${d.mode||'sandbox'}</strong> · URL: <strong>${d.baseUrl||'—'}</strong><br/>API Key: <strong>${d.apiKey?d.apiKey.slice(0,6)+'****':'⚠ Not set'}</strong> · Public Key: <strong>${d.publicKey?d.publicKey.slice(0,6)+'****'+d.publicKey.slice(-4):'⚠ Not set'}</strong>`;
       const m=document.getElementById('vt-mode2');if(m)m.value=d.mode||'sandbox';
       const u=document.getElementById('vt-url2');if(u)u.value=d.baseUrl||'';
+      const a=document.getElementById('vt-api2');if(a)a.value=d.apiKey||'';
+      const p=document.getElementById('vt-pub2');if(p)p.value=d.publicKey||'';
     }
   }catch(e){}
 }
 async function saveVtpass(){
   const mode=document.getElementById('vt-mode')?.value;
+  const api=document.getElementById('vt-api')?.value.trim();
   const pub=document.getElementById('vt-pub')?.value.trim();
   const sec=document.getElementById('vt-sec')?.value.trim();
   const url=document.getElementById('vt-url')?.value.trim();
-  if(!pub||!sec||!url){toast('All fields required');return;}
-  await db.collection('settings').doc('vtpass').set({mode,publicKey:pub,secretKey:sec,baseUrl:url,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:CU?.email});
+  if(!api||!pub||!sec||!url){toast('All 4 fields required (API Key, Public Key, Secret Key, Base URL)');return;}
+  await db.collection('settings').doc('vtpass').set({mode,apiKey:api,publicKey:pub,secretKey:sec,baseUrl:url,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:CU?.email});
   toast('VTPass config saved!');closeM('m-vtpass');
 }
 async function saveVtpass2(){
   const mode=document.getElementById('vt-mode2')?.value;
+  const api=document.getElementById('vt-api2')?.value.trim();
   const pub=document.getElementById('vt-pub2')?.value.trim();
   const sec=document.getElementById('vt-sec2')?.value.trim();
   const url=document.getElementById('vt-url2')?.value.trim();
-  if(!pub||!sec||!url){toast('All fields required');return;}
-  await db.collection('settings').doc('vtpass').set({mode,publicKey:pub,secretKey:sec,baseUrl:url,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:CU?.email});
+  if(!api||!pub||!sec||!url){toast('All 4 fields required (API Key, Public Key, Secret Key, Base URL)');return;}
+  await db.collection('settings').doc('vtpass').set({mode,apiKey:api,publicKey:pub,secretKey:sec,baseUrl:url,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:CU?.email});
   toast('VTPass config saved!');
   const r=document.getElementById('vt-result2');if(r){r.style.display='block';r.style.background='#dcfce7';r.style.color='#15803d';r.textContent='✅ Configuration saved successfully!';}
 }
@@ -4021,8 +4028,9 @@ async function loadRewardsHistoryAdmin(el){
   </div>
   <div id="vt-current" style="background:#f1f5f9;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--g600)">Loading current config...</div>
   <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Mode</label><select class="inp" id="vt-mode"><option value="sandbox">Sandbox (Testing)</option><option value="live">Live (Production)</option></select></div>
-  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Public Key</label><input class="inp" id="vt-pub" placeholder="Enter public key"/></div>
-  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Secret Key</label><input class="inp" type="password" id="vt-sec" placeholder="Enter secret key"/></div>
+  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Key <span style='color:#dc2626;font-size:10px;font-weight:400'>(static key from VTPass profile)</span></label><input class="inp" id="vt-api" placeholder="e.g. 03f401bf628bf9bc9013..."/></div>
+  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Public Key <span style='color:#64748b;font-size:10px;font-weight:400'>(PK_...)</span></label><input class="inp" id="vt-pub" placeholder="PK_510dca003b..."/></div>
+  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Secret Key <span style='color:#64748b;font-size:10px;font-weight:400'>(SK_...)</span></label><input class="inp" type="password" id="vt-sec" placeholder="SK_..."/></div>
   <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label><input class="inp" id="vt-url" placeholder="https://sandbox.vtpass.com or https://vtpass.com"/></div>
   <div style="display:flex;gap:8px;margin-bottom:10px">
     <button onclick="testVtpass()" style="flex:1;padding:11px;border-radius:10px;background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔗 Test Connection</button>
