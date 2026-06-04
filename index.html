@@ -1288,15 +1288,32 @@ async function verPin(){
   }
 }
 // ===== VTPASS CONFIG =====
+// CORS FIX: GitHub Pages cannot call VTPass directly — browser blocks cross-origin requests.
+// Solution: Route all VTPass calls through a CORS proxy.
+// We use corsproxy.io which is free, reliable, and supports POST + custom headers.
+
 const VTP={
-  base:'https://sandbox.vtpass.com/api',
+  // The real VTPass sandbox base (no trailing slash, no /api suffix here — added per-call)
+  sandboxBase:'https://sandbox.vtpass.com/api',
+  liveBase:'https://api-service.vtpass.com/api',
   apiKey:'03f401bf628bf9bc9013a324f3865c4a',
   pubKey:'PK_510dca003bdefc29d919142e5a66452fefd459dcea3',
-  secKey:'SK_3602c9fce88b8bd84978e1bc3dfd411ca3e87100193'
+  secKey:'SK_3602c9fce88b8bd84978e1bc3dfd411ca3e87100193',
+  mode:'sandbox'
 };
-// Switch to live when ready: base:'https://api-service.vtpass.com/api'
 
-// Always fetch latest keys from Firestore before any API call
+// CORS proxy — prepend to every VTPass URL
+// corsproxy.io supports GET and POST with custom headers
+const CORS_PROXY='https://corsproxy.io/?';
+
+function vtpUrl(path){
+  // Always reload base from current VTP state
+  const base=(VTP.mode==='live'?VTP.liveBase:VTP.sandboxBase);
+  const fullUrl=base+(path.startsWith('/')?path:'/'+path);
+  return CORS_PROXY+encodeURIComponent(fullUrl);
+}
+
+// Always reload keys from Firestore before any API call
 async function getVTP(){
   try{
     const s=await db.collection('settings').doc('vtpass').get();
@@ -1304,31 +1321,71 @@ async function getVTP(){
       const d=s.data();
       if(d.publicKey)VTP.pubKey=d.publicKey;
       if(d.secretKey)VTP.secKey=d.secretKey;
-      if(d.baseUrl)VTP.base=d.baseUrl.replace(/\/$/,''); // strip trailing slash
-      if(d.apiKey)VTP.apiKey=d.apiKey;
+      if(d.mode)VTP.mode=d.mode;
+      // If admin saved a custom base URL, parse it
+      if(d.baseUrl){
+        const clean=d.baseUrl.replace(/\/+$/,'');
+        if(clean.includes('api-service'))VTP.liveBase=clean;
+        else VTP.sandboxBase=clean;
+      }
     }
-  }catch(e){console.warn('[VTP] Could not load config from Firestore, using defaults',e);}
+  }catch(e){console.warn('[VTP] Config load error (using defaults):',e.message);}
+  console.log('[VTP] Config: mode='+VTP.mode+' pubKey='+VTP.pubKey.slice(0,12)+'...');
   return VTP;
 }
 
-// VTPass requires Basic Auth (base64 of publicKey:secretKey) for /pay endpoint
-// and api-key + public-key headers for GET endpoints
-function vtpHeaders(useBasic=false){
-  if(useBasic){
-    const creds=btoa(VTP.pubKey+':'+VTP.secKey);
-    console.log('[VTP] Using Basic Auth. PubKey prefix:',VTP.pubKey.slice(0,8));
-    return{'Authorization':'Basic '+creds,'Content-Type':'application/json'};
-  }
-  console.log('[VTP] Using API-Key headers. ApiKey prefix:',VTP.apiKey.slice(0,8));
-  return{'api-key':VTP.apiKey,'public-key':VTP.pubKey,'Content-Type':'application/json'};
+// Headers: GET endpoints use api-key, POST /pay uses Basic Auth
+function vtpGetHeaders(){
+  return{
+    'api-key':VTP.apiKey,
+    'public-key':VTP.pubKey
+  };
+}
+function vtpPostHeaders(){
+  const creds=btoa(VTP.pubKey+':'+VTP.secKey);
+  return{
+    'Authorization':'Basic '+creds,
+    'Content-Type':'application/json'
+  };
 }
 
-// ── CORRECT VTPass Sandbox Service IDs ──
-// Airtime serviceIDs: mtn, airtel, glo, etisalat
-// Data   serviceIDs: mtn-data, airtel-data, glo-data, etisalat-data
-// Electricity: ikeja-electric, ekedc, abuja-electric, ibadan-electric, phed, enugu-electric, kano-electric, jos-electric
-// Cable TV: dstv, gotv, startimes
+// Unified fetch wrapper with full logging and error handling
+async function vtpFetch(path, options={}){
+  await getVTP();
+  const proxyUrl=vtpUrl(path);
+  console.log('[VTP]',options.method||'GET',path,'→',proxyUrl);
+  if(options.body)console.log('[VTP] Payload:',options.body);
 
+  let res;
+  try{
+    res=await fetch(proxyUrl,options);
+  }catch(netErr){
+    console.error('[VTP] Network error:',netErr.message);
+    throw new Error('Network error — check your internet connection. ('+netErr.message+')');
+  }
+
+  const raw=await res.text();
+  console.log('[VTP] HTTP',res.status,'raw response (first 500):',raw.slice(0,500));
+
+  // Detect HTML error page (CORS proxy failure or VTPass returning HTML)
+  if(raw.trim().startsWith('<')){
+    console.error('[VTP] Got HTML instead of JSON — proxy or auth issue. Status:',res.status);
+    throw new Error('VTPass returned an error page (HTTP '+res.status+'). Check API keys and that services are enabled in your VTPass sandbox dashboard.');
+  }
+
+  let json;
+  try{
+    json=JSON.parse(raw);
+  }catch(parseErr){
+    console.error('[VTP] JSON parse error. Raw:',raw.slice(0,200));
+    throw new Error('Invalid response from VTPass: '+raw.slice(0,100));
+  }
+
+  console.log('[VTP] Parsed response:',JSON.stringify(json).slice(0,400));
+  return json;
+}
+
+// ── CORRECT VTPass Service IDs ──
 const NET_MAP={
   'MTN':    {airtime:'mtn',       data:'mtn-data'},
   'Airtel': {airtime:'airtel',    data:'airtel-data'},
@@ -1336,14 +1393,11 @@ const NET_MAP={
   '9mobile':{airtime:'etisalat',  data:'etisalat-data'}
 };
 
-// Cache plans per network
 const planCache={};
 let currentNetworkId=null;
 let currentPlanMeta={};
 
-async function fetchDataPlans(){
-  // Called when network button selected
-}
+async function fetchDataPlans(){}
 
 async function fetchPlansForNetwork(networkId){
   if(!networkId)return;
@@ -1352,31 +1406,34 @@ async function fetchPlansForNetwork(networkId){
   const loadEl=document.getElementById('data-loading');
   const infoEl=document.getElementById('data-info');
   if(!sel)return;
+
+  // Clear cache if needed
   if(planCache[networkId]){renderPlans(planCache[networkId],sel,infoEl);return;}
-  if(loadEl)loadEl.style.display='block';
-  sel.innerHTML='<option value="">Loading plans...</option>';
+
+  if(loadEl){loadEl.style.display='block';loadEl.textContent='⏳ Loading plans...';}
+  sel.innerHTML='<option value="">Loading plans from VTPass...</option>';
+
   try{
-    await getVTP(); // Always use latest keys
-    const url=VTP.base+'/service-variations?serviceID='+networkId;
-    console.log('[VTP] Fetching plans from:',url);
-    const res=await fetch(url,{headers:vtpHeaders()});
-    const json=await res.json();
-    console.log('[VTP] Plans response for',networkId,':',JSON.stringify(json).slice(0,300));
+    const json=await vtpFetch('service-variations?serviceID='+networkId,{headers:vtpGetHeaders()});
     if(loadEl)loadEl.style.display='none';
+
     const variations=json?.content?.varations||json?.content?.variations||[];
     if(variations.length){
       planCache[networkId]=variations;
       renderPlans(variations,sel,infoEl);
     }else{
-      sel.innerHTML='<option value="">No plans available — check VTPass dashboard</option>';
-      console.warn('[VTP] No variations returned. Full response:',json);
+      sel.innerHTML='<option value="">No plans — enable this service in VTPass dashboard</option>';
+      if(infoEl){infoEl.style.display='block';infoEl.textContent='⚠ No plans returned for '+networkId+'. Make sure it is enabled in your VTPass sandbox account at vtpass.com → Sandbox → Enable Services.';}
+      console.warn('[VTP] No variations for',networkId,'Full:',json);
     }
   }catch(e){
     if(loadEl)loadEl.style.display='none';
-    sel.innerHTML='<option value="">Error loading plans — check connection</option>';
-    console.error('[VTP] fetchPlansForNetwork error:',e);
+    sel.innerHTML='<option value="">⚠ Error — '+e.message.slice(0,60)+'</option>';
+    if(infoEl){infoEl.style.display='block';infoEl.style.color='#dc2626';infoEl.textContent='❌ '+e.message;}
+    console.error('[VTP] fetchPlansForNetwork('+networkId+') error:',e.message);
   }
 }
+
 
 function renderPlans(plans,sel,infoEl){
   currentPlanMeta={};
@@ -1643,62 +1700,41 @@ function showVtpError(type,amt,ref,code,desc,raw){
   document.body.appendChild(m);
 }
 
-// ── VTPass API call functions (fully corrected) ──
+// ══════════════════════════════════════════════════════════════
+//  VTPASS PURCHASE FUNCTIONS — all routed through CORS proxy
+// ══════════════════════════════════════════════════════════════
 
 async function vtpAirtime(phone,serviceID,amount,requestRef){
-  // Airtime: serviceID = 'mtn' | 'airtel' | 'glo' | 'etisalat'
+  // serviceID = 'mtn' | 'airtel' | 'glo' | 'etisalat'
   const body={request_id:requestRef,serviceID,amount:String(amount),phone};
-  console.log('[VTP] Airtime payload:',JSON.stringify(body),'URL:',VTP.base+'/pay');
-  const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
-  const data=await res.json();
-  console.log('[VTP] Airtime response HTTP',res.status,':',JSON.stringify(data).slice(0,400));
-  return data;
+  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
 }
 
 async function vtpData(phone,serviceID,variation_code,amount,requestRef){
-  // Data: serviceID = 'mtn-data' | 'airtel-data' | 'glo-data' | 'etisalat-data'
-  // billersCode = phone number
+  // serviceID = 'mtn-data' | 'airtel-data' | 'glo-data' | 'etisalat-data'
   const body={request_id:requestRef,serviceID,billersCode:phone,variation_code,amount:String(amount),phone};
-  console.log('[VTP] Data payload:',JSON.stringify(body));
-  const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
-  const data=await res.json();
-  console.log('[VTP] Data response HTTP',res.status,':',JSON.stringify(data).slice(0,400));
-  return data;
+  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
 }
 
 async function vtpCable(smartcard,serviceID,variation_code,amount,requestRef){
-  // Cable TV: serviceID = 'dstv' | 'gotv' | 'startimes'
-  // billersCode = smartcard/IUC number, subscription_type = 'change'
+  // serviceID = 'dstv' | 'gotv' | 'startimes'
   const body={request_id:requestRef,serviceID,billersCode:smartcard,variation_code,amount:String(amount),subscription_type:'change',quantity:1};
-  console.log('[VTP] Cable payload:',JSON.stringify(body));
-  const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
-  const data=await res.json();
-  console.log('[VTP] Cable response HTTP',res.status,':',JSON.stringify(data).slice(0,400));
-  return data;
+  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
 }
 
 async function vtpElectricity(meter,serviceID,variation_code,amount,requestRef,custPhone){
-  // Electricity: billersCode = meter number, variation_code = 'prepaid'|'postpaid'
-  // phone = customer phone (for token delivery) — NOT email
+  // variation_code = 'prepaid' | 'postpaid'
   const phone=custPhone||UD?.phone||'08011111111';
   const body={request_id:requestRef,serviceID,billersCode:meter,variation_code,amount:String(amount),phone};
-  console.log('[VTP] Electricity payload:',JSON.stringify(body));
-  const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
-  const data=await res.json();
-  console.log('[VTP] Electricity response HTTP',res.status,':',JSON.stringify(data).slice(0,400));
-  return data;
+  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
 }
 
 async function vtpResultChecker(serviceID,variation_code,amount,requestRef){
-  const body={request_id:requestRef,serviceID,billersCode:'none',variation_code,amount:String(amount),phone:UD?.phone||'08011111111'};
-  console.log('[VTP] Result payload:',JSON.stringify(body));
-  const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
-  const data=await res.json();
-  console.log('[VTP] Result response HTTP',res.status,':',JSON.stringify(data).slice(0,400));
-  return data;
+  const phone=UD?.phone||'08011111111';
+  const body={request_id:requestRef,serviceID,billersCode:'none',variation_code,amount:String(amount),phone};
+  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
 }
 
-// Keep old name alias for any remaining references
 async function vtpResult2(serviceID,variation_code,amount,requestRef){
   return vtpResultChecker(serviceID,variation_code,amount,requestRef);
 }
@@ -2636,59 +2672,55 @@ async function saveVtpass2(){
 }
 async function testVtpass(){
   const r=document.getElementById('vt-result');
-  if(r){r.style.display='block';r.style.background='#f1f5f9';r.style.color='var(--g600)';r.innerHTML='⏳ Running full VTPass diagnostic...';}
+  if(r){r.style.display='block';r.style.background='#f1f5f9';r.style.color='var(--g600)';r.innerHTML='⏳ Running VTPass diagnostic via CORS proxy...';}
   await getVTP();
-  const base=VTP.base;
   const results=[];
-  // 1. Connection test
   try{
-    const resp=await fetch(base+'/service-categories',{headers:vtpHeaders()});
-    const json=await resp.json();
-    results.push({label:'Connection',ok:resp.ok,detail:'HTTP '+resp.status+' — '+(resp.ok?'✅ Reachable':'❌ Failed')});
-    console.log('[VTP TEST] service-categories:',json);
-  }catch(e){results.push({label:'Connection',ok:false,detail:'❌ '+e.message});}
-  // 2. Per-service variation fetch
-  const testServices=[
-    {id:'mtn',label:'MTN Airtime'},
-    {id:'mtn-data',label:'MTN Data'},
-    {id:'airtel',label:'Airtel Airtime'},
-    {id:'airtel-data',label:'Airtel Data'},
-    {id:'glo',label:'Glo Airtime'},
-    {id:'dstv',label:'DSTV'},
-    {id:'gotv',label:'GOtv'},
-    {id:'ikeja-electric',label:'Ikeja Electric'},
-    {id:'ekedc',label:'EKEDC'},
-    {id:'abuja-electric',label:'Abuja Electric'},
+    const json=await vtpFetch('service-categories',{headers:vtpGetHeaders()});
+    const cats=Array.isArray(json?.content)?json.content.length:Object.keys(json?.content||{}).length;
+    results.push({ok:true,label:'CORS Proxy + Connection',detail:'✅ Connected — '+cats+' service categories returned'});
+  }catch(e){
+    results.push({ok:false,label:'CORS Proxy + Connection',detail:'❌ '+e.message});
+  }
+  const svcs=[
+    {id:'mtn',label:'MTN Airtime'},{id:'mtn-data',label:'MTN Data'},
+    {id:'airtel',label:'Airtel Airtime'},{id:'airtel-data',label:'Airtel Data'},
+    {id:'glo',label:'Glo Airtime'},{id:'glo-data',label:'Glo Data'},
+    {id:'etisalat',label:'9mobile Airtime'},{id:'etisalat-data',label:'9mobile Data'},
+    {id:'dstv',label:'DSTV'},{id:'gotv',label:'GOtv'},{id:'startimes',label:'Startimes'},
+    {id:'ikeja-electric',label:'Ikeja Electric'},{id:'ekedc',label:'EKEDC'},
+    {id:'abuja-electric',label:'Abuja Electric'},{id:'phed',label:'PHED'},
   ];
-  for(const svc of testServices){
+  for(const svc of svcs){
     try{
-      const resp=await fetch(base+'/service-variations?serviceID='+svc.id,{headers:vtpHeaders()});
-      const json=await resp.json();
+      const json=await vtpFetch('service-variations?serviceID='+svc.id,{headers:vtpGetHeaders()});
       const count=(json?.content?.varations||json?.content?.variations||[]).length;
-      const ok=count>0;
-      results.push({label:svc.label+'('+svc.id+')',ok,detail:ok?`✅ ${count} variation(s) found`:'⚠ '+JSON.stringify(json).slice(0,80)});
-      console.log('[VTP TEST]',svc.id,'→',json);
-    }catch(e){results.push({label:svc.label,ok:false,detail:'❌ '+e.message});}
+      results.push({ok:count>0,label:svc.label+' ('+svc.id+')',detail:count>0?'✅ '+count+' plan(s)':'⚠ 0 plans — enable at vtpass.com dashboard'});
+    }catch(e){
+      results.push({ok:false,label:svc.label+' ('+svc.id+')',detail:'❌ '+e.message.slice(0,80)});
+    }
   }
   if(r){
+    const ok=results.filter(x=>x.ok).length,fail=results.filter(x=>!x.ok).length;
     r.style.background='#fff';r.style.color='var(--g700)';
-    r.innerHTML='<div style="font-weight:700;font-size:13px;margin-bottom:10px">VTPass Diagnostic Report</div>'+
-      results.map(res=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:12px">
-        <span style="font-size:14px;flex-shrink:0">${res.ok?'✅':'❌'}</span>
-        <div><div style="font-weight:600">${res.label}</div><div style="color:${res.ok?'#15803d':'#dc2626'};margin-top:2px">${res.detail}</div></div>
-      </div>`).join('')+
-      `<div style="margin-top:12px;padding:10px;background:#fef3c7;border-radius:8px;font-size:11px;color:#92400e">
-        <strong>Sandbox test numbers:</strong> MTN: 08011111111 · Airtel: 08021111111 · Glo: 08031111111<br/>
-        DSTV smartcard: 1212121212 · Meter: 1234567890<br/>
-        <strong>Keys used:</strong> PubKey: ${VTP.pubKey.slice(0,12)}... · Base: ${base}
-      </div>`;
+    r.innerHTML='<div style="font-weight:700;font-size:13px;margin-bottom:8px">VTPass Diagnostic — '+ok+' OK · '+fail+' Issues</div>'+
+      '<div style="font-size:11px;color:var(--g500);margin-bottom:12px">Mode: <strong>'+VTP.mode+'</strong> · Key: <strong>'+VTP.pubKey.slice(0,14)+'...</strong> · Via: corsproxy.io</div>'+
+      results.map(res=>'<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:12px">'+
+        '<span style="flex-shrink:0">'+(res.ok?'✅':'❌')+'</span>'+
+        '<div><div style="font-weight:600;color:var(--g700)">'+res.label+'</div>'+
+        '<div style="color:'+(res.ok?'#15803d':'#dc2626')+';margin-top:1px">'+res.detail+'</div></div></div>').join('')+
+      '<div style="margin-top:12px;padding:10px;background:#fef3c7;border-radius:8px;font-size:11px;color:#92400e;line-height:1.8">'+
+      '<strong>Sandbox test numbers:</strong><br/>MTN: 08011111111 · Airtel: 08021111111 · Glo: 08031111111<br/>'+
+      'DSTV smartcard: 1212121212 · Meter: 1234567890<br/>'+
+      '<strong>Enable services:</strong> vtpass.com → Login → Sandbox → Enable Services</div>';
   }
 }
 async function testVtpass2(){
-  const r=document.getElementById('vt-result2');if(r){r.style.display='block';r.style.background='#f1f5f9';r.style.color='var(--g600)';r.innerHTML='Testing...';}
+  const r=document.getElementById('vt-result2');
+  if(r){r.style.display='block';r.style.background='#f1f5f9';r.style.color='var(--g600)';r.innerHTML='⏳ Testing...';}
   await testVtpass();
   const r1=document.getElementById('vt-result');
-  if(r&&r1){r.style.display='block';r.style.background=r1.style.background;r.style.color=r1.style.color;r.innerHTML=r1.innerHTML;}
+  if(r&&r1){r.style.display='block';r.innerHTML=r1.innerHTML;r.style.background=r1.style.background;}
 }
 
 // ── Fetch VTPass config before VTU calls ──
