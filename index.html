@@ -1319,9 +1319,9 @@ async function getVTP(){
     const s=await db.collection('settings').doc('vtpass').get();
     if(s.exists){
       const d=s.data();
-      if(d.publicKey)VTP.pubKey=d.publicKey;
-      if(d.secretKey)VTP.secKey=d.secretKey;
-      if(d.apiKey)VTP.apiKey=d.apiKey;
+      if(d.publicKey)VTP.pubKey=String(d.publicKey).trim();
+      if(d.secretKey)VTP.secKey=String(d.secretKey).trim();
+      if(d.apiKey)VTP.apiKey=String(d.apiKey).trim();
       if(d.mode)VTP.mode=d.mode;
       // If admin saved a custom base URL, parse it
       if(d.baseUrl){
@@ -1345,11 +1345,19 @@ function vtpGetHeaders(){
   };
 }
 function vtpPostHeaders(){
-  // NOTE: corsproxy.io strips Authorization headers, so we use api-key + public-key
-  // VTPass /pay accepts both Basic Auth AND api-key header authentication
+  // VTPass /pay REQUIRES Basic Auth (code 087 = wrong/missing credentials)
+  // Trim keys to remove any whitespace/newlines that Firestore may have saved
+  const pub=(VTP.pubKey||'').trim();
+  const sec=(VTP.secKey||'').trim();
+  // btoa() fails on non-ASCII chars — use unescape+encodeURIComponent to be safe
+  let basicAuth='';
+  try{
+    basicAuth='Basic '+btoa(unescape(encodeURIComponent(pub+':'+sec)));
+  }catch(e){
+    basicAuth='Basic '+btoa(pub+':'+sec);
+  }
   return{
-    'api-key':VTP.apiKey,
-    'public-key':VTP.pubKey,
+    'Authorization':basicAuth,
     'Content-Type':'application/json'
   };
 }
@@ -1365,7 +1373,9 @@ async function vtpFetch(path, options={}){
   console.log('[VTP] Headers api-key:',VTP.apiKey.slice(0,8)+'... public-key:',VTP.pubKey.slice(0,14)+'...');
   if(options.body){
     console.log('[VTP] POST Payload:',options.body);
-    console.log('[VTP] POST Headers:',JSON.stringify(options.headers));
+    const authHeader=options.headers?.Authorization||options.headers?.['api-key']||'(none)';
+    console.log('[VTP] POST Auth (first 30):',authHeader.slice(0,30)+'...');
+    console.log('[VTP] pubKey used:',VTP.pubKey.slice(0,16),'secKey used:',VTP.secKey.slice(0,8));
   }
 
   let res;
