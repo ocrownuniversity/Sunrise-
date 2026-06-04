@@ -1345,19 +1345,11 @@ function vtpGetHeaders(){
   };
 }
 function vtpPostHeaders(){
-  // VTPass /pay REQUIRES Basic Auth (code 087 = wrong/missing credentials)
-  // Trim keys to remove any whitespace/newlines that Firestore may have saved
-  const pub=(VTP.pubKey||'').trim();
-  const sec=(VTP.secKey||'').trim();
-  // btoa() fails on non-ASCII chars — use unescape+encodeURIComponent to be safe
-  let basicAuth='';
-  try{
-    basicAuth='Basic '+btoa(unescape(encodeURIComponent(pub+':'+sec)));
-  }catch(e){
-    basicAuth='Basic '+btoa(pub+':'+sec);
-  }
+  // VTPass POST auth = api-key + secret-key headers (NOT Basic Auth, NOT public-key)
+  // Source: https://vtpass.com/documentation/authentication/
   return{
-    'Authorization':basicAuth,
+    'api-key':(VTP.apiKey||'').trim(),
+    'secret-key':(VTP.secKey||'').trim(),
     'Content-Type':'application/json'
   };
 }
@@ -1646,34 +1638,30 @@ function showVtpError(type,amt,ref,code,desc,raw){
 // ══════════════════════════════════════════════════════════════
 
 async function vtpAirtime(phone,serviceID,amount,requestRef){
-  // serviceID = 'mtn' | 'airtel' | 'glo' | 'etisalat'
   const body={request_id:requestRef,serviceID,amount:Number(amount),phone};
-  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
+  return vtpFetch('pay',{method:'POST',body:JSON.stringify(body)});
 }
 
 async function vtpData(phone,serviceID,variation_code,amount,requestRef){
-  // serviceID = 'mtn-data' | 'airtel-data' | 'glo-data' | 'etisalat-data'
   const body={request_id:requestRef,serviceID,billersCode:phone,variation_code,amount:Number(amount),phone};
-  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
+  return vtpFetch('pay',{method:'POST',body:JSON.stringify(body)});
 }
 
 async function vtpCable(smartcard,serviceID,variation_code,amount,requestRef){
-  // serviceID = 'dstv' | 'gotv' | 'startimes'
   const body={request_id:requestRef,serviceID,billersCode:smartcard,variation_code,amount:Number(amount),subscription_type:'change',quantity:1};
-  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
+  return vtpFetch('pay',{method:'POST',body:JSON.stringify(body)});
 }
 
 async function vtpElectricity(meter,serviceID,variation_code,amount,requestRef,custPhone){
-  // variation_code = 'prepaid' | 'postpaid'
   const phone=custPhone||UD?.phone||'08011111111';
   const body={request_id:requestRef,serviceID,billersCode:meter,variation_code,amount:Number(amount),phone};
-  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
+  return vtpFetch('pay',{method:'POST',body:JSON.stringify(body)});
 }
 
 async function vtpResultChecker(serviceID,variation_code,amount,requestRef){
   const phone=UD?.phone||'08011111111';
-  const body={request_id:requestRef,serviceID,billersCode:'none',variation_code,amount:String(amount),phone};
-  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
+  const body={request_id:requestRef,serviceID,billersCode:'none',variation_code,amount:Number(amount),phone};
+  return vtpFetch('pay',{method:'POST',body:JSON.stringify(body)});
 }
 
 async function vtpResult2(serviceID,variation_code,amount,requestRef){
