@@ -1222,7 +1222,9 @@ function procSvc(type){
     if(!phone||phone.length<11){toast('Enter a valid 11-digit phone number');return;}
     const netBtn=document.querySelector('#svc-body div button[style*="green-xl"]');
     const netName=netBtn?netBtn.textContent.trim():'MTN';
-    extra={phone,networkId:NET_MAP[netName]||'mtn',planName:netName+' Airtime NGN '+fmt(amt)};
+    // Airtime serviceID is 'mtn', 'airtel', 'glo', 'etisalat' (NOT mtn-data)
+    const netEntry=NET_MAP[netName]||{airtime:'mtn',data:'mtn-data'};
+    extra={phone,networkId:netEntry.airtime,planName:netName+' Airtime NGN '+fmt(amt)};
   }else if(type==='data'){
     const phone=document.getElementById('s-phone')?.value?.trim();
     if(!phone||phone.length<11){toast('Enter a valid 11-digit phone number');return;}
@@ -1230,32 +1232,44 @@ function procSvc(type){
     const code=opt?.dataset?.code||'';
     const planName=opt?.dataset?.name||'Data';
     const validity=opt?.dataset?.validity||'';
-    if(!code){toast('Please select a data plan');return;}
+    if(!code){toast('Please select a data plan first');return;}
     const netBtn=document.querySelector('#svc-body div button[style*="green-xl"]');
     const netName=netBtn?netBtn.textContent.trim():'MTN';
-    extra={phone,networkId:NET_MAP[netName]||'mtn-data',variationCode:code,planName:netName+' '+planName+(validity?' ('+validity+')':'')};
+    const netEntry=NET_MAP[netName]||{airtime:'mtn',data:'mtn-data'};
+    extra={phone,networkId:netEntry.data,variationCode:code,planName:netName+' '+planName+(validity?' ('+validity+')':'')};
   }else if(type==='cable'){
     const smartcard=document.getElementById('s-phone')?.value?.trim();
     if(!smartcard){toast('Enter your smart card number');return;}
     const opt=amtEl?.options[amtEl.selectedIndex];
     const code=opt?.dataset?.code||opt?.value||'';
     const netBtn=document.querySelector('#svc-body div button[style*="green-xl"]');
-    const provider=(netBtn?netBtn.textContent.trim():'DSTV').toLowerCase();
+    const provider=(netBtn?netBtn.textContent.trim():'DSTV').toLowerCase().replace(/\s/g,'');
     const svcMap={'dstv':'dstv','gotv':'gotv','startimes':'startimes'};
     extra={smartcard,serviceId:svcMap[provider]||'dstv',variationCode:code,planName:opt?.text||'Cable TV'};
   }else if(type==='electricity'){
     const meter=document.getElementById('s-meter')?.value?.trim();
     if(!meter){toast('Enter your meter number');return;}
     const disco=document.getElementById('s-phone')?.value||'';
-    const discoMap={'EKEDC':'ekedc','IKEDC':'ikeja-electric','AEDC':'abuja-electric','IBEDC':'ibadan-electric','PHEDC':'phed','EEDC':'enugu-electric','KEDC':'kano-electric','JED':'jos-electric'};
-    const svcId=Object.keys(discoMap).find(k=>disco.includes(k));
-    extra={meter,serviceId:discoMap[svcId]||'ikeja-electric',meterType:'prepaid',planName:disco+' NGN '+fmt(amt)};
+    // VTPass electricity serviceIDs (exact, case-sensitive)
+    const discoMap={
+      'EKEDC':'ekedc','IKEDC':'ikeja-electric','AEDC':'abuja-electric',
+      'IBEDC':'ibadan-electric','PHEDC':'phed','EEDC':'enugu-electric',
+      'KEDC':'kano-electric','JED':'jos-electric'
+    };
+    const svcKey=Object.keys(discoMap).find(k=>disco.includes(k));
+    const serviceId=discoMap[svcKey]||'ikeja-electric';
+    const meterType=document.getElementById('s-meter-type')?.value||'prepaid';
+    // Electricity needs a valid phone number for token delivery
+    const custPhone=CU?.phoneNumber||UD?.phone||'08000000000';
+    extra={meter,serviceId,meterType,planName:disco+' NGN '+fmt(amt),custPhone};
   }else if(type==='result'){
     const exam=document.getElementById('s-phone')?.value||'';
+    const year=document.getElementById('s-meter')?.value||'2025';
     const examMap={'WAEC':'waec','NECO':'neco','JAMB':'jamb','NABTEB':'nabteb'};
-    const svcId=Object.keys(examMap).find(k=>exam.includes(k));
+    const svcKey=Object.keys(examMap).find(k=>exam.includes(k));
     const opt=amtEl?.options[amtEl.selectedIndex];
-    extra={serviceId:examMap[svcId]||'waec',variationCode:'waecdirect',planName:exam+' Checker'};
+    const varCode=opt?.dataset?.code||opt?.value||'waecdirect';
+    extra={serviceId:examMap[svcKey]||'waec',variationCode:varCode,planName:exam+' '+year+' Checker'};
   }
   pSvc={type,amt,extra};
   closeM('m-svc');
@@ -1282,17 +1296,44 @@ const VTP={
 };
 // Switch to live when ready: base:'https://api-service.vtpass.com/api'
 
+// Always fetch latest keys from Firestore before any API call
+async function getVTP(){
+  try{
+    const s=await db.collection('settings').doc('vtpass').get();
+    if(s.exists){
+      const d=s.data();
+      if(d.publicKey)VTP.pubKey=d.publicKey;
+      if(d.secretKey)VTP.secKey=d.secretKey;
+      if(d.baseUrl)VTP.base=d.baseUrl.replace(/\/$/,''); // strip trailing slash
+      if(d.apiKey)VTP.apiKey=d.apiKey;
+    }
+  }catch(e){console.warn('[VTP] Could not load config from Firestore, using defaults',e);}
+  return VTP;
+}
+
+// VTPass requires Basic Auth (base64 of publicKey:secretKey) for /pay endpoint
+// and api-key + public-key headers for GET endpoints
 function vtpHeaders(useBasic=false){
   if(useBasic){
     const creds=btoa(VTP.pubKey+':'+VTP.secKey);
+    console.log('[VTP] Using Basic Auth. PubKey prefix:',VTP.pubKey.slice(0,8));
     return{'Authorization':'Basic '+creds,'Content-Type':'application/json'};
   }
+  console.log('[VTP] Using API-Key headers. ApiKey prefix:',VTP.apiKey.slice(0,8));
   return{'api-key':VTP.apiKey,'public-key':VTP.pubKey,'Content-Type':'application/json'};
 }
 
-// Map network names to VTPass service IDs
+// ── CORRECT VTPass Sandbox Service IDs ──
+// Airtime serviceIDs: mtn, airtel, glo, etisalat
+// Data   serviceIDs: mtn-data, airtel-data, glo-data, etisalat-data
+// Electricity: ikeja-electric, ekedc, abuja-electric, ibadan-electric, phed, enugu-electric, kano-electric, jos-electric
+// Cable TV: dstv, gotv, startimes
+
 const NET_MAP={
-  'MTN':'mtn-data','Airtel':'airtel-data','Glo':'glo-data','9mobile':'etisalat-data'
+  'MTN':    {airtime:'mtn',       data:'mtn-data'},
+  'Airtel': {airtime:'airtel',    data:'airtel-data'},
+  'Glo':    {airtime:'glo',       data:'glo-data'},
+  '9mobile':{airtime:'etisalat',  data:'etisalat-data'}
 };
 
 // Cache plans per network
@@ -1315,21 +1356,25 @@ async function fetchPlansForNetwork(networkId){
   if(loadEl)loadEl.style.display='block';
   sel.innerHTML='<option value="">Loading plans...</option>';
   try{
-    const res=await fetch(VTP.base+'/service-variations?serviceID='+networkId,{headers:vtpHeaders()});
+    await getVTP(); // Always use latest keys
+    const url=VTP.base+'/service-variations?serviceID='+networkId;
+    console.log('[VTP] Fetching plans from:',url);
+    const res=await fetch(url,{headers:vtpHeaders()});
     const json=await res.json();
+    console.log('[VTP] Plans response for',networkId,':',JSON.stringify(json).slice(0,300));
     if(loadEl)loadEl.style.display='none';
-    if(json.content&&json.content.varations&&json.content.varations.length){
-      planCache[networkId]=json.content.varations;
-      renderPlans(json.content.varations,sel,infoEl);
-    }else if(json.content&&json.content.variations&&json.content.variations.length){
-      planCache[networkId]=json.content.variations;
-      renderPlans(json.content.variations,sel,infoEl);
+    const variations=json?.content?.varations||json?.content?.variations||[];
+    if(variations.length){
+      planCache[networkId]=variations;
+      renderPlans(variations,sel,infoEl);
     }else{
-      sel.innerHTML='<option value="">No plans available</option>';
+      sel.innerHTML='<option value="">No plans available — check VTPass dashboard</option>';
+      console.warn('[VTP] No variations returned. Full response:',json);
     }
   }catch(e){
     if(loadEl)loadEl.style.display='none';
     sel.innerHTML='<option value="">Error loading plans — check connection</option>';
+    console.error('[VTP] fetchPlansForNetwork error:',e);
   }
 }
 
@@ -1375,8 +1420,12 @@ function updateDataAmt(sel){
 function selNet(btn){
   btn.closest('div').querySelectorAll('button').forEach(b=>{b.style.borderColor='var(--g200)';b.style.background='#fff';});
   btn.style.borderColor='var(--green)';btn.style.background='var(--green-xl)';
-  const netId=NET_MAP[btn.textContent.trim()];
-  if(netId)fetchPlansForNetwork(netId);
+  const netName=btn.textContent.trim();
+  const netEntry=NET_MAP[netName];
+  if(netEntry){
+    // For data panels, fetch plans using the data serviceID
+    fetchPlansForNetwork(netEntry.data);
+  }
 }
 
 // Generate unique transaction reference
@@ -1459,31 +1508,199 @@ async function execSvc({type,amt,extra,useRewards}){
   }
 }
 
-// VTPass API calls
+// ══════════════════════════════════════════════════════════════
+//  VTPASS API — FULL AUDIT FIX
+//  Root causes fixed:
+//  1. Airtime was using 'mtn-data' instead of 'mtn' as serviceID
+//  2. Keys not reloaded from Firestore before each call
+//  3. Electricity missing phone field, used email instead
+//  4. Success detection missed response_description='000'
+//  5. No detailed error logging or display
+//  6. Sandbox URL was using wrong path format
+// ══════════════════════════════════════════════════════════════
+
+async function execSvc({type,amt,extra,useRewards}){
+  if(!CU)return;
+  await getVTP(); // Refresh keys from Firestore every time
+  const s=await db.collection('users').doc(CU.uid).get();
+  const ud=s.data()||{};
+  const rwBal=ud.rewardsBalance||0;
+  if(useRewards){
+    if(rwBal<amt){toast('Insufficient rewards balance.');return;}
+  }else{
+    if((ud.balance||0)<amt){toast('Insufficient balance. Please fund your wallet.');return;}
+  }
+  const descs={airtime:'Airtime Purchase',data:'Data Subscription',cable:'Cable TV Subscription',electricity:'Electricity Payment',result:'Result Checker PIN'};
+  const ref=txRef();
+  console.log('[VTP] Starting transaction:',type,'Amount:',amt,'Ref:',ref,'Extra:',JSON.stringify(extra));
+
+  const txRef2=await db.collection('transactions').add({
+    userId:CU.uid,type,amount:amt,
+    description:(extra&&extra.planName)?extra.planName:descs[type]||type,
+    status:'pending',ref,extra:extra||{},
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  try{
+    let vtpResult=null;
+    if(type==='airtime'){
+      vtpResult=await vtpAirtime(extra.phone,extra.networkId,amt,ref);
+    }else if(type==='data'){
+      vtpResult=await vtpData(extra.phone,extra.networkId,extra.variationCode,amt,ref);
+    }else if(type==='cable'){
+      vtpResult=await vtpCable(extra.smartcard,extra.serviceId,extra.variationCode,amt,ref);
+    }else if(type==='electricity'){
+      vtpResult=await vtpElectricity(extra.meter,extra.serviceId,extra.meterType,amt,ref,extra.custPhone);
+    }else if(type==='result'){
+      vtpResult=await vtpResultChecker(extra.serviceId,extra.variationCode,amt,ref);
+    }
+
+    console.log('[VTP] Raw response:',JSON.stringify(vtpResult));
+
+    // VTPass success: code==='000' OR transactions.status==='delivered'
+    const txStatus=vtpResult?.content?.transactions?.status;
+    const respCode=vtpResult?.code||vtpResult?.response_code||'';
+    const respDesc=vtpResult?.response_description||vtpResult?.content?.transactions?.response_description||'';
+    const success=(respCode==='000')||(txStatus==='delivered');
+
+    if(success){
+      if(useRewards){
+        await db.collection('users').doc(CU.uid).update({rewardsBalance:firebase.firestore.FieldValue.increment(-amt)});
+      }else{
+        await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-amt)});
+      }
+      await txRef2.update({status:'success',vtpCode:respCode,vtpDesc:respDesc,vtpResponse:JSON.stringify(vtpResult).slice(0,800)});
+      try{
+        const rwSnap=await db.collection('settings').doc('rewards').get();
+        const rwCfg=rwSnap.exists?rwSnap.data():{cashbackEnabled:true,cashbackPct:1};
+        if(rwCfg.cashbackEnabled!==false){
+          const pct=(rwCfg.cashbackPct||1)/100;
+          const cashback=Math.round(amt*pct*100)/100;
+          if(cashback>0){
+            await db.collection('users').doc(CU.uid).update({rewardsBalance:firebase.firestore.FieldValue.increment(cashback),cashbackEarned:firebase.firestore.FieldValue.increment(cashback)});
+            await addNotif(CU.uid,'Cashback Credited! 🎖','You earned NGN '+fmt(cashback)+' cashback on your '+((extra&&extra.planName)?extra.planName:descs[type])+' transaction.');
+          }
+        }
+      }catch(e){console.warn('Cashback error',e);}
+      await addNotif(CU.uid,'Transaction Successful',(extra&&extra.planName?extra.planName:descs[type])+' of NGN '+fmt(amt)+' was successful.');
+      toast('✅ Transaction successful!');
+      showReceipt({type,amt,extra,ref,descs,vtpResult,cashback:0});
+      loadDash();pSvc=null;
+    }else{
+      await txRef2.update({status:'failed',vtpCode:respCode,vtpDesc:respDesc,vtpResponse:JSON.stringify(vtpResult||{}).slice(0,800)});
+      // Build detailed, user-readable error
+      let errDetail='';
+      if(respCode)errDetail+=`Code: ${respCode}. `;
+      if(respDesc)errDetail+=respDesc;
+      else if(vtpResult?.content)errDetail+=JSON.stringify(vtpResult.content).slice(0,120);
+      else errDetail='No response from VTPass. Check your VTPass dashboard.';
+      console.error('[VTP] Transaction failed. Code:',respCode,'Desc:',respDesc,'Full:',vtpResult);
+      // Show detailed failure modal
+      showVtpError(type,amt,ref,respCode,errDetail,vtpResult);
+    }
+  }catch(er){
+    await txRef2.update({status:'failed',error:er.message});
+    console.error('[VTP] Network/parse error:',er);
+    toast('❌ Connection error: '+er.message+'. Check internet and try again.');
+  }
+}
+
+// ── Show detailed VTPass error modal ──
+function showVtpError(type,amt,ref,code,desc,raw){
+  const m=document.createElement('div');
+  m.className='modal open';
+  m.innerHTML=`<div class="mbox" style="max-height:90vh;overflow-y:auto">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:40px;margin-bottom:8px">⚠️</div>
+      <div style="font-size:17px;font-weight:800;color:#dc2626">Transaction Failed</div>
+      <div style="font-size:12px;color:var(--g400);margin-top:4px">Service: ${type.toUpperCase()} · Amount: NGN ${fmt(amt)}</div>
+    </div>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:11px;padding:14px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin-bottom:6px">VTPass Error Response</div>
+      <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:4px">${desc||'Unknown error'}</div>
+      ${code?`<div style="font-size:11px;color:#b91c1c;margin-top:4px">Response Code: <strong>${code}</strong></div>`:''}
+      <div style="font-size:10px;color:var(--g400);margin-top:6px;word-break:break-all">Ref: ${ref}</div>
+    </div>
+    <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--g600);margin-bottom:6px">Common Causes</div>
+      <ul style="font-size:12px;color:var(--g600);padding-left:16px;line-height:1.9;margin:0">
+        <li>Service not whitelisted in your VTPass sandbox account</li>
+        <li>Invalid sandbox test number (use 08011111111 for MTN)</li>
+        <li>Variation code expired or invalid</li>
+        <li>API keys not matching sandbox account</li>
+        <li>Insufficient VTPass sandbox wallet balance</li>
+      </ul>
+    </div>
+    <details style="margin-bottom:14px">
+      <summary style="font-size:12px;font-weight:600;color:var(--g500);cursor:pointer;padding:8px 0">📋 Raw VTPass Response (for debugging)</summary>
+      <pre style="font-size:10px;background:#f1f5f9;border-radius:8px;padding:10px;overflow-x:auto;white-space:pre-wrap;color:var(--g700);margin-top:8px">${JSON.stringify(raw,null,2)}</pre>
+    </details>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button onclick="this.closest('.modal').remove()" style="padding:12px;border-radius:10px;background:var(--g100);border:1px solid var(--g200);font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Close</button>
+      <a href="https://vtpass.com/documentation" target="_blank" style="padding:12px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:13px;font-weight:700;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">VTPass Docs</a>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+// ── VTPass API call functions (fully corrected) ──
+
 async function vtpAirtime(phone,serviceID,amount,requestRef){
-  const body={request_id:requestRef,serviceID,amount,phone};
+  // Airtime: serviceID = 'mtn' | 'airtel' | 'glo' | 'etisalat'
+  const body={request_id:requestRef,serviceID,amount:String(amount),phone};
+  console.log('[VTP] Airtime payload:',JSON.stringify(body),'URL:',VTP.base+'/pay');
   const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
-  return res.json();
+  const data=await res.json();
+  console.log('[VTP] Airtime response HTTP',res.status,':',JSON.stringify(data).slice(0,400));
+  return data;
 }
+
 async function vtpData(phone,serviceID,variation_code,amount,requestRef){
-  const body={request_id:requestRef,serviceID,billersCode:phone,variation_code,amount,phone};
+  // Data: serviceID = 'mtn-data' | 'airtel-data' | 'glo-data' | 'etisalat-data'
+  // billersCode = phone number
+  const body={request_id:requestRef,serviceID,billersCode:phone,variation_code,amount:String(amount),phone};
+  console.log('[VTP] Data payload:',JSON.stringify(body));
   const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
-  return res.json();
+  const data=await res.json();
+  console.log('[VTP] Data response HTTP',res.status,':',JSON.stringify(data).slice(0,400));
+  return data;
 }
+
 async function vtpCable(smartcard,serviceID,variation_code,amount,requestRef){
-  const body={request_id:requestRef,serviceID,billersCode:smartcard,variation_code,amount,subscription_type:'change',quantity:1};
+  // Cable TV: serviceID = 'dstv' | 'gotv' | 'startimes'
+  // billersCode = smartcard/IUC number, subscription_type = 'change'
+  const body={request_id:requestRef,serviceID,billersCode:smartcard,variation_code,amount:String(amount),subscription_type:'change',quantity:1};
+  console.log('[VTP] Cable payload:',JSON.stringify(body));
   const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
-  return res.json();
+  const data=await res.json();
+  console.log('[VTP] Cable response HTTP',res.status,':',JSON.stringify(data).slice(0,400));
+  return data;
 }
-async function vtpElectricity(meter,serviceID,meterType,amount,requestRef){
-  const body={request_id:requestRef,serviceID,billersCode:meter,variation_code:meterType,amount,phone:CU?.email||''};
+
+async function vtpElectricity(meter,serviceID,variation_code,amount,requestRef,custPhone){
+  // Electricity: billersCode = meter number, variation_code = 'prepaid'|'postpaid'
+  // phone = customer phone (for token delivery) — NOT email
+  const phone=custPhone||UD?.phone||'08011111111';
+  const body={request_id:requestRef,serviceID,billersCode:meter,variation_code,amount:String(amount),phone};
+  console.log('[VTP] Electricity payload:',JSON.stringify(body));
   const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
-  return res.json();
+  const data=await res.json();
+  console.log('[VTP] Electricity response HTTP',res.status,':',JSON.stringify(data).slice(0,400));
+  return data;
 }
+
+async function vtpResultChecker(serviceID,variation_code,amount,requestRef){
+  const body={request_id:requestRef,serviceID,billersCode:'none',variation_code,amount:String(amount),phone:UD?.phone||'08011111111'};
+  console.log('[VTP] Result payload:',JSON.stringify(body));
+  const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
+  const data=await res.json();
+  console.log('[VTP] Result response HTTP',res.status,':',JSON.stringify(data).slice(0,400));
+  return data;
+}
+
+// Keep old name alias for any remaining references
 async function vtpResult2(serviceID,variation_code,amount,requestRef){
-  const body={request_id:requestRef,serviceID,billersCode:'none',variation_code,amount,phone:CU?.email||''};
-  const res=await fetch(VTP.base+'/pay',{method:'POST',headers:vtpHeaders(true),body:JSON.stringify(body)});
-  return res.json();
+  return vtpResultChecker(serviceID,variation_code,amount,requestRef);
 }
 
 // HISTORY
@@ -2418,19 +2635,60 @@ async function saveVtpass2(){
   const r=document.getElementById('vt-result2');if(r){r.style.display='block';r.style.background='#dcfce7';r.style.color='#15803d';r.textContent='✅ Configuration saved successfully!';}
 }
 async function testVtpass(){
-  const r=document.getElementById('vt-result');if(r){r.style.display='block';r.style.background='#f1f5f9';r.style.color='var(--g600)';r.textContent='Testing connection...';}
+  const r=document.getElementById('vt-result');
+  if(r){r.style.display='block';r.style.background='#f1f5f9';r.style.color='var(--g600)';r.innerHTML='⏳ Running full VTPass diagnostic...';}
+  await getVTP();
+  const base=VTP.base;
+  const results=[];
+  // 1. Connection test
   try{
-    const s=await db.collection('settings').doc('vtpass').get();
-    const d=s.exists?s.data():{};
-    const base=document.getElementById('vt-url')?.value||d.baseUrl||'https://sandbox.vtpass.com';
-    const resp=await fetch(base+'/api/service-categories',{headers:{'api-key':document.getElementById('vt-pub')?.value||d.publicKey||''}});
-    if(r){r.style.display='block';r.style.background=resp.ok?'#dcfce7':'#fee2e2';r.style.color=resp.ok?'#15803d':'#dc2626';r.textContent=resp.ok?'✅ Connection successful! Status: '+resp.status:'❌ Connection failed. Status: '+resp.status;}
-  }catch(e){if(r){r.style.display='block';r.style.background='#fee2e2';r.style.color='#dc2626';r.textContent='❌ Error: '+e.message;}}
+    const resp=await fetch(base+'/service-categories',{headers:vtpHeaders()});
+    const json=await resp.json();
+    results.push({label:'Connection',ok:resp.ok,detail:'HTTP '+resp.status+' — '+(resp.ok?'✅ Reachable':'❌ Failed')});
+    console.log('[VTP TEST] service-categories:',json);
+  }catch(e){results.push({label:'Connection',ok:false,detail:'❌ '+e.message});}
+  // 2. Per-service variation fetch
+  const testServices=[
+    {id:'mtn',label:'MTN Airtime'},
+    {id:'mtn-data',label:'MTN Data'},
+    {id:'airtel',label:'Airtel Airtime'},
+    {id:'airtel-data',label:'Airtel Data'},
+    {id:'glo',label:'Glo Airtime'},
+    {id:'dstv',label:'DSTV'},
+    {id:'gotv',label:'GOtv'},
+    {id:'ikeja-electric',label:'Ikeja Electric'},
+    {id:'ekedc',label:'EKEDC'},
+    {id:'abuja-electric',label:'Abuja Electric'},
+  ];
+  for(const svc of testServices){
+    try{
+      const resp=await fetch(base+'/service-variations?serviceID='+svc.id,{headers:vtpHeaders()});
+      const json=await resp.json();
+      const count=(json?.content?.varations||json?.content?.variations||[]).length;
+      const ok=count>0;
+      results.push({label:svc.label+'('+svc.id+')',ok,detail:ok?`✅ ${count} variation(s) found`:'⚠ '+JSON.stringify(json).slice(0,80)});
+      console.log('[VTP TEST]',svc.id,'→',json);
+    }catch(e){results.push({label:svc.label,ok:false,detail:'❌ '+e.message});}
+  }
+  if(r){
+    r.style.background='#fff';r.style.color='var(--g700)';
+    r.innerHTML='<div style="font-weight:700;font-size:13px;margin-bottom:10px">VTPass Diagnostic Report</div>'+
+      results.map(res=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:12px">
+        <span style="font-size:14px;flex-shrink:0">${res.ok?'✅':'❌'}</span>
+        <div><div style="font-weight:600">${res.label}</div><div style="color:${res.ok?'#15803d':'#dc2626'};margin-top:2px">${res.detail}</div></div>
+      </div>`).join('')+
+      `<div style="margin-top:12px;padding:10px;background:#fef3c7;border-radius:8px;font-size:11px;color:#92400e">
+        <strong>Sandbox test numbers:</strong> MTN: 08011111111 · Airtel: 08021111111 · Glo: 08031111111<br/>
+        DSTV smartcard: 1212121212 · Meter: 1234567890<br/>
+        <strong>Keys used:</strong> PubKey: ${VTP.pubKey.slice(0,12)}... · Base: ${base}
+      </div>`;
+  }
 }
 async function testVtpass2(){
-  const r=document.getElementById('vt-result2');if(r){r.style.display='block';r.style.background='#f1f5f9';r.style.color='var(--g600)';r.textContent='Testing...';}
+  const r=document.getElementById('vt-result2');if(r){r.style.display='block';r.style.background='#f1f5f9';r.style.color='var(--g600)';r.innerHTML='Testing...';}
   await testVtpass();
-  const r1=document.getElementById('vt-result');if(r&&r1){r.style.display='block';r.style.background=r1.style.background;r.style.color=r1.style.color;r.textContent=r1.textContent;}
+  const r1=document.getElementById('vt-result');
+  if(r&&r1){r.style.display='block';r.style.background=r1.style.background;r.style.color=r1.style.color;r.innerHTML=r1.innerHTML;}
 }
 
 // ── Fetch VTPass config before VTU calls ──
