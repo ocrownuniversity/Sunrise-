@@ -1289,28 +1289,29 @@ async function verPin(){
 }
 // ===== VTPASS CONFIG =====
 // CORS FIX: GitHub Pages cannot call VTPass directly — browser blocks cross-origin requests.
-// Solution: Route all VTPass calls through a CORS proxy.
-// We use corsproxy.io which is free, reliable, and supports POST + custom headers.
+// Solution: Route all VTPass calls through a CORS proxy with automatic failover.
+// Primary: corsproxy.io | Fallback: allorigins.win
 
 const VTP={
-  // The real VTPass sandbox base (no trailing slash, no /api suffix here — added per-call)
   sandboxBase:'https://sandbox.vtpass.com/api',
   liveBase:'https://api-service.vtpass.com/api',
   apiKey:'03f401bf628bf9bc9013a324f3865c4a',
   pubKey:'PK_510dca003bdefc29d919142e5a66452fefd459dcea3',
   secKey:'SK_3602c9fce88b8bd84978e1bc3dfd411ca3e87100193',
-  mode:'sandbox'
+  mode:'sandbox',
+  _proxyFailed:false
 };
 
-// CORS proxy — prepend to every VTPass URL
-// corsproxy.io supports GET and POST with custom headers
-const CORS_PROXY='https://corsproxy.io/?';
-
-function vtpUrl(path){
-  // Always reload base from current VTP state
-  const base=(VTP.mode==='live'?VTP.liveBase:VTP.sandboxBase);
+// Two CORS proxies — corsproxy.io primary, allorigins.win as fallback
+function vtpUrl(path,useBackup){
+  // Normalize base: strip any trailing /api then re-add once
+  const rawBase=(VTP.mode==='live'?VTP.liveBase:VTP.sandboxBase);
+  const base=rawBase.replace(/\/api\/?$/, '')+'/api';
   const fullUrl=base+(path.startsWith('/')?path:'/'+path);
-  return CORS_PROXY+encodeURIComponent(fullUrl);
+  if(useBackup||VTP._proxyFailed){
+    return 'https://api.allorigins.win/raw?url='+encodeURIComponent(fullUrl);
+  }
+  return 'https://corsproxy.io/?'+encodeURIComponent(fullUrl);
 }
 
 // Always reload keys from Firestore before any API call
@@ -1325,11 +1326,11 @@ async function getVTP(){
       if(d.mode)VTP.mode=d.mode;
       // If admin saved a custom base URL, parse it
       if(d.baseUrl){
-        // Normalize: strip trailing slash, ensure /api suffix
-        let clean=d.baseUrl.replace(/\/+$/,'');
-        if(!clean.endsWith('/api'))clean=clean+'/api';
-        if(clean.includes('api-service'))VTP.liveBase=clean;
-        else VTP.sandboxBase=clean;
+        // Normalize: strip trailing slash AND /api suffix, then re-add /api exactly once
+        let clean=String(d.baseUrl).trim().replace(/\/+$/, '').replace(/\/api\/?$/, '');
+        const withApi=clean+'/api';
+        if(clean.includes('api-service'))VTP.liveBase=withApi;
+        else VTP.sandboxBase=withApi;
       }
     }
   }catch(e){console.warn('[VTP] Config load error (using defaults):',e.message);}
@@ -1374,8 +1375,19 @@ async function vtpFetch(path, options={}){
   try{
     res=await fetch(proxyUrl,options);
   }catch(netErr){
-    console.error('[VTP] Network error:',netErr.message);
-    throw new Error('Network error — check your internet connection. ('+netErr.message+')');
+    // Primary proxy failed — try backup proxy automatically
+    console.warn('[VTP] Primary proxy failed, trying backup:',netErr.message);
+    VTP._proxyFailed=true;
+    const backupUrl=vtpUrl(path,true);
+    console.log('[VTP] Backup proxy URL:',backupUrl);
+    try{
+      res=await fetch(backupUrl,options);
+      VTP._proxyFailed=false; // backup worked, reset flag
+    }catch(e2){
+      VTP._proxyFailed=false;
+      console.error('[VTP] Both proxies failed:',e2.message);
+      throw new Error('Network error — both CORS proxies failed. Check your internet. ('+netErr.message+')');
+    }
   }
 
   const raw=await res.text();
@@ -1500,6 +1512,32 @@ function selNet(btn){
   }
 }
 
+function selCable(btn){
+  btn.closest('div').querySelectorAll('button').forEach(b=>{b.style.borderColor='var(--g200)';b.style.background='#fff';});
+  btn.style.borderColor='var(--green)';btn.style.background='var(--green-xl)';
+  const provider=btn.textContent.trim().toLowerCase().replace(/[^a-z]/g,'');
+  const svcMap={'dstv':'dstv','gotv':'gotv','startimes':'startimes'};
+  const svcId=svcMap[provider]||'dstv';
+  const sel=document.getElementById('s-amt');
+  const loadEl=document.getElementById('data-loading');
+  const infoEl=document.getElementById('data-info');
+  if(sel){
+    sel.innerHTML='<option value="">Loading packages...</option>';
+    if(loadEl){loadEl.style.display='block';loadEl.textContent='⏳ Loading '+btn.textContent.trim()+' packages...';}
+    vtpFetch('service-variations?serviceID='+svcId,{headers:vtpGetHeaders()}).then(json=>{
+      if(loadEl)loadEl.style.display='none';
+      const vars=json?.content?.varations||json?.content?.variations||[];
+      if(vars.length){renderPlans(vars,sel,infoEl);}
+      else{sel.innerHTML='<option value="">No packages — enable this service in VTPass dashboard</option>';
+        if(infoEl){infoEl.style.display='block';infoEl.style.color='#dc2626';infoEl.textContent='⚠ Enable '+btn.textContent.trim()+' at vtpass.com → Sandbox → Enable Services';}}
+    }).catch(e=>{
+      if(loadEl)loadEl.style.display='none';
+      sel.innerHTML='<option value="">⚠ Error loading packages</option>';
+      if(infoEl){infoEl.style.display='block';infoEl.style.color='#dc2626';infoEl.textContent='❌ '+e.message;}
+    });
+  }
+}
+
 // Generate unique transaction reference
 function txRef(){return 'ZMN'+Date.now()+Math.floor(Math.random()*10000);}
 
@@ -1612,13 +1650,13 @@ function showVtpError(type,amt,ref,code,desc,raw){
       <div style="font-size:10px;color:var(--g400);margin-top:6px;word-break:break-all">Ref: ${ref}</div>
     </div>
     <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:14px">
-      <div style="font-size:11px;font-weight:700;color:var(--g600);margin-bottom:6px">Common Causes</div>
-      <ul style="font-size:12px;color:var(--g600);padding-left:16px;line-height:1.9;margin:0">
-        <li>Service not whitelisted in your VTPass sandbox account</li>
-        <li>Invalid sandbox test number (use 08011111111 for MTN)</li>
-        <li>Variation code expired or invalid</li>
-        <li>API keys not matching sandbox account</li>
-        <li>Insufficient VTPass sandbox wallet balance</li>
+      <div style="font-size:11px;font-weight:700;color:var(--g600);margin-bottom:6px">Common Causes &amp; Fixes</div>
+      <ul style="font-size:12px;color:var(--g600);padding-left:16px;line-height:2;margin:0">
+        <li><strong>Service not enabled</strong> — Log in to <a href="https://sandbox.vtpass.com" target="_blank" style="color:#2563eb">sandbox.vtpass.com</a> → Services → Enable MTN/Airtel/Glo etc.</li>
+        <li><strong>Wrong test number</strong> — MTN: 08011111111 · Airtel: 08021111111 · Glo: 08031111111</li>
+        <li><strong>API keys mismatch</strong> — Open Admin → VTPass Settings → re-enter all 3 keys from your VTPass profile</li>
+        <li>Variation code expired or invalid plan selected</li>
+        <li>Insufficient VTPass sandbox wallet balance (fund at sandbox.vtpass.com)</li>
       </ul>
     </div>
     <details style="margin-bottom:14px">
@@ -1896,7 +1934,7 @@ function aTab(tab){
       <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Key <span style='color:#dc2626;font-size:10px;font-weight:400'>(static key from VTPass profile)</span></label><input class="inp" id="vt-api2" placeholder="e.g. 03f401bf628bf9bc9013..."/></div>
       <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Public Key <span style='color:#64748b;font-size:10px;font-weight:400'>(PK_...)</span></label><input class="inp" id="vt-pub2" placeholder="PK_510dca003b..."/></div>
       <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Secret Key <span style='color:#64748b;font-size:10px;font-weight:400'>(SK_...)</span></label><input class="inp" type="password" id="vt-sec2" placeholder="SK_..."/></div>
-      <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label><input class="inp" id="vt-url2" value="https://sandbox.vtpass.com" placeholder="API base URL"/></div>
+      <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label><input class="inp" id="vt-url2" value="https://sandbox.vtpass.com" placeholder="https://sandbox.vtpass.com (no /api needed)"/></div>
       <div style="display:flex;gap:8px">
         <button onclick="testVtpass2()" style="flex:1;padding:11px;border-radius:10px;background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔗 Test</button>
         <button onclick="saveVtpass2()" class="btn-g" style="flex:1;padding:11px;border-radius:10px;font-size:13px">💾 Save</button>
@@ -2592,8 +2630,10 @@ async function saveVtpass(){
   const sec=document.getElementById('vt-sec')?.value.trim();
   const url=document.getElementById('vt-url')?.value.trim();
   if(!api||!pub||!sec||!url){toast('All 4 fields required (API Key, Public Key, Secret Key, Base URL)');return;}
-  await db.collection('settings').doc('vtpass').set({mode,apiKey:api,publicKey:pub,secretKey:sec,baseUrl:url,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:CU?.email});
-  toast('VTPass config saved!');closeM('m-vtpass');
+  // Normalize URL before saving: strip /api, it gets added in code
+  const cleanUrl=url.trim().replace(/\/+$/, '').replace(/\/api\/?$/, '');
+  await db.collection('settings').doc('vtpass').set({mode,apiKey:api,publicKey:pub,secretKey:sec,baseUrl:cleanUrl,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:CU?.email});
+  toast('VTPass config saved! ✅');closeM('m-vtpass');
 }
 async function saveVtpass2(){
   const mode=document.getElementById('vt-mode2')?.value;
@@ -2602,9 +2642,10 @@ async function saveVtpass2(){
   const sec=document.getElementById('vt-sec2')?.value.trim();
   const url=document.getElementById('vt-url2')?.value.trim();
   if(!api||!pub||!sec||!url){toast('All 4 fields required (API Key, Public Key, Secret Key, Base URL)');return;}
-  await db.collection('settings').doc('vtpass').set({mode,apiKey:api,publicKey:pub,secretKey:sec,baseUrl:url,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:CU?.email});
-  toast('VTPass config saved!');
-  const r=document.getElementById('vt-result2');if(r){r.style.display='block';r.style.background='#dcfce7';r.style.color='#15803d';r.textContent='✅ Configuration saved successfully!';}
+  const cleanUrl2=url.trim().replace(/\/+$/, '').replace(/\/api\/?$/, '');
+  await db.collection('settings').doc('vtpass').set({mode,apiKey:api,publicKey:pub,secretKey:sec,baseUrl:cleanUrl2,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:CU?.email});
+  toast('VTPass config saved! ✅');
+  const r=document.getElementById('vt-result2');if(r){r.style.display='block';r.style.background='#dcfce7';r.style.color='#15803d';r.textContent='✅ Configuration saved! Base URL normalized to: '+cleanUrl2;}
 }
 async function testVtpass(){
   const r=document.getElementById('vt-result');
@@ -4031,7 +4072,7 @@ async function loadRewardsHistoryAdmin(el){
   <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Key <span style='color:#dc2626;font-size:10px;font-weight:400'>(static key from VTPass profile)</span></label><input class="inp" id="vt-api" placeholder="e.g. 03f401bf628bf9bc9013..."/></div>
   <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Public Key <span style='color:#64748b;font-size:10px;font-weight:400'>(PK_...)</span></label><input class="inp" id="vt-pub" placeholder="PK_510dca003b..."/></div>
   <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Secret Key <span style='color:#64748b;font-size:10px;font-weight:400'>(SK_...)</span></label><input class="inp" type="password" id="vt-sec" placeholder="SK_..."/></div>
-  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label><input class="inp" id="vt-url" placeholder="https://sandbox.vtpass.com or https://vtpass.com"/></div>
+  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label><input class="inp" id="vt-url" placeholder="https://sandbox.vtpass.com (no /api needed)"/></div>
   <div style="display:flex;gap:8px;margin-bottom:10px">
     <button onclick="testVtpass()" style="flex:1;padding:11px;border-radius:10px;background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔗 Test Connection</button>
     <button onclick="saveVtpass()" class="btn-g" style="flex:1;padding:11px;border-radius:10px;font-size:13px">💾 Save Config</button>
