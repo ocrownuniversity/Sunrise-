@@ -1345,9 +1345,11 @@ function vtpGetHeaders(){
   };
 }
 function vtpPostHeaders(){
-  const creds=btoa(VTP.pubKey+':'+VTP.secKey);
+  // NOTE: corsproxy.io strips Authorization headers, so we use api-key + public-key
+  // VTPass /pay accepts both Basic Auth AND api-key header authentication
   return{
-    'Authorization':'Basic '+creds,
+    'api-key':VTP.apiKey,
+    'public-key':VTP.pubKey,
     'Content-Type':'application/json'
   };
 }
@@ -1361,7 +1363,10 @@ async function vtpFetch(path, options={}){
   const proxyUrl=vtpUrl(path);
   console.log('[VTP]',options.method||'GET',path,'→',proxyUrl);
   console.log('[VTP] Headers api-key:',VTP.apiKey.slice(0,8)+'... public-key:',VTP.pubKey.slice(0,14)+'...');
-  if(options.body)console.log('[VTP] Payload:',options.body);
+  if(options.body){
+    console.log('[VTP] POST Payload:',options.body);
+    console.log('[VTP] POST Headers:',JSON.stringify(options.headers));
+  }
 
   let res;
   try{
@@ -1372,7 +1377,7 @@ async function vtpFetch(path, options={}){
   }
 
   const raw=await res.text();
-  console.log('[VTP] HTTP',res.status,'raw response (first 500):',raw.slice(0,500));
+  console.log('[VTP] HTTP',res.status,'FULL raw response:',raw);
 
   // Detect HTML error page (CORS proxy failure or VTPass returning HTML)
   if(raw.trim().startsWith('<')){
@@ -1388,7 +1393,7 @@ async function vtpFetch(path, options={}){
     throw new Error('Invalid response from VTPass: '+raw.slice(0,100));
   }
 
-  console.log('[VTP] Parsed response:',JSON.stringify(json).slice(0,400));
+  console.log('[VTP] FULL Parsed response:',JSON.stringify(json));
   return json;
 }
 
@@ -1536,11 +1541,14 @@ async function execSvc({type,amt,extra,useRewards}){
 
     console.log('[VTP] Raw response:',JSON.stringify(vtpResult));
 
-    // VTPass success: code==='000' OR transactions.status==='delivered'
+    // VTPass success detection — covers all response shapes
     const txStatus=vtpResult?.content?.transactions?.status;
-    const respCode=vtpResult?.code||vtpResult?.response_code||'';
-    const respDesc=vtpResult?.response_description||vtpResult?.content?.transactions?.response_description||'';
-    const success=(respCode==='000')||(txStatus==='delivered');
+    const respCode=String(vtpResult?.code||vtpResult?.response_code||'');
+    const respDesc=vtpResult?.response_description
+      ||vtpResult?.content?.transactions?.response_description
+      ||vtpResult?.message||'';
+    // code '000' = success; 'delivered' status = success; some sandbox returns 200
+    const success=(respCode==='000')||(respCode==='200')||(txStatus==='delivered')||(txStatus==='successful');
 
     if(success){
       if(useRewards){
@@ -1571,8 +1579,9 @@ async function execSvc({type,amt,extra,useRewards}){
       let errDetail='';
       if(respCode)errDetail+=`Code: ${respCode}. `;
       if(respDesc)errDetail+=respDesc;
-      else if(vtpResult?.content)errDetail+=JSON.stringify(vtpResult.content).slice(0,120);
-      else errDetail='No response from VTPass. Check your VTPass dashboard.';
+      else if(vtpResult?.content)errDetail+=JSON.stringify(vtpResult.content).slice(0,300);
+      else if(vtpResult)errDetail+='Raw: '+JSON.stringify(vtpResult).slice(0,300);
+      else errDetail='VTPass returned no response body. Check browser console (F12) for details.';
       console.error('[VTP] Transaction failed. Code:',respCode,'Desc:',respDesc,'Full:',vtpResult);
       // Show detailed failure modal
       showVtpError(type,amt,ref,respCode,errDetail,vtpResult);
