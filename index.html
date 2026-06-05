@@ -1640,12 +1640,17 @@ function extractNBSPlans(res, networkId){
         products.forEach((prod,idx) => {
           // Log first plan so we can see exact field values
           if(idx===0) console.log('[NBS] First product raw:', JSON.stringify(prod));
-          // PRODUCT_CODE is what NBS DataPlan param expects
-          // Fall back to PRODUCT_SNO if PRODUCT_CODE is missing/empty
-          const pcode = prod.PRODUCT_CODE || prod.product_code || prod.code || prod.PRODUCT_SNO || prod.SNO || String(idx+1);
+          // ClubKonnect support confirmed: DataPlan param must be PRODUCT_ID
+          // PRODUCT_CODE / PRODUCT_SNO are for grouping/display only — NOT for purchase
+          const pid   = prod.PRODUCT_ID  || prod.product_id  || '';
+          const pcode = prod.PRODUCT_CODE|| prod.product_code|| prod.code || '';
+          const psno  = prod.PRODUCT_SNO || prod.SNO         || '';
+          // Use PRODUCT_ID as the value sent to DataPlan; fall back only if truly absent
+          const planId = pid || pcode || psno || String(idx+1);
+          if(idx===0) console.log('[NBS] IDs for first plan → PRODUCT_ID:',pid,' PRODUCT_CODE:',pcode,' PRODUCT_SNO:',psno,' → sending:',planId);
           allPlans.push({
-            variation_code   : String(pcode),
-            variation_sno    : String(prod.PRODUCT_SNO || prod.SNO || ''),
+            variation_code   : String(planId),
+            variation_sno    : String(psno),
             variation_name   : String(prod.PRODUCT_NAME || prod.product_name || prod.name || prod.PLAN || ''),
             variation_amount : String(prod.PRODUCT_AMOUNT || prod.product_amount || prod.price || prod.AMOUNT || 0),
             description      : String(prod.PRODUCT_NAME || prod.product_name || prod.name || '')
@@ -1659,7 +1664,8 @@ function extractNBSPlans(res, networkId){
   // ── Format 2: direct array ──
   if(Array.isArray(res)){
     return res.map(p => ({
-      variation_code   : String(p.PRODUCT_CODE||p.DataPlanID||p.PlanID||p.id||p.code||''),
+      // PRODUCT_ID is the correct DataPlan value per ClubKonnect support
+      variation_code   : String(p.PRODUCT_ID||p.product_id||p.PRODUCT_CODE||p.DataPlanID||p.PlanID||p.id||p.code||''),
       variation_name   : String(p.PRODUCT_NAME||p.DataPlan||p.Plan||p.name||''),
       variation_amount : String(p.PRODUCT_AMOUNT||p.Price||p.price||p.Amount||0),
       description      : String(p.PRODUCT_NAME||p.DataPlan||p.Plan||p.name||'')
@@ -1673,7 +1679,8 @@ function extractNBSPlans(res, networkId){
       if(typeof first === 'object' && first !== null){
         console.log('[NBS] Fallback array under key:', key, '| sample:', JSON.stringify(first).slice(0,100));
         return res[key].map(p => ({
-          variation_code   : String(p.PRODUCT_CODE||p.DataPlanID||p.PlanID||p.code||p.id||''),
+          // PRODUCT_ID is the correct DataPlan value per ClubKonnect support
+          variation_code   : String(p.PRODUCT_ID||p.product_id||p.PRODUCT_CODE||p.DataPlanID||p.PlanID||p.code||p.id||''),
           variation_name   : String(p.PRODUCT_NAME||p.DataPlan||p.Plan||p.name||''),
           variation_amount : String(p.PRODUCT_AMOUNT||p.Price||p.price||p.Amount||0),
           description      : String(p.PRODUCT_NAME||p.DataPlan||p.Plan||p.name||'')
@@ -1691,7 +1698,7 @@ async function fetchPlansForNetwork(networkId){
   const loadEl = document.getElementById('data-loading');
   const infoEl = document.getElementById('data-info');
   if(!sel) return;
-  if(planCache[networkId]){ renderPlans(planCache[networkId], sel, infoEl); return; }
+  if(planCache[networkId]){ renderPlansWithAdminSettings(planCache[networkId], sel, infoEl, networkId); return; }
   if(loadEl){ loadEl.style.display='block'; loadEl.textContent='⏳ Loading plans...'; }
   sel.innerHTML = '<option value="">Loading plans...</option>';
 
@@ -1841,7 +1848,7 @@ function normalizePlans(plans){
   const nameF  = sk.find(k=>/plan|data|bundle|name/i.test(k)&&!/id|price|amt/i.test(k)) || sk[1];
   const priceF = sk.find(k=>/price|amt|cost|amount/i.test(k)) || sk[2];
   return plans.map(p=>({
-    variation_code   : String(p[idF]||p.DataPlanID||p.PlanID||p.id||''),
+    variation_code   : String(p[idF]||p.PRODUCT_ID||p.product_id||p.DataPlanID||p.PlanID||p.id||''),
     variation_name   : String(p[nameF]||p.DataPlan||p.Plan||p.name||''),
     variation_amount : String(p[priceF]||p.Price||p.price||p.Amount||0),
     description      : String(p[nameF]||p.DataPlan||p.Plan||p.name||'')
@@ -1923,7 +1930,8 @@ function selNet(btn){
   const amtEl   = document.getElementById('s-amt');
   if(entry){
     if(amtEl && amtEl.tagName==='SELECT'){
-      // Data panel — fetch plans (also populates nbsNetworkIds)
+      // Always clear cache so we re-fetch and use fresh PRODUCT_ID values
+      delete planCache[entry.data];
       fetchPlansForNetwork(entry.data);
     } else {
       // Airtime panel — silently pre-fetch to discover network ID
@@ -1956,11 +1964,13 @@ async function apiAirtime(phone, network, amount, reqId){
 }
 async function apiData(phone, network, planCode, amount, reqId, planSno){
   const netId = resolveNetworkId(network);
-  console.log('[API] Data → MobileNetwork:',netId,' DataPlan:',planCode,' SNO:',planSno);
+  // ClubKonnect: DataPlan must be PRODUCT_ID — trim whitespace as instructed by support
+  const cleanPlanId = String(planCode||'').trim();
+  console.log('[API] Data → MobileNetwork:',netId,' DataPlan (PRODUCT_ID):',cleanPlanId,' SNO:',planSno);
   return apiFetch('data',{
     MobileNumber : phone,
     MobileNetwork: netId,
-    DataPlan     : planCode,
+    DataPlan     : cleanPlanId,
     Amount       : amount,
     RequestID    : reqId
   },{ type:'data', amount, userId:CU?.uid||'' });
@@ -2618,25 +2628,56 @@ async function importClubKonnectPlans(){
 // Override renderPlans to respect admin-managed plan settings
 const _origRenderPlans=renderPlans;
 async function renderPlansWithAdminSettings(plans,sel,infoEl,networkId){
+  // IMPORTANT: variation_code (used as DataPlan param in API call) is NEVER changed.
+  // Admin settings only affect: sell price display and whether plan is shown to user.
   try{
-    // Fetch managed plans for this network
     const net=networkId||currentNetworkId||'';
     const s=await db.collection('dataPlans').where('network','==',net).get();
     const managed=s.docs.map(d=>({id:d.id,...d.data()}));
+    // If no admin-managed plans exist for this network, show all plans as-is
     if(!managed.length){_origRenderPlans(plans,sel,infoEl);return;}
-    // Build lookup by planCode
-    const mgMap={};managed.forEach(m=>mgMap[m.planCode]=m);
-    // Filter + override prices
+    // Build lookups: by planCode (exact) and by name (fuzzy fallback)
+    const mgByCode={};
+    const mgByName={};
+    managed.forEach(m=>{
+      if(m.planCode) mgByCode[String(m.planCode).trim()]=m;
+      if(m.name) mgByName[String(m.name).trim().toLowerCase()]=m;
+    });
+    // Count how many live plans match admin records
+    const matchCount=plans.filter(p=>{
+      const code=String(p.variation_code||'').trim();
+      const name=String(p.variation_name||'').trim().toLowerCase();
+      return mgByCode[code]||mgByName[name];
+    }).length;
+    // Safety: if fewer than 20% of plans match admin records, admin data is stale/mismatched
+    // In that case show all plans at original prices to avoid breaking purchases
+    const matchRatio=plans.length>0?matchCount/plans.length:0;
+    if(matchRatio<0.2){
+      console.warn('[AdminPlans] Low match ratio',matchRatio,'— showing all plans unfiltered');
+      _origRenderPlans(plans,sel,infoEl);
+      return;
+    }
+    // Apply admin settings: only modify display price, NEVER modify variation_code
     const filtered=plans.filter(p=>{
-      const m=mgMap[p.variation_code];
-      return !m||(m.active!==false);
+      const code=String(p.variation_code||'').trim();
+      const name=String(p.variation_name||'').trim().toLowerCase();
+      const m=mgByCode[code]||mgByName[name];
+      // If no admin record for this plan, show it (don't hide unknown plans)
+      if(!m) return true;
+      return m.active!==false;
     }).map(p=>{
-      const m=mgMap[p.variation_code];
-      if(m&&m.sellPrice>0)return{...p,variation_amount:String(m.sellPrice)};
+      const code=String(p.variation_code||'').trim();
+      const name=String(p.variation_name||'').trim().toLowerCase();
+      const m=mgByCode[code]||mgByName[name];
+      // Only override display price — variation_code stays original for API
+      if(m&&m.sellPrice>0) return{...p,variation_amount:String(m.sellPrice)};
       return p;
     });
     _origRenderPlans(filtered,sel,infoEl);
-  }catch(e){_origRenderPlans(plans,sel,infoEl);}
+  }catch(e){
+    console.warn('[AdminPlans] Error applying admin settings, using raw plans:',e.message);
+    _origRenderPlans(plans,sel,infoEl);
+  }
 }
 
 async function savePromo(){
