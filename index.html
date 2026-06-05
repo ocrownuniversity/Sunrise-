@@ -4,14 +4,6 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="theme-color" content="#16a34a"/>
-<meta name="mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="ZMONIE"/>
-<meta name="application-name" content="ZMONIE"/>
-<meta name="description" content="Nigeria's premium VTU platform. Airtime, data, bills instantly and securely, 24/7."/>
-<link rel="manifest" id="pwa-manifest"/>
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='38' fill='%2316a34a'/%3E%3Ctext x='96' y='130' text-anchor='middle' font-family='Arial Black,sans-serif' font-size='110' font-weight='900' fill='white'%3EZ%3C/text%3E%3C/svg%3E"/>
 <title>ZMONIE - Smart Money Platform</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -38,8 +30,6 @@
 .fin-stat::after{content:'';position:absolute;right:-10px;top:-10px;width:60px;height:60px;background:rgba(255,255,255,.1);border-radius:50%}
 .anav.fin-tab:hover,.anav.fin-tab.on{background:rgba(139,92,246,.15);color:#a78bfa}
 textarea.inp{resize:vertical;min-height:80px}
-@keyframes bannerIn{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:translateY(0)}}
-#pwa-banner,#pwa-ios-banner{transition:opacity .3s}
 .c-purple{background:#ede9fe;color:#6d28d9}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);overflow-x:hidden}
 /* PAGES */
@@ -150,37 +140,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
 
 <!-- ======== LANDING ======== -->
 <div id="pg-land" class="page active">
-
-  <!-- ══ PWA INSTALL BANNER ══ -->
-  <div id="pwa-banner" style="display:none;position:relative;z-index:50;background:linear-gradient(90deg,#0f172a 0%,#15803d 100%);padding:11px 16px;animation:bannerIn .4s ease">
-    <div style="display:flex;align-items:center;gap:12px;max-width:600px;margin:0 auto">
-      <div style="width:42px;height:42px;background:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.3)">
-        <span style="font-weight:900;font-size:20px;color:#16a34a">Z</span>
-      </div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:13px;color:#fff;line-height:1.2">Install ZMONIE App</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:1px">Fast, offline-ready &amp; works like a native app</div>
-      </div>
-      <button id="pwa-install-btn" onclick="pwaTriggerInstall()" style="background:#22c55e;border:none;color:#fff;font-weight:700;font-size:13px;padding:9px 16px;border-radius:9px;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(34,197,94,.4)">
-        Install
-      </button>
-      <button onclick="pwaDismiss()" style="background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.7);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Inter',sans-serif">✕</button>
-    </div>
-  </div>
-  <!-- iOS manual install hint (shown only on iOS Safari) -->
-  <div id="pwa-ios-banner" style="display:none;position:relative;z-index:50;background:linear-gradient(90deg,#0f172a 0%,#1d4ed8 100%);padding:11px 16px">
-    <div style="display:flex;align-items:center;gap:12px;max-width:600px;margin:0 auto">
-      <div style="width:42px;height:42px;background:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <span style="font-weight:900;font-size:20px;color:#16a34a">Z</span>
-      </div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:13px;color:#fff;line-height:1.2">Add ZMONIE to Home Screen</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:1px">Tap <strong style="color:#fff">Share</strong> then <strong style="color:#fff">"Add to Home Screen"</strong></div>
-      </div>
-      <button onclick="pwaDismissIos()" style="background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.7);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
-    </div>
-  </div>
-
   <!-- Fixed header — no scroll needed -->
   <div class="lhdr">
     <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
@@ -309,8 +268,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
           <div style="position:relative"><input class="inp" type="password" id="li-pw" placeholder="Enter password" style="padding-right:42px" onkeydown="if(event.key==='Enter')doLogin()"/>
           <button onclick="tpw('li-pw')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--g400)">👁</button></div>
         </div>
-        <button onclick="doLogin()" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px;margin-bottom:8px">Sign In</button>
-        <div style="text-align:right;margin-bottom:12px"><button onclick="goPg('pg-forgot-pw')" style="background:none;border:none;color:var(--green-d);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Forgot Password?</button></div>
+        <button onclick="doLogin()" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px;margin-bottom:12px">Sign In</button>
         <div class="divider"><span>or continue with</span></div>
         <button onclick="doGoogle()" class="gbtn" style="margin-bottom:4px">
           <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -719,72 +677,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
   </div>
 </div>
 
-
-<!-- ======== FORGOT PASSWORD PAGE ======== -->
-<div id="pg-forgot-pw" class="page">
-  <div class="auth-wrap">
-    <div style="width:100%;max-width:390px">
-      <div style="text-align:center;margin-bottom:22px">
-        <div style="width:52px;height:52px;background:#fff;border-radius:15px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 18px rgba(0,0,0,.25)"><span style="font-size:22px">🔐</span></div>
-        <h1 style="font-size:22px;font-weight:800;color:#fff;margin-bottom:4px">Reset Password</h1>
-        <p style="color:rgba(255,255,255,.5);font-size:13px">Submit a request — admin will approve it</p>
-      </div>
-      <div class="auth-card">
-        <div id="fgpw-form">
-          <div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Email Address</label><input class="inp" type="email" id="fgpw-email" placeholder="you@example.com"/></div>
-          <div style="margin-bottom:18px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Registered Phone Number</label><input class="inp" type="tel" id="fgpw-phone" placeholder="080XXXXXXXX"/></div>
-          <button onclick="submitForgotPassword()" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px;margin-bottom:12px">Submit Reset Request</button>
-        </div>
-        <div id="fgpw-success" style="display:none;text-align:center;padding:16px 0">
-          <div style="font-size:42px;margin-bottom:12px">⏳</div>
-          <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;color:var(--black)">Request Submitted</h3>
-          <p style="font-size:13px;color:var(--g600);line-height:1.6">Your password reset request has been submitted and is awaiting admin approval. You will receive a WhatsApp message once approved.</p>
-        </div>
-        <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--g600)"><button onclick="goPg('pg-login')" style="background:none;border:none;color:var(--green-d);font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">← Back to Login</button></p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ======== PASSWORD RESET PAGE (from WhatsApp link) ======== -->
-<div id="pg-reset-pw" class="page">
-  <div class="auth-wrap">
-    <div style="width:100%;max-width:390px">
-      <div style="text-align:center;margin-bottom:22px">
-        <div style="width:52px;height:52px;background:#fff;border-radius:15px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 18px rgba(0,0,0,.25)"><span style="font-size:22px">🔑</span></div>
-        <h1 style="font-size:22px;font-weight:800;color:#fff;margin-bottom:4px">Create New Password</h1>
-        <p style="color:rgba(255,255,255,.5);font-size:13px">Choose a strong password for your account</p>
-      </div>
-      <div class="auth-card">
-        <div id="rpw-checking" style="text-align:center;padding:20px"><div style="font-size:32px;margin-bottom:8px">⏳</div><p style="color:var(--g600);font-size:13px">Verifying reset link...</p></div>
-        <div id="rpw-form" style="display:none">
-          <div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">New Password</label>
-            <div style="position:relative"><input class="inp" type="password" id="rpw-pw1" placeholder="Min. 6 characters" style="padding-right:42px"/>
-            <button onclick="tpw('rpw-pw1')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--g400)">👁</button></div>
-          </div>
-          <div style="margin-bottom:20px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Confirm Password</label>
-            <div style="position:relative"><input class="inp" type="password" id="rpw-pw2" placeholder="Repeat password" style="padding-right:42px"/>
-            <button onclick="tpw('rpw-pw2')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--g400)">👁</button></div>
-          </div>
-          <button onclick="doResetPassword()" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Set New Password</button>
-        </div>
-        <div id="rpw-invalid" style="display:none;text-align:center;padding:16px 0">
-          <div style="font-size:42px;margin-bottom:12px">❌</div>
-          <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;color:#dc2626">Link Invalid or Expired</h3>
-          <p style="font-size:13px;color:var(--g600);line-height:1.6">This reset link is invalid, expired (24h), or has already been used. Please submit a new request.</p>
-          <button onclick="goPg('pg-forgot-pw')" class="btn-g" style="margin-top:14px;padding:11px 22px;border-radius:10px;font-size:14px">Request New Reset</button>
-        </div>
-        <div id="rpw-done" style="display:none;text-align:center;padding:16px 0">
-          <div style="font-size:42px;margin-bottom:12px">✅</div>
-          <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;color:var(--green-d)">Password Updated!</h3>
-          <p style="font-size:13px;color:var(--g600);line-height:1.6">Your password has been changed successfully. You can now sign in with your new password.</p>
-          <button onclick="goPg('pg-login')" class="btn-g" style="margin-top:14px;padding:11px 22px;border-radius:10px;font-size:14px">Go to Login</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- ADMIN PAGE -->
 <div id="pg-admin" class="page">
   <div style="display:flex;min-height:100vh">
@@ -802,7 +694,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <div class="anav" onclick="aTab('funding')">💰 Funding</div>
         <div class="anav" onclick="aTab('withdrawals')">💸 Withdrawals</div>
         <div class="anav" onclick="aTab('pins')">🔒 PIN Requests</div>
-        <div class="anav" onclick="aTab('pwdreset')">🔐 Pwd Requests</div>
         <div class="anav" onclick="aTab('promos')">🎯 Promo Slides</div>
         <div class="anav" onclick="aTab('broadcast')">📢 Broadcast</div>
         <div class="anav" onclick="aTab('wallet')">👛 Wallet Ops</div>
@@ -835,14 +726,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <button onclick="aTab('funding')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Funding</button>
         <button onclick="aTab('withdrawals')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #fce7f3;background:#fdf2f8;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#9d174d">💸 Withdrawals</button>
         <button onclick="aTab('pins')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">PINs</button>
-        <button onclick="aTab('pwdreset')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #fce7f3;background:#fdf2f8;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#7c3aed">🔐 Pwd Resets</button>
         <button onclick="aTab('promos')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Promos</button>
         <button onclick="aTab('broadcast')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Broadcast</button>
         <button onclick="aTab('wallet')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Wallet</button>
         <button onclick="aTab('fin-loans')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Loans</button>
         <button onclick="aTab('fin-investments')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Investments</button>
         <button onclick="aTab('fin-analytics')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Fin Stats</button>
-        <button onclick="aTab('vtpass')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">API Settings</button>
+        <button onclick="aTab('vtpass')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">API</button>
         <button onclick="aTab('rewards-settings')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #86efac;background:#f0fdf4;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#15803d">🎁 Rewards</button>
       </div>
       <div id="a-content"></div>
@@ -889,7 +779,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
     <input class="pbox" type="password" maxlength="1" id="vp1" oninput="pn('vp1','vp2')"/>
     <input class="pbox" type="password" maxlength="1" id="vp2" oninput="pn('vp2','vp3')"/>
     <input class="pbox" type="password" maxlength="1" id="vp3" oninput="pn('vp3','vp4')"/>
-    <input class="pbox" type="password" maxlength="1" id="vp4"/>
+    <input class="pbox" type="password" maxlength="1" id="vp4" oninput="if(this.value.length===1)verPin()"/>
   </div>
   <!-- Rewards balance option (shown only when user has enough rewards) -->
   <div id="pin-rw-note" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:11px;padding:12px;margin-bottom:14px;align-items:center;gap:10px">
@@ -1195,333 +1085,6 @@ async function doGoogle(){
     }
   }catch(er){toast('Google sign-in failed: '+er.message);}
 }
-
-// ═══════════════════════════════════════════════════
-// FORGOT PASSWORD — Full System
-// ═══════════════════════════════════════════════════
-
-// Helper: generate a secure random token
-function genResetToken(){
-  const arr=new Uint8Array(32);
-  crypto.getRandomValues(arr);
-  return Array.from(arr).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-
-// User submits forgot password request
-async function submitForgotPassword(){
-  const email=(document.getElementById('fgpw-email')?.value||'').trim().toLowerCase();
-  const phone=(document.getElementById('fgpw-phone')?.value||'').trim();
-  if(!email&&!phone){toast('Enter your email or phone number');return;}
-
-  // Look up the user account
-  let userDoc=null;
-  try{
-    if(email){
-      const snap=await db.collection('users').where('email','==',email).limit(1).get();
-      if(!snap.empty)userDoc={id:snap.docs[0].id,...snap.docs[0].data()};
-    }
-    if(!userDoc&&phone){
-      const snap=await db.collection('users').where('phone','==',phone).limit(1).get();
-      if(!snap.empty)userDoc={id:snap.docs[0].id,...snap.docs[0].data()};
-    }
-  }catch(e){toast('Error looking up account. Try again.');return;}
-
-  if(!userDoc){
-    // For security, show same message even if not found
-    document.getElementById('fgpw-form').style.display='none';
-    document.getElementById('fgpw-success').style.display='block';
-    return;
-  }
-
-  // Check for existing pending request to prevent spam
-  try{
-    const ex=await db.collection('passwordResets')
-      .where('userId','==',userDoc.id)
-      .where('status','==','pending').get();
-    if(!ex.empty){toast('You already have a pending reset request. Please wait for admin approval.');return;}
-  }catch(e){}
-
-  // Create the reset request in Firestore
-  try{
-    await db.collection('passwordResets').add({
-      userId:userDoc.id,
-      name:userDoc.name||'User',
-      email:userDoc.email||email,
-      phone:userDoc.phone||phone,
-      status:'pending',
-      token:null,
-      tokenUsed:false,
-      tokenExpiry:null,
-      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-      adminAction:null,
-      adminActionAt:null,
-      adminNote:''
-    });
-    document.getElementById('fgpw-form').style.display='none';
-    document.getElementById('fgpw-success').style.display='block';
-  }catch(e){toast('Failed to submit request. Please try again.');}
-}
-
-// ── Admin: render password reset requests panel ──
-function renderAdminPwdResets(el){
-  const reqs=AD.pwdResets||[];
-  const pending=reqs.filter(r=>r.status==='pending');
-  const others=reqs.filter(r=>r.status!=='pending');
-
-  let html=`<div style="margin-bottom:14px;display:flex;align-items:center;gap:10px">
-    <div style="flex:1"><h3 style="font-size:16px;font-weight:700">Password Reset Requests</h3><p style="font-size:12px;color:var(--g500);margin-top:2px">${reqs.length} total · ${pending.length} pending</p></div>
-    <button onclick="loadAdmin()" style="padding:7px 14px;background:var(--green-l);border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:var(--green-d);font-family:'Inter',sans-serif">↻ Refresh</button>
-  </div>`;
-
-  if(pending.length){
-    html+=`<div class="card" style="overflow:hidden;margin-bottom:14px">
-      <div style="padding:13px 16px;border-bottom:1px solid #f8fafc;background:#fef3c7;display:flex;align-items:center;gap:8px">
-        <span style="font-size:16px">⏳</span><span style="font-weight:700;font-size:14px;color:#92400e">${pending.length} Pending Approval</span>
-      </div>`;
-    pending.forEach(r=>{
-      html+=`<div style="padding:14px 16px;border-bottom:1px solid #f8fafc">
-        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
-          <div style="width:38px;height:38px;background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0">${(r.name||'U')[0].toUpperCase()}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:700;font-size:14px">${r.name||'Unknown'}</div>
-            <div style="font-size:12px;color:var(--g500);margin-top:2px">📧 ${r.email||'—'}</div>
-            <div style="font-size:12px;color:var(--g500)">📱 ${r.phone||'—'}</div>
-            <div style="font-size:11px;color:var(--g400);margin-top:3px">Requested: ${fdate(r.createdAt)}</div>
-          </div>
-          <span class="status-badge sb-pending">Pending</span>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button onclick="approvePwdReset('${r.id}','${r.userId}','${r.name||'User'}','${r.phone||''}','${r.email||''}')" style="flex:1;padding:9px;background:#dcfce7;border:1px solid #86efac;color:#15803d;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">✅ Approve & Send Link</button>
-          <button onclick="rejectPwdReset('${r.id}','${r.userId}','${r.name||'User'}','${r.phone||''}')" style="flex:1;padding:9px;background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">❌ Reject</button>
-        </div>
-      </div>`;
-    });
-    html+=`</div>`;
-  }else{
-    html+=`<div class="card" style="padding:28px;text-align:center;color:var(--g400);margin-bottom:14px"><div style="font-size:32px;margin-bottom:8px">✅</div><p>No pending password reset requests</p></div>`;
-  }
-
-  if(others.length){
-    html+=`<div class="card" style="overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #f8fafc;font-weight:700;font-size:14px">History (${others.length})</div>`;
-    others.forEach(r=>{
-      const badge=r.status==='approved'?'sb-approved':'sb-rejected';
-      html+=`<div style="padding:12px 16px;border-bottom:1px solid #f8fafc;display:flex;align-items:center;gap:10px">
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:600;font-size:13px">${r.name||'Unknown'}</div>
-          <div style="font-size:11px;color:var(--g400)">${r.email||'—'} · ${r.phone||'—'}</div>
-          <div style="font-size:11px;color:var(--g400)">Requested: ${fdate(r.createdAt)}</div>
-          ${r.adminActionAt?`<div style="font-size:11px;color:var(--g400)">Action: ${fdate(r.adminActionAt)}</div>`:''}
-          ${r.status==='approved'&&r.tokenUsed?'<div style="font-size:11px;color:var(--green-d);font-weight:600">✅ Link used — password changed</div>':''}
-          ${r.status==='approved'&&!r.tokenUsed?'<div style="font-size:11px;color:#d97706;font-weight:600">⏳ Link sent — not yet used</div>':''}
-        </div>
-        <span class="status-badge ${badge}">${r.status}</span>
-      </div>`;
-    });
-    html+=`</div>`;
-  }
-
-  el.innerHTML=html;
-}
-
-// ── Admin approves password reset ──
-async function approvePwdReset(reqId,userId,userName,userPhone,userEmail){
-  if(!confirm('Approve this password reset request and send WhatsApp link to '+userPhone+'?'))return;
-  const token=genResetToken();
-  const expiry=new Date(Date.now()+24*60*60*1000); // 24 hours
-
-  // Build reset link — uses URL hash so GitHub Pages handles it
-  const resetLink=window.location.origin+window.location.pathname+'?pwdreset='+token;
-
-  try{
-    await db.collection('passwordResets').doc(reqId).update({
-      status:'approved',
-      token:token,
-      tokenUsed:false,
-      tokenExpiry:firebase.firestore.Timestamp.fromDate(expiry),
-      adminAction:'approved',
-      adminActionAt:firebase.firestore.FieldValue.serverTimestamp(),
-      adminEmail:CU?.email||'admin'
-    });
-    // Log admin action
-    await db.collection('adminLog').add({
-      action:'password_reset_approved',
-      reqId,userId,userName,userPhone,
-      adminEmail:CU?.email||'admin',
-      createdAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-  }catch(e){toast('Error updating request: '+e.message);return;}
-
-  // Send WhatsApp message
-  const waMsg=encodeURIComponent(
-    'Hello '+userName+', your password reset request has been approved. Click the link below to create a new password. This link will expire within 24 hours for security reasons.\n\n'+resetLink
-  );
-  const cleanPhone=userPhone.replace(/[^0-9]/g,'');
-  const intlPhone=cleanPhone.startsWith('0')?'234'+cleanPhone.slice(1):cleanPhone;
-  window.open('https://wa.me/'+intlPhone+'?text='+waMsg,'_blank');
-
-  toast('✅ Approved! WhatsApp message opened. Send it to the user.');
-  loadAdmin();
-}
-
-// ── Admin rejects password reset ──
-async function rejectPwdReset(reqId,userId,userName,userPhone){
-  if(!confirm('Reject this password reset request for '+userName+'?'))return;
-  try{
-    await db.collection('passwordResets').doc(reqId).update({
-      status:'rejected',
-      adminAction:'rejected',
-      adminActionAt:firebase.firestore.FieldValue.serverTimestamp(),
-      adminEmail:CU?.email||'admin'
-    });
-    await db.collection('adminLog').add({
-      action:'password_reset_rejected',
-      reqId,userId,userName,userPhone,
-      adminEmail:CU?.email||'admin',
-      createdAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-  }catch(e){toast('Error: '+e.message);return;}
-
-  // Send WhatsApp rejection message
-  const waMsg=encodeURIComponent(
-    'Hello '+userName+', your password reset request for your ZMONIE account has been rejected. '+
-    'If you did not make this request, your account is safe. '+
-    'If you need help, please contact our customer support via WhatsApp.'
-  );
-  const cleanPhone=userPhone.replace(/[^0-9]/g,'');
-  const intlPhone=cleanPhone.startsWith('0')?'234'+cleanPhone.slice(1):cleanPhone;
-  window.open('https://wa.me/'+intlPhone+'?text='+waMsg,'_blank');
-
-  toast('Rejected. WhatsApp message opened.');
-  loadAdmin();
-}
-
-// ── User opens reset link (runs on page load) ──
-async function checkPasswordResetToken(){
-  const params=new URLSearchParams(window.location.search);
-  const token=params.get('pwdreset');
-  if(!token)return;
-
-  // Show the reset page immediately
-  goPg('pg-reset-pw');
-
-  try{
-    const snap=await db.collection('passwordResets')
-      .where('token','==',token)
-      .where('status','==','approved')
-      .where('tokenUsed','==',false)
-      .limit(1).get();
-
-    if(snap.empty){
-      document.getElementById('rpw-checking').style.display='none';
-      document.getElementById('rpw-invalid').style.display='block';
-      return;
-    }
-
-    const doc=snap.docs[0];
-    const data=doc.data();
-    // Check expiry
-    const expiry=data.tokenExpiry?.toDate ? data.tokenExpiry.toDate() : new Date(data.tokenExpiry);
-    if(expiry<new Date()){
-      document.getElementById('rpw-checking').style.display='none';
-      document.getElementById('rpw-invalid').style.display='block';
-      return;
-    }
-
-    // Valid token — store for use on submit
-    window._pwdResetReqId=doc.id;
-    window._pwdResetUserId=data.userId;
-    window._pwdResetEmail=data.email;
-    document.getElementById('rpw-checking').style.display='none';
-    document.getElementById('rpw-form').style.display='block';
-  }catch(e){
-    document.getElementById('rpw-checking').style.display='none';
-    document.getElementById('rpw-invalid').style.display='block';
-  }
-}
-
-// ── User submits new password ──
-async function doResetPassword(){
-  const pw1=(document.getElementById('rpw-pw1')?.value||'').trim();
-  const pw2=(document.getElementById('rpw-pw2')?.value||'').trim();
-  if(!pw1||pw1.length<6){toast('Password must be at least 6 characters');return;}
-  if(pw1!==pw2){toast('Passwords do not match');return;}
-  if(!window._pwdResetReqId||!window._pwdResetUserId){toast('Invalid session. Please use the link again.');return;}
-
-  // Re-verify token is still valid before proceeding
-  try{
-    const doc=await db.collection('passwordResets').doc(window._pwdResetReqId).get();
-    if(!doc.exists||doc.data().tokenUsed||doc.data().status!=='approved'){
-      document.getElementById('rpw-form').style.display='none';
-      document.getElementById('rpw-invalid').style.display='block';
-      return;
-    }
-    const expiry=doc.data().tokenExpiry?.toDate?doc.data().tokenExpiry.toDate():new Date(doc.data().tokenExpiry);
-    if(expiry<new Date()){
-      document.getElementById('rpw-form').style.display='none';
-      document.getElementById('rpw-invalid').style.display='block';
-      return;
-    }
-  }catch(e){toast('Verification error. Try again.');return;}
-
-  // Update the Firebase Auth password using Admin SDK isn't possible client-side.
-  // Instead: use Firebase Auth's updatePassword (requires recent sign-in) OR
-  // store a hashed "force password" flag and use it on next login.
-  // Best client-side approach: use Firebase's sendPasswordResetEmail as the actual
-  // mechanism, but store a pending-new-password hash in Firestore for reference.
-  // We use crypto.subtle to hash and store; actual auth password updated via
-  // firebase.auth().signInWithEmailAndPassword then .updatePassword()
-
-  // Hash the password with SHA-256 for Firestore storage record
-  const enc=new TextEncoder();
-  const hashBuf=await crypto.subtle.digest('SHA-256',enc.encode(pw1));
-  const hashHex=Array.from(new Uint8Array(hashBuf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-
-  try{
-    // Mark the reset token as used first (prevent race condition reuse)
-    await db.collection('passwordResets').doc(window._pwdResetReqId).update({
-      tokenUsed:true,
-      tokenUsedAt:firebase.firestore.FieldValue.serverTimestamp(),
-      passwordChangedAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // Store a pending password change in the user's doc
-    // The actual Firebase Auth password update requires the user to re-authenticate.
-    // We store a temporary reset code that gets applied on next login attempt.
-    await db.collection('users').doc(window._pwdResetUserId).update({
-      pendingPasswordHash:hashHex,
-      pendingPasswordRaw:pw1, // stored temporarily — cleared after auth update
-      pendingPasswordAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // Now attempt to update Firebase Auth password directly
-    // We need to sign in the user first using admin-generated temp credential
-    // Since we can't do that client-side, we use Firebase Auth password reset flow
-    await auth.sendPasswordResetEmail(window._pwdResetEmail);
-
-    await db.collection('adminLog').add({
-      action:'password_reset_completed',
-      reqId:window._pwdResetReqId,
-      userId:window._pwdResetUserId,
-      passwordHashSha256:hashHex,
-      completedAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    document.getElementById('rpw-form').style.display='none';
-    document.getElementById('rpw-done').style.display='block';
-
-    // Clean URL
-    const url=new URL(window.location.href);
-    url.searchParams.delete('pwdreset');
-    window.history.replaceState({},'',url.toString());
-
-  }catch(e){toast('Error updating password: '+e.message);}
-}
-
-// ── Run token check on page load ──
-window.addEventListener('load',()=>{
-  setTimeout(checkPasswordResetToken,800);
-});
-
 async function doLogout(){await auth.signOut();}
 function tpw(id){const el=document.getElementById(id);el.type=el.type==='password'?'text':'password';}
 
@@ -1629,26 +1192,11 @@ function svcForm(t){
   if(t==='airtime')return`${nbtns}<div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Phone Number</label><input class="inp" id="s-phone" type="tel" placeholder="080XXXXXXXX"/></div><div style="margin-bottom:20px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Amount</label><input class="inp" id="s-amt" type="number" placeholder="100"/>${qk([100,200,500,1000])}</div><button onclick="procSvc('airtime')" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Buy Airtime</button>`;
   if(t==='data')return`${nbtns}<div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Phone Number</label><input class="inp" id="s-phone" type="tel" placeholder="080XXXXXXXX" oninput="fetchDataPlans()"/></div><div style="margin-bottom:4px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Data Plan</label><select class="inp" id="s-amt" onchange="updateDataAmt(this)"><option value="">-- Select network first --</option></select></div><div id="data-loading" style="display:none;font-size:12px;color:var(--g500);padding:6px 2px;margin-bottom:8px">Fetching plans...</div><div id="data-info" style="display:none;background:var(--green-xl);border:1px solid #bbf7d0;border-radius:9px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--green-d)"></div><button onclick="procSvc('data')" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px;margin-top:6px">Buy Data</button>`;
   if(t==='cable')return`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:13px">${['DSTV','GOtv','StarTimes'].map(p=>`<button onclick="selCable(this)" style="padding:9px 2px;border:1.5px solid var(--g200);border-radius:9px;background:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">${p}</button>`).join('')}</div><div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Smart Card Number</label><input class="inp" id="s-phone" placeholder="e.g. 1212121212"/></div><div style="margin-bottom:4px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Package</label><select class="inp" id="s-amt" onchange="updateDataAmt(this)"><option value="">— Select provider first —</option></select></div><div id="data-loading" style="display:none;font-size:12px;color:var(--g500);padding:6px 2px;margin-bottom:8px">Loading packages...</div><div id="data-info" style="display:none;background:var(--green-xl);border:1px solid #bbf7d0;border-radius:9px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--green-d)"></div><button onclick="procSvc('cable')" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px;margin-top:6px">Pay Subscription</button>`;
-  if(t==='electricity')return`<div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Distribution Company</label><select class="inp" id="s-phone"><option>EKEDC - Eko Electric</option><option>IKEDC - Ikeja Electric</option><option>AEDC - Abuja Electric</option><option>IBEDC - Ibadan Electric</option><option>PHEDC - Port Harcourt Electric</option><option>EEDC - Enugu Electric</option><option>KEDC - Kano Electric</option><option>JED - Jos Electric</option></select></div><div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Meter Number</label><input class="inp" id="s-meter" placeholder="Meter number"/></div><div style="margin-bottom:20px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Amount</label><input class="inp" id="s-amt" type="number" placeholder="1000"/>${qk([1000,2000,5000,10000])}</div><button onclick="procSvc('electricity')" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Pay Electricity</button>`;
+  if(t==='electricity')return`<div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Distribution Company</label><select class="inp" id="s-phone"><option>EKEDC - Eko Electric</option><option>IKEDC - Ikeja Electric</option><option>AEDC - Abuja Electric</option><option>IBEDC - Ibadan Electric</option><option>PHEDC - Port Harcourt Electric</option><option>EEDC - Enugu Electric</option><option>KEDC - Kano Electric</option><option>JED - Jos Electric</option></select></div><div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Meter Type</label><select class="inp" id="s-meter-type"><option value="prepaid">Prepaid</option><option value="postpaid">Postpaid</option></select></div><div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Meter Number</label><input class="inp" id="s-meter" placeholder="Meter number"/></div><div style="margin-bottom:20px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Amount</label><input class="inp" id="s-amt" type="number" placeholder="1000"/>${qk([1000,2000,5000,10000])}</div><button onclick="procSvc('electricity')" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Pay Electricity</button>`;
   if(t==='loan')return`<div class="info-box"><p style="font-size:13px;color:var(--green-d);line-height:1.6">Quick loans reviewed within 24 hours. Amount credited to wallet on approval.</p></div><div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Loan Amount</label><select class="inp" id="s-amt"><option value="5000">NGN 5,000</option><option value="10000">NGN 10,000</option><option value="20000">NGN 20,000</option><option value="50000">NGN 50,000</option><option value="100000">NGN 100,000</option><option value="200000">NGN 200,000</option><option value="500000">NGN 500,000</option></select></div><div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Purpose</label><input class="inp" id="s-phone" placeholder="Brief purpose of loan"/></div><div style="margin-bottom:20px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Repayment Period</label><select class="inp" id="s-meter"><option>7 days</option><option>14 days</option><option>30 days</option></select></div><button onclick="procLoan()" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Apply for Loan</button>`;
   if(t==='result')return`<div class="info-box"><p style="font-size:13px;color:var(--green-d);line-height:1.6">Check WAEC, NECO, JAMB, NABTEB results. Scratch card PIN delivered instantly.</p></div><div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Exam Type</label><select class="inp" id="s-phone"><option>WAEC - West African Examinations Council</option><option>NECO - National Examinations Council</option><option>JAMB - Joint Admissions Board</option><option>NABTEB - National Business and Technical Board</option></select></div><div style="margin-bottom:13px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Year</label><select class="inp" id="s-meter"><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></div><div style="margin-bottom:20px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px;display:block">Result Checker</label><select class="inp" id="s-amt"><option value="800">WAEC Scratch Card - NGN 800</option><option value="700">NECO Scratch Card - NGN 700</option><option value="500">JAMB Profile Code - NGN 500</option><option value="750">NABTEB Scratch Card - NGN 750</option></select></div><button onclick="procSvc('result')" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Buy Result Checker</button>`;
 }
-function selNet(btn){
-  btn.closest('div').querySelectorAll('button').forEach(b=>{b.style.borderColor='var(--g200)';b.style.background='#fff';});
-  btn.style.borderColor='var(--green)';btn.style.background='var(--green-xl)';
-  const netName=btn.textContent.trim();
-  const netEntry=NET_MAP[netName];
-  if(netEntry){fetchPlansForNetwork(netEntry.data);}
-}
-function selCable(btn){
-  btn.closest('div').querySelectorAll('button').forEach(b=>{b.style.borderColor='var(--g200)';b.style.background='#fff';});
-  btn.style.borderColor='var(--green)';btn.style.background='var(--green-xl)';
-  const name=btn.textContent.trim().toLowerCase();
-  let svcId='dstv';
-  if(name.includes('gotv')||name.includes('go tv')){svcId='gotv';}
-  else if(name.includes('star')){svcId='startimes';}
-  fetchPlansForNetwork(svcId);
-}
+// selNet and selCable defined below near renderPlans
 
 async function procLoan(){closeM('m-svc');openM('m-loan-apply');}
 
@@ -1667,7 +1215,7 @@ function procSvc(type){
     const rwNote=document.getElementById('pin-rw-note');
     if(rwNote)rwNote.style.display='none';
   }
-  // Build extra payload for Nellobytesystems API
+  // Build extra payload for VTPass
   let extra={};
   if(type==='airtime'){
     const phone=document.getElementById('s-phone')?.value?.trim();
@@ -1682,13 +1230,15 @@ function procSvc(type){
     if(!phone||phone.length<11){toast('Enter a valid 11-digit phone number');return;}
     const opt=amtEl?.options[amtEl.selectedIndex];
     const code=opt?.dataset?.code||'';
+    const sno =opt?.dataset?.sno||'';
     const planName=opt?.dataset?.name||'Data';
     const validity=opt?.dataset?.validity||'';
-    if(!code){toast('Please select a data plan first');return;}
+    if(!code&&!sno){toast('Please select a data plan first');return;}
+    console.log('[procSvc] Data plan code:',code,'sno:',sno,'name:',planName,'price:',opt?.value);
     const netBtn=document.querySelector('#svc-body div button[style*="green-xl"]');
     const netName=netBtn?netBtn.textContent.trim():'MTN';
-    const netEntry=NET_MAP[netName]||{airtime:'mtn',data:'mtn-data'};
-    extra={phone,networkId:netEntry.data,variationCode:code,planName:netName+' '+planName+(validity?' ('+validity+')':'')};
+    const netEntry=NET_MAP[netName]||{airtime:'MTN',data:'MTN'};
+    extra={phone,networkId:netEntry.data,variationCode:code,variationSno:sno,planName:netName+' '+planName+(validity?' ('+validity+')':'')};
   }else if(type==='cable'){
     const smartcard=document.getElementById('s-phone')?.value?.trim();
     if(!smartcard){toast('Enter your smart card number');return;}
@@ -1696,17 +1246,17 @@ function procSvc(type){
     const code=opt?.dataset?.code||opt?.value||'';
     const netBtn=document.querySelector('#svc-body div button[style*="green-xl"]');
     const provider=(netBtn?netBtn.textContent.trim():'DSTV').toLowerCase().replace(/\s/g,'');
-    const svcMap={'dstv':'dstv','gotv':'gotv','startimes':'startimes'};
+    const svcMap={'dstv':'DSTV','gotv':'GOTV','startimes':'STARTIMES'};
     extra={smartcard,serviceId:svcMap[provider]||'dstv',variationCode:code,planName:opt?.text||'Cable TV'};
   }else if(type==='electricity'){
     const meter=document.getElementById('s-meter')?.value?.trim();
     if(!meter){toast('Enter your meter number');return;}
     const disco=document.getElementById('s-phone')?.value||'';
-    // Nellobytesystems electricity service IDs
+    // VTPass electricity serviceIDs (exact, case-sensitive)
     const discoMap={
-      'EKEDC':'ekedc','IKEDC':'ikeja-electric','AEDC':'abuja-electric',
-      'IBEDC':'ibadan-electric','PHEDC':'phed','EEDC':'enugu-electric',
-      'KEDC':'kano-electric','JED':'jos-electric'
+      'EKEDC':'EKEDC','IKEDC':'IKEDC','AEDC':'AEDC',
+      'IBEDC':'IBEDC','PHEDC':'PHEDC','EEDC':'EEDC',
+      'KEDC':'KEDC','JED':'JED'
     };
     const svcKey=Object.keys(discoMap).find(k=>disco.includes(k));
     const serviceId=discoMap[svcKey]||'ikeja-electric';
@@ -1735,565 +1285,701 @@ async function verPin(){
   closeM('m-pin');
   if(pSvc){
     const useRewards=document.getElementById('use-rewards-chk')?.checked||false;
+    const btn=document.querySelector('#m-pin .btn-g');
+    if(btn){btn.textContent='Processing...';btn.disabled=true;}
     toast('Processing...');
-    await execSvc({...pSvc,useRewards});
-  }
-}
-// ===== VTPASS CONFIG =====
-// Nellobytesystems API — called directly (no CORS proxy needed for NBS)
-
-// ══════════════════════════════════════════════════════════
-//  NELLOBYTESYSTEMS API CONFIG (ClubKonnet)
-//  Loaded from Firestore — never hardcode API Key here
-// ══════════════════════════════════════════════════════════
-const NBS = {
-  baseUrl:     'https://www.nellobytesystems.com/',
-  userId:      'CK100352389',
-  apiKey:      '',   // loaded from Firestore — entered by admin after deploy
-  callbackUrl: '',   // loaded from Firestore
-  enabled:     true,
-  // Endpoints
-  endpoints: {
-    airtime:     'APIAirtimeV1.asp',
-    data:        'APIDatabundleV1.asp',
-    cable:       'APICableTVV1.asp',
-    electricity: 'APIElectricityV1.asp'
-  }
-};
-// Legacy alias so older code that references VTP still works
-const VTP = NBS;
-
-// Nellobytesystems does not require a CORS proxy (direct fetch)
-
-function nbsUrl(endpoint){
-  const base = NBS.baseUrl.replace(/\/+$/,'');
-  return base + '/' + endpoint;
-}
-// Legacy alias
-function vtpUrl(path){ return nbsUrl(path); }
-
-// Always reload NBS config from Firestore before any API call
-async function getNBS(){
-  try{
-    const s=await db.collection('settings').doc('nellobytesystems').get();
-    if(s.exists){
-      const d=s.data();
-      if(d.apiKey)    NBS.apiKey      = d.apiKey;
-      if(d.baseUrl)   NBS.baseUrl     = d.baseUrl;
-      if(d.userId)    NBS.userId      = d.userId;
-      if(d.callbackUrl) NBS.callbackUrl = d.callbackUrl;
-      if(d.enabled !== undefined) NBS.enabled = d.enabled;
+    console.log('[verPin] Calling execSvc with pSvc:',JSON.stringify(pSvc));
+    try{
+      await execSvc({...pSvc,useRewards});
+    }catch(e){
+      console.error('[verPin] execSvc threw:',e);
+      toast('Error: '+e.message);
+    }finally{
+      if(btn){btn.textContent='Confirm';btn.disabled=false;}
     }
-  }catch(e){console.warn('[NBS] Config load error (using defaults):',e.message);}
-  console.log('[NBS] Config: baseUrl='+NBS.baseUrl+' userId='+NBS.userId+' apiKey='+(NBS.apiKey?'***set***':'NOT SET'));
-  return NBS;
-}
-// Legacy alias
-async function getVTP(){ return getNBS(); }
-
-// NBS doesn't use special auth headers — UserID & APIKey go in query params
-function nbsParams(extra={}){
-  return new URLSearchParams({
-    UserID:    NBS.userId,
-    APIKey:    NBS.apiKey,
-    ...extra
-  }).toString();
-}
-// Legacy aliases
-function vtpGetHeaders(){ return {'Content-Type':'application/json'}; }
-function vtpPostHeaders(){ return {'Content-Type':'application/json'}; }
-
-// ════════════════════════════════════════════════════════════
-//  NELLOBYTESYSTEMS UNIFIED FETCH + REQUEST ID GENERATOR
-// ════════════════════════════════════════════════════════════
-
-function genRequestID(){
-  // Unique RequestID: timestamp + random hex — required by Nellobytesystems
-  const ts=Date.now().toString(36).toUpperCase();
-  const rnd=Math.random().toString(36).slice(2,8).toUpperCase();
-  return 'CK'+ts+rnd;
-}
-
-async function nbsFetch(endpoint, params={}){
-  await getNBS();
-  if(!NBS.apiKey){
-    throw new Error('API Key not configured. Go to Admin → API Settings to enter your Nellobytesystems API Key.');
+  }else{
+    console.warn('[verPin] pSvc is null — nothing to process');
+    toast('Session expired. Please start the transaction again.');
   }
+}
+// ===== TRANSACTION EXECUTOR =====
+// Wallet is ONLY debited AFTER successful provider confirmation
+async function execSvc({type, amt, extra, useRewards}){
+  if(!CU) return;
+  const s   = await db.collection('users').doc(CU.uid).get();
+  const ud  = s.data()||{};
+  const bal = useRewards ? (ud.rewardsBalance||0) : (ud.balance||0);
+  if(bal < amt){ toast('Insufficient '+(useRewards?'rewards ':'')+'balance. Please fund your wallet.'); return; }
 
-  const requestId = genRequestID();
-  const allParams = {
-    UserID:    NBS.userId,
-    APIKey:    NBS.apiKey,
-    RequestID: requestId,
-    ...params
+  const descs = {
+    airtime:'Airtime Purchase', data:'Data Subscription',
+    cable:'Cable TV Subscription', electricity:'Electricity Payment',
+    result:'Result Checker PIN'
   };
-  if(NBS.callbackUrl) allParams.CallbackURL = NBS.callbackUrl;
-
-  const url = nbsUrl(endpoint) + '?' + new URLSearchParams(allParams).toString();
-  console.log('[NBS] Calling:', endpoint, '| RequestID:', requestId, '| UserID:', NBS.userId);
-
-  // Log request to Firestore
-  const logRef = await db.collection('apiLogs').add({
-    provider: 'nellobytesystems',
-    endpoint, requestId,
-    params: {...allParams, APIKey: '***'},
-    status: 'pending',
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  const ref    = genRequestId();
+  const txRef2 = await db.collection('transactions').add({
+    userId:CU.uid, type, amount:amt,
+    description:(extra?.planName)||descs[type]||type,
+    status:'pending', ref, extra:extra||{},
+    provider: API_CFG.providerName||'Nellobytesystems',
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  let res, raw;
+  console.log('[EXEC] ── START execSvc ──');
+  console.log('[EXEC] type:',type,'amt:',amt,'extra:',JSON.stringify(extra),'useRewards:',useRewards);
+  console.log('[EXEC] user balance:',bal,'required:',amt);
+
+  let apiResult = null;
   try{
-    res = await fetch(url);
-    raw = await res.text();
-  }catch(netErr){
-    await logRef.update({status:'network_error', error: netErr.message, updatedAt: firebase.firestore.FieldValue.serverTimestamp()});
-    console.error('[NBS] Network error:', netErr.message);
-    throw new Error('Network error — check internet connection. ('+netErr.message+')');
+    if(type==='airtime'){
+      apiResult = await apiAirtime(extra.phone, extra.networkId, amt, ref);
+    }else if(type==='data'){
+      apiResult = await apiData(extra.phone, extra.networkId, extra.variationCode, amt, ref, extra.variationSno);
+    }else if(type==='cable'){
+      apiResult = await apiCable(extra.smartcard, extra.serviceId, extra.variationCode, amt, ref);
+    }else if(type==='electricity'){
+      const custPhone = extra.custPhone||UD?.phone||'08011111111';
+      apiResult = await apiElectricity(extra.meter, extra.serviceId, extra.meterType, amt, custPhone, ref);
+    }else{
+      apiResult = {status:'error', message:'Service not supported yet.'};
+    }
+
+    console.log('[EXEC] ── API RESPONSE RECEIVED ──');
+    console.log('[EXEC] Full response:', JSON.stringify(apiResult));
+    console.log('[EXEC] response keys:', apiResult ? Object.keys(apiResult) : 'null');
+
+    const success = isApiSuccess(apiResult);
+    console.log('[EXEC] isApiSuccess result:', success);
+    const respCode = String(apiResult?.status||apiResult?.Status||apiResult?.StatusCode||'');
+    const respDesc = getApiError(apiResult);
+
+    if(success){
+      // ── Debit wallet ONLY after confirmed success ──
+      if(useRewards){
+        await db.collection('users').doc(CU.uid).update({rewardsBalance:firebase.firestore.FieldValue.increment(-amt)});
+      }else{
+        await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-amt)});
+      }
+      const txLabel=getApiStatusLabel(apiResult);
+      await txRef2.update({status:'success', apiCode:respCode, apiDesc:txLabel, apiResponse:JSON.stringify(apiResult).slice(0,800)});
+
+      // ── Cashback reward ──
+      try{
+        const rwSnap = await db.collection('settings').doc('rewards').get();
+        const rwCfg  = rwSnap.exists ? rwSnap.data() : {cashbackEnabled:true, cashbackPct:1};
+        if(rwCfg.cashbackEnabled!==false){
+          const pct      = (rwCfg.cashbackPct||1)/100;
+          const cashback = Math.round(amt*pct*100)/100;
+          if(cashback>0){
+            await db.collection('users').doc(CU.uid).update({
+              rewardsBalance : firebase.firestore.FieldValue.increment(cashback),
+              cashbackEarned : firebase.firestore.FieldValue.increment(cashback)
+            });
+            await db.collection('rewards').add({
+              userId:CU.uid, type:'cashback', amount:cashback, txId:txRef2.id,
+              description:'Cashback on '+(extra?.planName||descs[type]),
+              createdAt:firebase.firestore.FieldValue.serverTimestamp()
+            });
+            await addNotif(CU.uid,'Cashback Credited! 🎖','You earned NGN '+fmt(cashback)+' cashback on your '+(extra?.planName||descs[type])+' transaction.');
+          }
+        }
+      }catch(e){ console.warn('Cashback error',e); }
+
+      await addNotif(CU.uid,'Transaction Successful',(extra?.planName||descs[type])+' of NGN '+fmt(amt)+' was successful.');
+      toast('✅ Transaction '+getApiStatusLabel(apiResult)+'!');
+      showReceipt({type, amt, extra, ref, descs, vtpResult:apiResult, cashback:0});
+      loadDash(); pSvc=null;
+
+    }else{
+      // Provider returned failure — do NOT debit wallet
+      await txRef2.update({status:'failed', apiCode:respCode, apiDesc:respDesc, apiResponse:JSON.stringify(apiResult||{}).slice(0,800)});
+      let errDetail = respDesc || '';
+      if(apiResult?.raw) errDetail += ' Raw: '+String(apiResult.raw).slice(0,200);
+      console.error('[EXEC] Transaction failed. Code:',respCode,'Desc:',respDesc,'Full:',apiResult);
+      showApiError(type, amt, ref, respCode, errDetail, apiResult);
+    }
+
+  }catch(er){
+    await txRef2.update({status:'failed', error:er.message});
+    toast('Error: '+er.message);
+    console.error('[EXEC] Exception:', er);
   }
+}
 
-  console.log('[NBS] HTTP', res.status, '| Raw (first 500):', raw.slice(0,500));
+function showApiError(type, amt, ref, code, desc, raw){
+  // Always show toast first so user sees something even if modal fails
+  toast('Failed: '+(desc||code||'Transaction error'));
+  console.error('[showApiError] type:',type,'code:',code,'desc:',desc,'raw:',JSON.stringify(raw));
+  const el = document.getElementById('svc-body');
+  if(!el){ return; }
+  const rawStr = raw ? JSON.stringify(raw, null, 2) : 'No response body';
+  closeM('m-svc');
+  setTimeout(()=>{
+    openM('m-svc');
+    const svcTtl=document.getElementById('svc-ttl');if(svcTtl)svcTtl.textContent='Transaction Failed';
+    el.innerHTML=`
+    <div style="text-align:center;padding:10px 0 6px">
+      <div style="font-size:44px">⚠️</div>
+      <div style="font-weight:800;font-size:18px;color:#dc2626;margin:6px 0">Transaction Failed</div>
+      <div style="font-size:12px;color:var(--g500);margin-bottom:14px">${type.toUpperCase()} · NGN ${fmt(amt)}</div>
+    </div>
+    <div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:800;color:#dc2626;letter-spacing:.05em;margin-bottom:4px">API ERROR RESPONSE</div>
+      <div style="font-weight:700;font-size:14px;color:#dc2626">${desc||'Transaction could not be completed'}</div>
+      ${code?`<div style="font-size:12px;color:#dc2626;margin-top:4px">Status Code: <strong>${code}</strong></div>`:''}
+      <div style="font-size:11px;color:var(--g500);margin-top:4px">Ref: ${ref}</div>
+    </div>
+    <div style="font-size:13px;font-weight:700;color:var(--g700);margin-bottom:8px">Your wallet was NOT debited.</div>
+    <details style="margin-bottom:16px">
+      <summary style="font-size:12px;cursor:pointer;color:var(--g500);display:flex;align-items:center;gap:5px">🗂 Raw API Response</summary>
+      <pre style="background:#f8fafc;border-radius:8px;padding:10px;font-size:11px;overflow-x:auto;margin-top:6px;max-height:150px">${rawStr.slice(0,600)}</pre>
+    </details>
+    <button onclick="closeM('m-svc')" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Close</button>`;
+  }, 100);
+}
 
-  // Parse response — NBS returns pipe-delimited or JSON depending on endpoint
-  let result;
+// ===== NELLOBYTESYSTEMS API CONFIG =====
+// Provider: Nellobytesystems | Docs: https://www.nellobytesystems.com/APIDocs.asp
+// All credentials stored in Firestore → settings/apiconfig (admin-only read)
+// Users NEVER see API keys — all calls go through admin-controlled config
+
+const API_DEFAULTS = {
+  providerName : 'Nellobytesystems',
+  baseUrl      : 'https://www.nellobytesystems.com/',
+  userId       : 'CK100352389',
+  apiKey       : '',   // entered by admin after deployment
+  callbackUrl  : '',
+  enabled      : true,
+  endpoints    : {
+    airtime     : 'APIAirtimeV1.asp',
+    data        : 'APIDatabundleV1.asp',
+    cable       : 'APICableTVV1.asp',
+    electricity : 'APIElectricityV1.asp',
+    balance     : 'APIWalletBalance.asp',
+    dataPlans   : 'APIDataBundlePlansV1.asp',
+    cablePlans  : 'APICableTVPlansV1.asp'
+  }
+};
+
+// Runtime config (loaded from Firestore, never exposed to users)
+const API_CFG = Object.assign({}, API_DEFAULTS);
+
+// Load config from Firestore (admin-only document)
+async function loadApiConfig(){
   try{
-    result = JSON.parse(raw);
-  }catch(e){
-    // NBS pipe-delimited: STATUS|TRANSID|DETAILS
-    const parts = raw.trim().split('|');
-    result = { raw, parts, STATUS: parts[0], TRANSID: parts[1], DETAILS: parts[2] };
+    const s = await db.collection('settings').doc('apiconfig').get();
+    if(s.exists){
+      const d = s.data();
+      if(d.providerName) API_CFG.providerName = d.providerName;
+      if(d.baseUrl)      API_CFG.baseUrl      = String(d.baseUrl).trim().replace(/\/+$/,'')+'/';
+      if(d.userId)       API_CFG.userId       = String(d.userId).trim();
+      if(d.apiKey)       API_CFG.apiKey       = String(d.apiKey).trim();
+      if(d.callbackUrl)  API_CFG.callbackUrl  = String(d.callbackUrl).trim();
+      if(typeof d.enabled !== 'undefined') API_CFG.enabled = !!d.enabled;
+      if(d.endpoints)    Object.assign(API_CFG.endpoints, d.endpoints);
+    }
+  }catch(e){ console.warn('[API] Config load error:',e.message); }
+  return API_CFG;
+}
+
+// Generate unique RequestID per transaction
+function genRequestId(){
+  return 'ZMN'+Date.now()+Math.floor(Math.random()*100000);
+}
+function txRef(){ return genRequestId(); }
+
+// ── Core API fetch (GET with query params — no CORS proxy needed) ──
+// Logs every request + response to Firestore api_logs collection
+async function apiFetch(endpointKey, params={}, txMeta={}){
+  await loadApiConfig();
+  if(!API_CFG.enabled){
+    throw new Error('API is currently disabled by admin. Please try again later.');
+  }
+  if(!API_CFG.apiKey){
+    throw new Error('API Key not configured. Admin must set the API Key in API Settings.');
+  }
+  const endpoint = API_CFG.endpoints[endpointKey] || endpointKey;
+  const url      = API_CFG.baseUrl + endpoint;
+  const allParams = Object.assign({
+    UserID : API_CFG.userId,
+    APIKey : API_CFG.apiKey,
+    output : 'JSON'
+  }, params);
+  const qs  = Object.entries(allParams).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+  const fullUrl = url + '?' + qs;
+  const safeUrl = fullUrl.replace(API_CFG.apiKey, '***HIDDEN***');
+  console.log('[API] →', endpointKey, safeUrl);
+
+  const logRef = db.collection('api_logs').doc();
+  const logData = {
+    requestId   : params.RequestID || allParams.RequestID || '',
+    provider    : API_CFG.providerName,
+    endpoint    : endpointKey,
+    url         : safeUrl,
+    params      : Object.assign({}, allParams, {APIKey:'***HIDDEN***'}),
+    status      : 'pending',
+    userId      : txMeta.userId || (CU?.uid||''),
+    type        : txMeta.type   || endpointKey,
+    amount      : txMeta.amount || 0,
+    createdAt   : firebase.firestore.FieldValue.serverTimestamp()
+  };
+  await logRef.set(logData).catch(()=>{});
+
+  let raw='', parsed=null, httpStatus=0;
+  try{
+    const res = await fetch(fullUrl);
+    httpStatus = res.status;
+    raw = await res.text();
+    console.log('[API] ← HTTP', httpStatus, raw.slice(0,300));
+    try{ parsed = JSON.parse(raw); }catch(e){ parsed = { status: raw.trim(), raw }; }
+  }catch(netErr){
+    await logRef.update({ status:'net_error', error:netErr.message, respondedAt:firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
+    throw new Error('Network error: '+netErr.message);
   }
 
   await logRef.update({
-    status: result.STATUS||result.status||'unknown',
-    response: raw.slice(0,1000),
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
+    httpStatus,
+    rawResponse : raw.slice(0,1500),
+    parsed      : parsed ? JSON.stringify(parsed).slice(0,2000) : '',
+    status      : 'completed',
+    respondedAt : firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(()=>{});
 
-  console.log('[NBS] Parsed response:', JSON.stringify(result).slice(0,400));
-  result._requestId = requestId;
-  return result;
+  return parsed;
 }
 
-// NBS success check — STATUS==='00' means success
-function nbsIsSuccess(result){
-  return result?.STATUS==='00' || result?.STATUS==='000' || result?.status==='success' || result?.status==='00';
+// ── Success detection for Nellobytesystems responses ──
+function isApiSuccess(res){
+  if(!res) return false;
+  const st   = String(res.status||res.Status||res.statuscode||res.StatusCode||res.code||'').toLowerCase();
+  const sc   = String(res.statuscode||res.StatusCode||'').toLowerCase();
+  const msg  = String(res.message||res.Message||res.description||'').toLowerCase();
+
+  // ── Nellobytesystems success codes (from real API responses) ──
+  // statuscode=100 + status=ORDER_RECEIVED = airtime/data accepted
+  // statuscode=100 + status=ORDER_QUEUED   = queued for processing
+  // statuscode=200 + status=SUCCESSFUL     = completed
+  const NBS_SUCCESS_CODES   = ['100','200','00','0'];
+  const NBS_SUCCESS_STATUSES= ['order_received','order_queued','successful','success','completed','delivered'];
+  const NBS_FAIL_STATUSES   = ['invalid','missing','error','failed','unauthorized','insufficient','unknown'];
+
+  const codeOk   = NBS_SUCCESS_CODES.some(c => sc===c);
+  const statusOk = NBS_SUCCESS_STATUSES.some(s => st.includes(s));
+  const isFail   = NBS_FAIL_STATUSES.some(f => st.includes(f) || msg.includes(f));
+
+  const ok = !isFail && (codeOk || statusOk);
+  console.log('[isApiSuccess] st='+st+' sc='+sc+' codeOk='+codeOk+' statusOk='+statusOk+' isFail='+isFail+' → '+ok);
+  return ok;
 }
 
-// Legacy vtpFetch wrapper — maps old VTPass calls into NBS equivalents
-async function vtpFetch(path, options={}){
-  await getNBS();
-  // Map old VTPass paths to NBS endpoints
-  const endpointMap = {
-    'pay': null, // handled by individual service funcs
-    'service-categories': NBS.endpoints.airtime,
-    'service-variations': NBS.endpoints.data
+function getApiStatusLabel(res){
+  // Human-readable label for NBS statuses shown in receipts/history
+  const st = String(res?.status||res?.Status||'').toUpperCase();
+  const labels = {
+    'ORDER_RECEIVED':'Processing','ORDER_QUEUED':'Queued',
+    'SUCCESSFUL':'Successful','COMPLETED':'Completed','DELIVERED':'Delivered'
   };
-  console.log('[NBS] vtpFetch alias called for path:', path);
-  // For diagnostics, just return a mock success so old code doesn't crash
-  return { STATUS: '00', content: { varations: [] } };
+  return labels[st] || st || 'Processed';
 }
 
-// ── Network map (already defined as NBS_NETWORK_MAP above) ──
-const NET_MAP={
-  'MTN':    {airtime:'mtn',       data:'mtn-data'},
-  'Airtel': {airtime:'airtel',    data:'airtel-data'},
-  'Glo':    {airtime:'glo',       data:'glo-data'},
-  '9mobile':{airtime:'etisalat',  data:'etisalat-data'}
-};
+function getApiError(res){
+  if(!res) return 'No response from API provider.';
+  return res.message || res.Message || res.description || res.status || JSON.stringify(res).slice(0,120);
+}
 
-const planCache={};
-let currentNetworkId=null;
-let currentPlanMeta={};
+// ── Plan fetching ──
+const planCache = {};
+let currentNetworkId = null;
+let currentPlanMeta  = {};
 
 async function fetchDataPlans(){}
 
+// ── Nellobytesystems plan extractor ──
+// Data response:  {"MOBILE_NETWORK":{"MTN":[{"ID":"01","PRODUCT":[{PRODUCT_SNO,PRODUCT_CODE,PRODUCT_NAME,PRODUCT_AMOUNT}]}]}}
+// Cable response: {"CABLE_TV":{"DSTV":[{"ID":"01","PRODUCT":[{PRODUCT_SNO,PRODUCT_CODE,PRODUCT_NAME,PRODUCT_AMOUNT}]}]}}
+function extractNBSPlans(res, networkId){
+  if(!res || typeof res !== 'object') return [];
+  console.log('[NBS] extractNBSPlans for:', networkId, '| keys:', Object.keys(res));
+
+  // ── Format 1: MOBILE_NETWORK or CABLE_TV wrapper ──
+  const wrapperKey = Object.keys(res).find(k => /MOBILE_NETWORK|CABLE_TV|NETWORK/i.test(k));
+  if(wrapperKey){
+    const wrapper = res[wrapperKey];
+    console.log('[NBS] Found wrapper:', wrapperKey, '| inner keys:', Object.keys(wrapper||{}));
+    // Find the network key inside (MTN, AIRTEL, GLO, ETISALAT, DSTV, etc.)
+    const netKey = Object.keys(wrapper).find(k =>
+      k.toUpperCase() === networkId.toUpperCase() ||
+      networkId.toUpperCase().includes(k.toUpperCase()) ||
+      k.toUpperCase().includes(networkId.toUpperCase())
+    ) || Object.keys(wrapper)[0];
+    if(netKey && Array.isArray(wrapper[netKey])){
+      const providers = wrapper[netKey]; // array of provider objects
+      console.log('[NBS] Provider array length:', providers.length);
+      // Each provider has PRODUCT array
+      // CRITICAL: read the ID field — this is the MobileNetwork value for purchases
+      const allPlans = [];
+      providers.forEach(prov => {
+        // Store provider ID so purchases use the right code
+        const provId = prov.ID || prov.id || prov.NetworkID || prov.network_id;
+        if(provId){
+          nbsNetworkIds[networkId] = String(provId);
+          nbsNetworkIds[netKey]    = String(provId);
+          console.log('[NBS] Stored purchase ID for', networkId, '→', provId);
+        }
+        const products = prov.PRODUCT || prov.products || prov.Plans || [];
+        console.log('[NBS] Provider:', JSON.stringify(prov).slice(0,80), '| products:', products.length);
+        products.forEach((prod,idx) => {
+          // Log first plan so we can see exact field values
+          if(idx===0) console.log('[NBS] First product raw:', JSON.stringify(prod));
+          // PRODUCT_CODE is what NBS DataPlan param expects
+          // Fall back to PRODUCT_SNO if PRODUCT_CODE is missing/empty
+          const pcode = prod.PRODUCT_CODE || prod.product_code || prod.code || prod.PRODUCT_SNO || prod.SNO || String(idx+1);
+          allPlans.push({
+            variation_code   : String(pcode),
+            variation_sno    : String(prod.PRODUCT_SNO || prod.SNO || ''),
+            variation_name   : String(prod.PRODUCT_NAME || prod.product_name || prod.name || prod.PLAN || ''),
+            variation_amount : String(prod.PRODUCT_AMOUNT || prod.product_amount || prod.price || prod.AMOUNT || 0),
+            description      : String(prod.PRODUCT_NAME || prod.product_name || prod.name || '')
+          });
+        });
+      });
+      if(allPlans.length) return allPlans;
+    }
+  }
+
+  // ── Format 2: direct array ──
+  if(Array.isArray(res)){
+    return res.map(p => ({
+      variation_code   : String(p.PRODUCT_CODE||p.DataPlanID||p.PlanID||p.id||p.code||''),
+      variation_name   : String(p.PRODUCT_NAME||p.DataPlan||p.Plan||p.name||''),
+      variation_amount : String(p.PRODUCT_AMOUNT||p.Price||p.price||p.Amount||0),
+      description      : String(p.PRODUCT_NAME||p.DataPlan||p.Plan||p.name||'')
+    }));
+  }
+
+  // ── Format 3: any key containing an array ──
+  for(const key of Object.keys(res)){
+    if(Array.isArray(res[key]) && res[key].length > 0){
+      const first = res[key][0];
+      if(typeof first === 'object' && first !== null){
+        console.log('[NBS] Fallback array under key:', key, '| sample:', JSON.stringify(first).slice(0,100));
+        return res[key].map(p => ({
+          variation_code   : String(p.PRODUCT_CODE||p.DataPlanID||p.PlanID||p.code||p.id||''),
+          variation_name   : String(p.PRODUCT_NAME||p.DataPlan||p.Plan||p.name||''),
+          variation_amount : String(p.PRODUCT_AMOUNT||p.Price||p.price||p.Amount||0),
+          description      : String(p.PRODUCT_NAME||p.DataPlan||p.Plan||p.name||'')
+        }));
+      }
+    }
+  }
+  return [];
+}
+
 async function fetchPlansForNetwork(networkId){
-  if(!networkId)return;
-  currentNetworkId=networkId;
-  const sel=document.getElementById('s-amt');
-  const loadEl=document.getElementById('data-loading');
-  const infoEl=document.getElementById('data-info');
-  if(!sel)return;
+  if(!networkId) return;
+  currentNetworkId = networkId;
+  const sel    = document.getElementById('s-amt');
+  const loadEl = document.getElementById('data-loading');
+  const infoEl = document.getElementById('data-info');
+  if(!sel) return;
+  if(planCache[networkId]){ renderPlans(planCache[networkId], sel, infoEl); return; }
+  if(loadEl){ loadEl.style.display='block'; loadEl.textContent='⏳ Loading plans...'; }
+  sel.innerHTML = '<option value="">Loading plans...</option>';
 
-  // Clear cache if needed
-  if(planCache[networkId]){renderPlans(planCache[networkId],sel,infoEl);return;}
-
-  if(loadEl){loadEl.style.display='block';loadEl.textContent='⏳ Loading plans...';}
-  sel.innerHTML='<option value="">Loading plans...</option>';
+  console.log('[PLANS] Fetching plans for network:', networkId);
 
   try{
-    const json=await vtpFetch('service-variations?serviceID='+networkId,{headers:vtpGetHeaders()});
-    if(loadEl)loadEl.style.display='none';
+    const res = await apiFetch('dataPlans', { MobileNetwork: networkId });
+    if(loadEl) loadEl.style.display='none';
 
-    const variations=json?.content?.varations||json?.content?.variations||[];
-    if(variations.length){
-      planCache[networkId]=variations;
-      renderPlans(variations,sel,infoEl);
-    }else{
-      sel.innerHTML='<option value="">No plans available for this network</option>';
-      if(infoEl){infoEl.style.display='block';infoEl.textContent='⚠ No plans returned for '+networkId+'. Check your Nellobytesystems account balance and API Key.';}
-      console.warn('[VTP] No variations for',networkId,'Full:',json);
+    // ── Full raw response log ──
+    console.log('[PLANS] Raw response type:', typeof res);
+    console.log('[PLANS] Raw response:', JSON.stringify(res));
+    if(res && typeof res === 'object') console.log('[PLANS] Response keys:', Object.keys(res));
+
+    // ── Smart multi-format extractor ──
+    // Nellobytesystems may wrap plans in different keys — probe every possibility
+    let plans = null;
+    if(Array.isArray(res)){
+      plans = res;
+      console.log('[PLANS] Format: top-level array, length:', plans.length);
+    } else if(res && typeof res === 'object'){
+      // Try every known wrapper key
+      const keys = Object.keys(res);
+      console.log('[PLANS] Probing object keys:', keys);
+      for(const key of keys){
+        if(Array.isArray(res[key]) && res[key].length > 0){
+          plans = res[key];
+          console.log('[PLANS] Found array under key "'+key+'", length:', plans.length);
+          break;
+        }
+      }
+      // Still nothing — check for nested object one level deeper
+      if(!plans){
+        for(const key of keys){
+          if(res[key] && typeof res[key]==='object' && !Array.isArray(res[key])){
+            const subKeys = Object.keys(res[key]);
+            for(const sk of subKeys){
+              if(Array.isArray(res[key][sk]) && res[key][sk].length > 0){
+                plans = res[key][sk];
+                console.log('[PLANS] Found array under key "'+key+'.'+sk+'", length:', plans.length);
+                break;
+              }
+            }
+          }
+          if(plans) break;
+        }
+      }
+    }
+
+    console.log('[PLANS] Extracted plans count:', plans ? plans.length : 0);
+    if(plans && plans.length > 0){
+      console.log('[PLANS] First plan sample:', JSON.stringify(plans[0]));
+    }
+
+    // ── Nellobytesystems specific extractor ──
+    // Response: {"MOBILE_NETWORK":{"MTN":[{"ID":"01","PRODUCT":[{PRODUCT_SNO,PRODUCT_CODE,PRODUCT_NAME,PRODUCT_AMOUNT}]}]}}
+    const norm = extractNBSPlans(res, networkId);
+    console.log('[PLANS] Normalized plans count:', norm.length);
+    if(norm.length > 0){
+      console.log('[PLANS] Sample plan:', JSON.stringify(norm[0]));
+      planCache[networkId] = norm;
+      renderPlans(norm, sel, infoEl);
+    } else {
+      const rawStr = JSON.stringify(res).slice(0, 400);
+      sel.innerHTML = '<option value="">No plans returned</option>';
+      if(infoEl){
+        infoEl.style.display='block';
+        infoEl.style.color='#dc2626';
+        infoEl.innerHTML='<strong>⚠ No plans from provider for: '+networkId+'</strong><br/>'
+          +'<span style="font-size:11px;font-family:monospace;word-break:break-all">Raw: '+rawStr+'</span>';
+      }
+      console.warn('[PLANS] No plans extracted. Full response:', JSON.stringify(res));
     }
   }catch(e){
-    if(loadEl)loadEl.style.display='none';
-    sel.innerHTML='<option value="">⚠ Error — '+e.message.slice(0,60)+'</option>';
-    if(infoEl){infoEl.style.display='block';infoEl.style.color='#dc2626';infoEl.textContent='❌ '+e.message;}
-    console.error('[VTP] fetchPlansForNetwork('+networkId+') error:',e.message);
+    if(loadEl) loadEl.style.display='none';
+    sel.innerHTML = '<option value="">⚠ '+e.message.slice(0,60)+'</option>';
+    if(infoEl){ infoEl.style.display='block'; infoEl.style.color='#dc2626'; infoEl.textContent='❌ '+e.message; }
+    console.error('[PLANS] fetchPlansForNetwork error:', e.message, e);
   }
 }
 
+async function fetchCablePlans(provider){
+  const sel    = document.getElementById('s-amt');
+  const loadEl = document.getElementById('data-loading');
+  const infoEl = document.getElementById('data-info');
+  if(!sel) return;
+  const cacheKey = 'cable_'+provider;
+  if(planCache[cacheKey]){ renderPlans(planCache[cacheKey], sel, infoEl); return; }
+  if(loadEl){ loadEl.style.display='block'; loadEl.textContent='⏳ Loading packages...'; }
+  sel.innerHTML = '<option value="">Loading packages...</option>';
+  console.log('[PLANS] Fetching cable plans for:', provider);
+  try{
+    // NBS cable plans — try both param names
+    let res = await apiFetch('cablePlans', { NetworkID: provider });
+    // If empty, retry with MobileNetwork param
+    if(!res || (typeof res==='object' && !Array.isArray(res) && Object.values(res).every(v=>!v))){
+      console.log('[PLANS] Cable retry with MobileNetwork param');
+      res = await apiFetch('cablePlans', { MobileNetwork: provider });
+    }
+    if(loadEl) loadEl.style.display='none';
+    console.log('[PLANS] Cable raw response:', JSON.stringify(res));
+    const plans = extractPlansArray(res);
+    console.log('[PLANS] Cable plans count:', plans.length);
+    if(plans.length){
+      const norm = normalizePlans(plans);
+      planCache[cacheKey] = norm;
+      renderPlans(norm, sel, infoEl);
+    } else {
+      const rawStr = JSON.stringify(res).slice(0,300);
+      sel.innerHTML = '<option value="">No packages available</option>';
+      if(infoEl){ infoEl.style.display='block'; infoEl.style.color='#dc2626';
+        infoEl.innerHTML='<strong>⚠ No packages from provider for: '+provider+'</strong><br/>'
+          +'<span style="font-size:11px;font-family:monospace;word-break:break-all">Raw: '+rawStr+'</span>'; }
+    }
+  }catch(e){
+    if(loadEl) loadEl.style.display='none';
+    sel.innerHTML = '<option value="">⚠ '+e.message.slice(0,60)+'</option>';
+    if(infoEl){ infoEl.style.display='block'; infoEl.style.color='#dc2626'; infoEl.textContent='❌ '+e.message; }
+    console.error('[PLANS] fetchCablePlans error:', e.message);
+  }
+}
 
-function renderPlans(plans,sel,infoEl){
-  currentPlanMeta={};
-  sel.innerHTML='<option value="">-- Select a plan --</option>';
+// ── Shared helpers ──
+function extractPlansArray(res){
+  if(!res) return [];
+  if(Array.isArray(res)) return res;
+  if(typeof res !== 'object') return [];
+  for(const key of Object.keys(res)){
+    if(Array.isArray(res[key]) && res[key].length > 0) return res[key];
+  }
+  // one level deeper
+  for(const key of Object.keys(res)){
+    if(res[key] && typeof res[key]==='object' && !Array.isArray(res[key])){
+      for(const sk of Object.keys(res[key])){
+        if(Array.isArray(res[key][sk]) && res[key][sk].length > 0) return res[key][sk];
+      }
+    }
+  }
+  return [];
+}
+function normalizePlans(plans){
+  if(!plans.length) return [];
+  const s = plans[0];
+  const sk = Object.keys(s);
+  const idF    = sk.find(k=>/planid|dataid|bundleid|id$/i.test(k)) || sk[0];
+  const nameF  = sk.find(k=>/plan|data|bundle|name/i.test(k)&&!/id|price|amt/i.test(k)) || sk[1];
+  const priceF = sk.find(k=>/price|amt|cost|amount/i.test(k)) || sk[2];
+  return plans.map(p=>({
+    variation_code   : String(p[idF]||p.DataPlanID||p.PlanID||p.id||''),
+    variation_name   : String(p[nameF]||p.DataPlan||p.Plan||p.name||''),
+    variation_amount : String(p[priceF]||p.Price||p.price||p.Amount||0),
+    description      : String(p[nameF]||p.DataPlan||p.Plan||p.name||'')
+  }));
+}
+
+function renderPlans(plans, sel, infoEl){
+  currentPlanMeta = {};
+  sel.innerHTML = '<option value="">-- Select a plan --</option>';
   plans.forEach(p=>{
-    const name=p.name||p.variation_name||'';
-    const price=parseFloat(p.variation_amount||p.price||0);
-    const code=p.variation_code||p.code||'';
-    // Extract validity from name or description
-    let validity='';
-    const src=(name+' '+(p.description||'')).toLowerCase();
-    const dayMatch=src.match(/(\d+)\s*day/i);
-    const monthMatch=src.match(/(\d+)\s*month/i);
-    const hrMatch=src.match(/(\d+)\s*hour/i);
-    if(hrMatch)validity=hrMatch[1]+' Hours';
-    else if(dayMatch)validity=dayMatch[1]+' Days';
-    else if(monthMatch)validity=monthMatch[1]+' Month'+(parseInt(monthMatch[1])>1?'s':'');
-    const label=name+(validity?' ('+validity+')':'')+' — NGN '+fmt(price);
-    const opt=document.createElement('option');
-    opt.value=price;
-    opt.dataset.code=code;
-    opt.dataset.validity=validity;
-    opt.dataset.name=name;
-    opt.textContent=label;
+    const name  = p.variation_name||'';
+    const price = parseFloat(p.variation_amount||0);
+    const code  = p.variation_code||'';
+    const src   = (name+' '+(p.description||'')).toLowerCase();
+    const dm=src.match(/(\d+)\s*day/i), mm=src.match(/(\d+)\s*month/i), hm=src.match(/(\d+)\s*hour/i);
+    const validity = hm?hm[1]+' Hours':dm?dm[1]+' Days':mm?mm[1]+' Month'+(parseInt(mm[1])>1?'s':''):'';
+    const opt = document.createElement('option');
+    opt.value = price;
+    opt.dataset.code     = p.variation_code  || code;
+    opt.dataset.sno      = p.variation_sno   || '';
+    opt.dataset.validity = validity;
+    opt.dataset.name     = name;
+    opt.textContent      = name+(validity?' ('+validity+')':'')+' — NGN '+fmt(price);
     sel.appendChild(opt);
-    currentPlanMeta[price+'_'+code]={code,name,validity,price};
+    currentPlanMeta[price+'_'+code] = {code, name, validity, price};
   });
-  if(infoEl){infoEl.style.display='none';}
+  if(infoEl) infoEl.style.display='none';
 }
 
 function updateDataAmt(sel){
-  const opt=sel.options[sel.selectedIndex];
-  const infoEl=document.getElementById('data-info');
-  if(opt&&opt.dataset.name&&infoEl){
-    const v=opt.dataset.validity;
+  const opt   = sel.options[sel.selectedIndex];
+  const infoEl= document.getElementById('data-info');
+  if(opt && opt.dataset.name && infoEl){
     infoEl.style.display='block';
-    infoEl.innerHTML='<strong>'+opt.dataset.name+'</strong>'+(v?' &nbsp;|&nbsp; Validity: <strong>'+v+'</strong>':'');
-  }else if(infoEl)infoEl.style.display='none';
+    infoEl.innerHTML='<strong>'+opt.dataset.name+'</strong>'+(opt.dataset.validity?' &nbsp;|&nbsp; Validity: <strong>'+opt.dataset.validity+'</strong>':'');
+  } else if(infoEl) infoEl.style.display='none';
+}
+
+// ── Network map ──
+// purchaseId = the MobileNetwork value NBS accepts for purchases
+// Plans response reveals actual IDs via {"MOBILE_NETWORK":{"MTN":[{"ID":"01",...}]}}
+// These IDs are stored in nbsNetworkIds at runtime when plans load
+const nbsNetworkIds = {}; // populated by extractNBSPlans: networkName → purchaseId
+
+const NET_MAP = {
+  'MTN'    :{ airtime:'MTN',      data:'MTN'      },
+  'Airtel' :{ airtime:'Airtel',   data:'Airtel'   },
+  'Glo'    :{ airtime:'Glo',      data:'Glo'      },
+  '9mobile':{ airtime:'Etisalat', data:'Etisalat' }
+};
+
+// Known Nellobytesystems network IDs for purchases
+// Discovered from plans response: {"MOBILE_NETWORK":{"MTN":[{"ID":"01",...}]}}
+// These are used when plans haven't been fetched yet (e.g. airtime purchases)
+const NBS_NET_IDS = {
+  'MTN'    :'01', 'mtn'    :'01',
+  'GLO'    :'02', 'glo'    :'02', 'Glo':'02',
+  'AIRTEL' :'03', 'airtel' :'03', 'Airtel':'03',
+  'ETISALAT':'04','etisalat':'04', 'Etisalat':'04', '9mobile':'04', '9MOBILE':'04'
+};
+
+// Resolve actual purchase network ID:
+// 1. Use ID discovered from plans response (most accurate)
+// 2. Fall back to hardcoded known IDs
+// 3. Fall back to the name itself
+function resolveNetworkId(name){
+  const fromPlans = nbsNetworkIds[name] || nbsNetworkIds[name.toUpperCase()];
+  const hardcoded = NBS_NET_IDS[name];
+  const result    = fromPlans || hardcoded || name;
+  console.log('[resolveNetworkId]', name, '→', result, fromPlans?'(from plans)':hardcoded?'(hardcoded)':'(fallback)');
+  return result;
 }
 
 function selNet(btn){
-  btn.closest('div').querySelectorAll('button').forEach(b=>{b.style.borderColor='var(--g200)';b.style.background='#fff';});
-  btn.style.borderColor='var(--green)';btn.style.background='var(--green-xl)';
-  const netName=btn.textContent.trim();
-  const netEntry=NET_MAP[netName];
-  if(netEntry){
-    // For data panels, fetch plans using the data serviceID
-    fetchPlansForNetwork(netEntry.data);
-  }
-}
-
-// Generate unique transaction reference
-function txRef(){return 'ZMN'+Date.now()+Math.floor(Math.random()*10000);}
-
-async function execSvc({type,amt,extra,useRewards}){
-  if(!CU)return;
-  const s=await db.collection('users').doc(CU.uid).get();
-  const ud=s.data()||{};
-  const rwBal=ud.rewardsBalance||0;
-  if(useRewards){
-    if(rwBal<amt){toast('Insufficient rewards balance.');return;}
-  }else{
-    if((ud.balance||0)<amt){toast('Insufficient balance. Please fund your wallet.');return;}
-  }
-  const descs={airtime:'Airtime Purchase',data:'Data Subscription',cable:'Cable TV Subscription',electricity:'Electricity Payment',result:'Result Checker PIN'};
-  const ref=txRef();
-  // Save pending transaction
-  const txRef2=await db.collection('transactions').add({
-    userId:CU.uid,type,amount:amt,
-    description:(extra&&extra.planName)?extra.planName:descs[type]||type,
-    status:'pending',ref,extra:extra||{},
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
-  });
-  try{
-    let vtpResult=null;
-    if(type==='airtime'){
-      vtpResult=await vtpAirtime(extra.phone,extra.networkId,amt,ref);
-    }else if(type==='data'){
-      vtpResult=await vtpData(extra.phone,extra.networkId,extra.variationCode,amt,ref);
-    }else if(type==='cable'){
-      vtpResult=await vtpCable(extra.smartcard,extra.serviceId,extra.variationCode,amt,ref);
-    }else if(type==='electricity'){
-      vtpResult=await vtpElectricity(extra.meter,extra.serviceId,extra.meterType,amt,ref);
-    }else if(type==='result'){
-      vtpResult=await vtpResult2(extra.serviceId,extra.variationCode,amt,ref);
-    }
-    const success=vtpResult&&(vtpResult.code==='000'||vtpResult.content?.transactions?.status==='delivered');
-    if(success){
-      if(useRewards){
-        await db.collection('users').doc(CU.uid).update({rewardsBalance:firebase.firestore.FieldValue.increment(-amt)});
-      }else{
-        await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-amt)});
+  btn.closest('div').querySelectorAll('button').forEach(b=>{ b.style.borderColor='var(--g200)'; b.style.background='#fff'; });
+  btn.style.borderColor='var(--green)'; btn.style.background='var(--green-xl)';
+  const netName = btn.textContent.trim();
+  const entry   = NET_MAP[netName];
+  const amtEl   = document.getElementById('s-amt');
+  if(entry){
+    if(amtEl && amtEl.tagName==='SELECT'){
+      // Data panel — fetch plans (also populates nbsNetworkIds)
+      fetchPlansForNetwork(entry.data);
+    } else {
+      // Airtime panel — silently pre-fetch to discover network ID
+      if(!nbsNetworkIds[entry.data]){
+        apiFetch('dataPlans',{MobileNetwork:entry.data},{type:'prefetch'})
+          .then(res=>{ if(res) extractNBSPlans(res, entry.data); })
+          .catch(()=>{});
       }
-      await txRef2.update({status:'success',nbsResponse:JSON.stringify(vtpResult).slice(0,500)});
-      // ── Cashback reward ──
-      try{
-        const rwSnap=await db.collection('settings').doc('rewards').get();
-        const rwCfg=rwSnap.exists?rwSnap.data():{cashbackEnabled:true,cashbackPct:1};
-        if(rwCfg.cashbackEnabled!==false){
-          const pct=(rwCfg.cashbackPct||1)/100;
-          const cashback=Math.round(amt*pct*100)/100;
-          if(cashback>0){
-            await db.collection('users').doc(CU.uid).update({
-              rewardsBalance:firebase.firestore.FieldValue.increment(cashback),
-              cashbackEarned:firebase.firestore.FieldValue.increment(cashback)
-            });
-            await db.collection('rewards').add({
-              userId:CU.uid,type:'cashback',amount:cashback,txId:txRef2.id,
-              description:'1% cashback on '+((extra&&extra.planName)?extra.planName:descs[type]),
-              createdAt:firebase.firestore.FieldValue.serverTimestamp()
-            });
-            await addNotif(CU.uid,'Cashback Credited! 🎖','You earned NGN '+fmt(cashback)+' cashback on your '+((extra&&extra.planName)?extra.planName:descs[type])+' transaction.');
-          }
-        }
-      }catch(e){console.warn('Cashback error',e);}
-      await addNotif(CU.uid,'Transaction Successful',(extra&&extra.planName?extra.planName:descs[type])+' of NGN '+fmt(amt)+' was successful.');
-      toast('Transaction successful!');
-      // Show receipt
-      showReceipt({type,amt,extra,ref,descs,vtpResult,cashback:0});
-      loadDash();pSvc=null;
-    }else{
-      await txRef2.update({status:'failed',nbsResponse:JSON.stringify(vtpResult||{}).slice(0,500)});
-      const errMsg=(vtpResult&&vtpResult.response_description)||'Transaction could not be completed. Please try again.';
-      toast('Failed: '+errMsg);
     }
-  }catch(er){
-    await txRef2.update({status:'failed',error:er.message});
-    toast('Transaction error: '+er.message);
   }
 }
-
-// ══════════════════════════════════════════════════════════════
-//  VTPASS API — FULL AUDIT FIX
-//  Root causes fixed:
-//  1. Airtime was using 'mtn-data' instead of 'mtn' as serviceID
-//  2. Keys not reloaded from Firestore before each call
-//  3. Electricity missing phone field, used email instead
-//  4. Success detection missed response_description='000'
-//  5. No detailed error logging or display
-//  6. Sandbox URL was using wrong path format
-// ══════════════════════════════════════════════════════════════
-
-async function execSvc({type,amt,extra,useRewards}){
-  if(!CU)return;
-  await getVTP(); // Refresh keys from Firestore every time
-  const s=await db.collection('users').doc(CU.uid).get();
-  const ud=s.data()||{};
-  const rwBal=ud.rewardsBalance||0;
-  if(useRewards){
-    if(rwBal<amt){toast('Insufficient rewards balance.');return;}
-  }else{
-    if((ud.balance||0)<amt){toast('Insufficient balance. Please fund your wallet.');return;}
-  }
-  const descs={airtime:'Airtime Purchase',data:'Data Subscription',cable:'Cable TV Subscription',electricity:'Electricity Payment',result:'Result Checker PIN'};
-  const ref=txRef();
-  console.log('[VTP] Starting transaction:',type,'Amount:',amt,'Ref:',ref,'Extra:',JSON.stringify(extra));
-
-  const txRef2=await db.collection('transactions').add({
-    userId:CU.uid,type,amount:amt,
-    description:(extra&&extra.planName)?extra.planName:descs[type]||type,
-    status:'pending',ref,extra:extra||{},
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  try{
-    let vtpResult=null;
-    if(type==='airtime'){
-      vtpResult=await vtpAirtime(extra.phone,extra.networkId,amt,ref);
-    }else if(type==='data'){
-      vtpResult=await vtpData(extra.phone,extra.networkId,extra.variationCode,amt,ref);
-    }else if(type==='cable'){
-      vtpResult=await vtpCable(extra.smartcard,extra.serviceId,extra.variationCode,amt,ref);
-    }else if(type==='electricity'){
-      vtpResult=await vtpElectricity(extra.meter,extra.serviceId,extra.meterType,amt,ref,extra.custPhone);
-    }else if(type==='result'){
-      vtpResult=await vtpResultChecker(extra.serviceId,extra.variationCode,amt,ref);
-    }
-
-    console.log('[NBS] Raw response:',JSON.stringify(vtpResult));
-
-    // NBS success: code==='000' OR transactions.status==='delivered' (normalized response)
-    const txStatus=vtpResult?.content?.transactions?.status;
-    const respCode=vtpResult?.code||vtpResult?.response_code||'';
-    const respDesc=vtpResult?.response_description||vtpResult?.content?.transactions?.response_description||'';
-    const success=(respCode==='000')||(txStatus==='delivered');
-
-    if(success){
-      if(useRewards){
-        await db.collection('users').doc(CU.uid).update({rewardsBalance:firebase.firestore.FieldValue.increment(-amt)});
-      }else{
-        await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-amt)});
-      }
-      await txRef2.update({status:'success',nbsCode:respCode,nbsDesc:respDesc,nbsResponse:JSON.stringify(vtpResult).slice(0,800)});
-      try{
-        const rwSnap=await db.collection('settings').doc('rewards').get();
-        const rwCfg=rwSnap.exists?rwSnap.data():{cashbackEnabled:true,cashbackPct:1};
-        if(rwCfg.cashbackEnabled!==false){
-          const pct=(rwCfg.cashbackPct||1)/100;
-          const cashback=Math.round(amt*pct*100)/100;
-          if(cashback>0){
-            await db.collection('users').doc(CU.uid).update({rewardsBalance:firebase.firestore.FieldValue.increment(cashback),cashbackEarned:firebase.firestore.FieldValue.increment(cashback)});
-            await addNotif(CU.uid,'Cashback Credited! 🎖','You earned NGN '+fmt(cashback)+' cashback on your '+((extra&&extra.planName)?extra.planName:descs[type])+' transaction.');
-          }
-        }
-      }catch(e){console.warn('Cashback error',e);}
-      await addNotif(CU.uid,'Transaction Successful',(extra&&extra.planName?extra.planName:descs[type])+' of NGN '+fmt(amt)+' was successful.');
-      toast('✅ Transaction successful!');
-      showReceipt({type,amt,extra,ref,descs,vtpResult,cashback:0});
-      loadDash();pSvc=null;
-    }else{
-      await txRef2.update({status:'failed',nbsCode:respCode,nbsDesc:respDesc,nbsResponse:JSON.stringify(vtpResult||{}).slice(0,800)});
-      // Build detailed, user-readable error
-      let errDetail='';
-      if(respCode)errDetail+=`Code: ${respCode}. `;
-      if(respDesc)errDetail+=respDesc;
-      else if(vtpResult?.content)errDetail+=JSON.stringify(vtpResult.content).slice(0,120);
-      else errDetail='No response from Nellobytesystems API. Check your API Key and account balance.';
-      console.error('[VTP] Transaction failed. Code:',respCode,'Desc:',respDesc,'Full:',vtpResult);
-      // Show detailed failure modal
-      showNBSError(type,amt,ref,respCode,errDetail,vtpResult);
-    }
-  }catch(er){
-    await txRef2.update({status:'failed',error:er.message});
-    console.error('[VTP] Network/parse error:',er);
-    toast('❌ Connection error: '+er.message+'. Check internet and try again.');
-  }
+function selCable(btn){
+  btn.closest('div').querySelectorAll('button').forEach(b=>{ b.style.borderColor='var(--g200)'; b.style.background='#fff'; });
+  btn.style.borderColor='var(--green)'; btn.style.background='var(--green-xl)';
+  const name = btn.textContent.trim().toUpperCase();
+  const svcId = name.includes('GOTV')?'GOTV':name.includes('STAR')?'STARTIMES':'DSTV';
+  fetchCablePlans(svcId);
 }
 
-// ── Show detailed VTPass error modal ──
-function showNBSError(type,amt,ref,code,desc,raw){
-  const m=document.createElement('div');
-  m.className='modal open';
-  m.innerHTML=`<div class="mbox" style="max-height:90vh;overflow-y:auto">
-    <div style="text-align:center;margin-bottom:16px">
-      <div style="font-size:40px;margin-bottom:8px">⚠️</div>
-      <div style="font-size:17px;font-weight:800;color:#dc2626">Transaction Failed</div>
-      <div style="font-size:12px;color:var(--g400);margin-top:4px">Service: ${type.toUpperCase()} · Amount: NGN ${fmt(amt)}</div>
-    </div>
-    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:11px;padding:14px;margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin-bottom:6px">Nellobytesystems API Error</div>
-      <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:4px">${desc||'Unknown error'}</div>
-      ${code?`<div style="font-size:11px;color:#b91c1c;margin-top:4px">Response Code: <strong>${code}</strong></div>`:''}
-      <div style="font-size:10px;color:var(--g400);margin-top:6px;word-break:break-all">Ref: ${ref}</div>
-    </div>
-    <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:14px">
-      <div style="font-size:11px;font-weight:700;color:var(--g600);margin-bottom:6px">Common Causes</div>
-      <ul style="font-size:12px;color:var(--g600);padding-left:16px;line-height:1.9;margin:0">
-        <li>Insufficient Nellobytesystems account balance</li>
-        <li>Invalid phone number or meter number provided</li>
-        <li>Variation code expired or invalid</li>
-        <li>API Key not matching your Nellobytesystems account</li>
-        <li>Check UserID matches CK100352389 in Admin → API Settings</li>
-      </ul>
-    </div>
-    <details style="margin-bottom:14px">
-      <summary style="font-size:12px;font-weight:600;color:var(--g500);cursor:pointer;padding:8px 0">📋 Raw API Response (for debugging)</summary>
-      <pre style="font-size:10px;background:#f1f5f9;border-radius:8px;padding:10px;overflow-x:auto;white-space:pre-wrap;color:var(--g700);margin-top:8px">${JSON.stringify(raw,null,2)}</pre>
-    </details>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button onclick="this.closest('.modal').remove()" style="padding:12px;border-radius:10px;background:var(--g100);border:1px solid var(--g200);font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Close</button>
-      <a href="https://www.nellobytesystems.com" target="_blank" style="padding:12px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:13px;font-weight:700;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">NBS Dashboard</a>
-    </div>
-  </div>`;
-  document.body.appendChild(m);
+// ── API purchase functions (wallet debited ONLY after success) ──
+async function apiAirtime(phone, network, amount, reqId){
+  const netId = resolveNetworkId(network);
+  console.log('[API] Airtime MobileNetwork resolved:', network, '→', netId);
+  return apiFetch('airtime',{
+    MobileNumber:phone,
+    MobileNetwork:netId,
+    Amount:amount,
+    RequestID:reqId
+  },{ type:'airtime', amount, userId:CU?.uid||'' });
+}
+async function apiData(phone, network, planCode, amount, reqId, planSno){
+  const netId = resolveNetworkId(network);
+  console.log('[API] Data → MobileNetwork:',netId,' DataPlan:',planCode,' SNO:',planSno);
+  return apiFetch('data',{
+    MobileNumber : phone,
+    MobileNetwork: netId,
+    DataPlan     : planCode,
+    Amount       : amount,
+    RequestID    : reqId
+  },{ type:'data', amount, userId:CU?.uid||'' });
+}
+async function apiCable(smartcard, provider, planCode, amount, reqId){
+  // Nellobytesystems cable params
+  return apiFetch('cable',{
+    SmartCardNo:smartcard,
+    CableNetwork:provider,
+    DataPlan:planCode,
+    Amount:amount,
+    RequestID:reqId
+  },{ type:'cable', amount, userId:CU?.uid||'' });
+}
+async function apiElectricity(meter, disco, meterType, amount, phone, reqId){
+  // Nellobytesystems electricity params
+  return apiFetch('electricity',{
+    MeterNo:meter,
+    DiscoNetwork:disco,
+    MeterType:meterType,
+    Amount:amount,
+    MobileNumber:phone,
+    RequestID:reqId
+  },{ type:'electricity', amount, userId:CU?.uid||'' });
 }
 
-// ══════════════════════════════════════════════════════════════
-//  NELLOBYTESYSTEMS PURCHASE FUNCTIONS (VTU — Airtime/Data/Cable/Electricity)
-// ══════════════════════════════════════════════════════════════
-
-// ════════════════════════════════════════════════════════════
-//  NELLOBYTESYSTEMS SERVICE PURCHASE FUNCTIONS
-// ════════════════════════════════════════════════════════════
-
-// Map VTPass network IDs to Nellobytesystems network codes
-const NBS_NETWORK_MAP = {
-  'mtn':'MTN', 'airtel':'AIRTEL', 'glo':'GLO', 'etisalat':'9MOBILE', '9mobile':'9MOBILE',
-  'mtn-data':'MTN', 'airtel-data':'AIRTEL', 'glo-data':'GLO', 'etisalat-data':'9MOBILE'
-};
-
-async function vtpAirtime(phone, serviceID, amount, requestRef){
-  const network = NBS_NETWORK_MAP[serviceID] || serviceID.toUpperCase();
-  const result = await nbsFetch(NBS.endpoints.airtime, {
-    MobileNetwork: network,
-    AirtimeType:   'VTU',
-    MobileNumber:  phone,
-    Amount:        String(amount),
-    CallBackURL:   NBS.callbackUrl || ''
-  });
-  // Normalize to VTPass-style response so existing success check works
-  return _normalizeNBSResponse(result, requestRef);
-}
-
-async function vtpData(phone, serviceID, variation_code, amount, requestRef){
-  const network = NBS_NETWORK_MAP[serviceID] || serviceID.replace('-data','').toUpperCase();
-  const result = await nbsFetch(NBS.endpoints.data, {
-    MobileNetwork: network,
-    DataPlan:      variation_code,
-    MobileNumber:  phone,
-    Amount:        String(amount),
-    CallBackURL:   NBS.callbackUrl || ''
-  });
-  return _normalizeNBSResponse(result, requestRef);
-}
-
-async function vtpCable(smartcard, serviceID, variation_code, amount, requestRef){
-  const result = await nbsFetch(NBS.endpoints.cable, {
-    CableNetwork:   serviceID.toUpperCase(),
-    SmartCardNo:    smartcard,
-    CablePlan:      variation_code,
-    Amount:         String(amount),
-    CallBackURL:    NBS.callbackUrl || ''
-  });
-  return _normalizeNBSResponse(result, requestRef);
-}
-
-async function vtpElectricity(meter, serviceID, variation_code, amount, requestRef, custPhone){
-  const phone = custPhone || UD?.phone || '08011111111';
-  const result = await nbsFetch(NBS.endpoints.electricity, {
-    ElectricCompany: serviceID.toUpperCase(),
-    MeterNumber:     meter,
-    MeterType:       variation_code === 'postpaid' ? 'POSTPAID' : 'PREPAID',
-    Amount:          String(amount),
-    MobileNumber:    phone,
-    CallBackURL:     NBS.callbackUrl || ''
-  });
-  return _normalizeNBSResponse(result, requestRef);
-}
-
-async function vtpResultChecker(serviceID, variation_code, amount, requestRef){
-  // Fallback for result checker — not a core NBS service
-  return _normalizeNBSResponse({STATUS:'00', TRANSID: requestRef, DETAILS:'ok'}, requestRef);
-}
-async function vtpResult2(serviceID, variation_code, amount, requestRef){
-  return vtpResultChecker(serviceID, variation_code, amount, requestRef);
-}
-
-// Normalize NBS response → VTPass-style so existing wallet debit logic works unchanged
-function _normalizeNBSResponse(result, requestRef){
-  const ok = nbsIsSuccess(result);
-  return {
-    code:                   ok ? '000' : result.STATUS || '099',
-    response_description:   result.DETAILS || result.message || (ok ? 'Successful' : 'Transaction failed'),
-    content: {
-      transactions: {
-        status:               ok ? 'delivered' : 'failed',
-        response_description: result.DETAILS || result.message || '',
-        transactionId:        result.TRANSID  || result._requestId || requestRef
-      }
-    },
-    _nbsRaw: result
-  };
+// ── Transaction status checker ──
+async function checkTxStatus(requestId){
+  return apiFetch('status',{ RequestID:requestId },{ type:'status_check' });
 }
 
 // HISTORY
@@ -2422,20 +2108,18 @@ const faqs=[
 function tFaq(i){const a=document.getElementById('fa'+i),ic=document.getElementById('fi'+i);const op=a.classList.toggle('open');ic.textContent=op?'−':'+';}
 
 // ADMIN
-let AD={users:[],txs:[],funds:[],pins:[],loans:[],investments:[],pwdResets:[]};
+let AD={users:[],txs:[],funds:[],pins:[],loans:[],investments:[]};
 async function loadAdmin(){
   const [us,tx,fn,pn,ls,ivs]=await Promise.all([db.collection('users').get(),db.collection('transactions').orderBy('createdAt','desc').limit(100).get(),db.collection('fundings').orderBy('createdAt','desc').get(),db.collection('pinRequests').where('status','==','pending').get(),db.collection('loans').orderBy('createdAt','desc').get(),db.collection('investments').orderBy('createdAt','desc').get()]);
   AD.users=us.docs.map(d=>({id:d.id,...d.data()}));AD.txs=tx.docs.map(d=>({id:d.id,...d.data()}));AD.funds=fn.docs.map(d=>({id:d.id,...d.data()}));AD.pins=pn.docs.map(d=>({id:d.id,...d.data()}));
   AD.loans=ls.docs.map(d=>({id:d.id,...d.data()}));
   AD.investments=ivs.docs.map(d=>({id:d.id,...d.data()}));
-  // Load password reset requests
-  try{const pr=await db.collection('passwordResets').orderBy('createdAt','desc').get();AD.pwdResets=pr.docs.map(d=>({id:d.id,...d.data()}));}catch(e){AD.pwdResets=[];}
   aTab('overview');
 }
 function aTab(tab){
   document.querySelectorAll('.anav').forEach(n=>n.classList.remove('on'));
   document.querySelectorAll('.anav').forEach(n=>{if(n.textContent.trim().toLowerCase().includes(tab.slice(0,4)))n.classList.add('on');});
-  document.getElementById('a-title').textContent={overview:'Overview',users:'Users',txs:'Transactions',funding:'Funding Requests',pins:'PIN Requests',promos:'Promo Slides',broadcast:'Broadcast',wallet:'Wallet Operations',vtpass:'API Settings (Nellobytesystems)',recovery:'Loan Recovery',['fin-nok']:'Next of Kin Verification'}[tab]||tab;
+  document.getElementById('a-title').textContent={overview:'Overview',users:'Users',txs:'Transactions',funding:'Funding Requests',pins:'PIN Requests',promos:'Promo Slides',broadcast:'Broadcast',wallet:'Wallet Operations',vtpass:'VTPass API',recovery:'Loan Recovery',['fin-nok']:'Next of Kin Verification'}[tab]||tab;
   const el=document.getElementById('a-content');
   const rev=AD.txs.reduce((s,t)=>s+(t.amount||0),0);
   if(tab==='overview')el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px;margin-bottom:16px"><div class="statc" style="background:linear-gradient(135deg,#15803d,#16a34a)"><div style="font-size:22px;margin-bottom:3px">👥</div><div style="font-size:26px;font-weight:800">${AD.users.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Total Users</div></div><div class="statc" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)"><div style="font-size:22px;margin-bottom:3px">💳</div><div style="font-size:26px;font-weight:800">${AD.txs.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Transactions</div></div><div class="statc" style="background:linear-gradient(135deg,#b45309,#d97706)"><div style="font-size:22px;margin-bottom:3px">💰</div><div style="font-size:20px;font-weight:800">NGN ${fmt(rev)}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Revenue</div></div><div class="statc" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)"><div style="font-size:22px;margin-bottom:3px">🔒</div><div style="font-size:26px;font-weight:800">${AD.pins.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">PIN Requests</div></div></div><div class="card" style="overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #f8fafc;font-weight:700;font-size:14px">Recent Transactions</div>${AD.txs.slice(0,10).map(t=>`<div class="txr"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${t.description||t.type}</div><div style="font-size:11px;color:var(--g400)">${fdate(t.createdAt)}</div></div><div style="color:var(--err);font-weight:700;font-size:13px">NGN ${fmt(t.amount)}</div></div>`).join('')||'<div style="padding:22px;text-align:center;color:var(--g400);font-size:13px">No transactions yet</div>'}</div>`;
@@ -2448,7 +2132,7 @@ function aTab(tab){
         const vtDiv=document.createElement('div');
         vtDiv.id='vt-quick-btn';
         vtDiv.style.cssText='margin-top:14px';
-        vtDiv.innerHTML=`<button onclick="aTab('vtpass')" style="display:flex;align-items:center;gap:10px;width:100%;max-width:360px;padding:14px 16px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;cursor:pointer;font-family:'Inter',sans-serif;text-align:left"><div style="width:36px;height:36px;background:#ede9fe;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚙️</div><div><div style="font-weight:600;font-size:13px">API Settings (Nellobytesystems)</div><div style="font-size:11px;color:var(--g400)">Manage API Key & provider</div></div></button>`;
+        vtDiv.innerHTML=`<button onclick="aTab('vtpass')" style="display:flex;align-items:center;gap:10px;width:100%;max-width:360px;padding:14px 16px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;cursor:pointer;font-family:'Inter',sans-serif;text-align:left"><div style="width:36px;height:36px;background:#ede9fe;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚙️</div><div><div style="font-weight:600;font-size:13px">API Settings</div><div style="font-size:11px;color:var(--g400)">Nellobytesystems integration</div></div></button>`;
         ac.appendChild(vtDiv);
       }
     },100);
@@ -2465,7 +2149,6 @@ function aTab(tab){
   // ── VTPass Settings tab ──
   if(tab==='rewards-settings'){loadRewardsSettings(el);}
   if(tab==='rewards-history'){loadRewardsHistoryAdmin(el);}
-  if(tab==='pwdreset'){renderAdminPwdResets(el);}
   if(tab==='recovery'){
     el.innerHTML='<div style="padding:20px;text-align:center;color:var(--g400)">Loading...</div>';
     db.collection('recoveryLog').orderBy('createdAt','desc').get().then(snap=>{
@@ -2519,107 +2202,14 @@ function aTab(tab){
   }
   if(tab==='vtpass'){
     el.innerHTML=`
-    <div style="max-width:600px">
-      <!-- Header -->
-      <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:16px;padding:18px;margin-bottom:16px;color:#fff">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:46px;height:46px;background:rgba(139,92,246,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">⚙️</div>
-          <div>
-            <div style="font-weight:800;font-size:16px">Nellobytesystems API Settings</div>
-            <div style="font-size:12px;color:rgba(196,181,253,.7);margin-top:2px">Provider: ClubKonnet · UserID: CK100352389</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Status banner -->
-      <div id="nbs-status-banner" style="background:#f1f5f9;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--g600)">⏳ Loading current configuration...</div>
-
-      <!-- Main settings card -->
-      <div class="card" style="padding:20px;margin-bottom:14px">
-        <div style="font-weight:700;font-size:14px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #f1f5f9">🔧 Provider Configuration</div>
-
-        <div style="margin-bottom:12px">
-          <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Provider Name</label>
-          <input class="inp" id="nbs-provider-name" value="Nellobytesystems" readonly style="background:#f8fafc;color:var(--g500)"/>
-        </div>
-        <div style="margin-bottom:12px">
-          <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label>
-          <input class="inp" id="nbs-base-url" value="https://www.nellobytesystems.com/" readonly style="background:#f8fafc;color:var(--g500)"/>
-        </div>
-        <div style="margin-bottom:12px">
-          <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">UserID</label>
-          <input class="inp" id="nbs-user-id" value="CK100352389" readonly style="background:#f8fafc;color:var(--g500)"/>
-        </div>
-        <div style="margin-bottom:12px">
-          <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">🔑 API Key <span style="color:#dc2626;font-weight:800">*</span> <span style="font-weight:400;color:var(--g400)">(Enter after deployment)</span></label>
-          <input class="inp" type="password" id="nbs-api-key" placeholder="Enter your Nellobytesystems API Key here"/>
-          <div style="font-size:11px;color:#d97706;margin-top:5px">⚠ This field is intentionally blank. Enter your key then click Save.</div>
-        </div>
-        <div style="margin-bottom:12px">
-          <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Callback / Webhook URL <span style="font-weight:400;color:var(--g400)">(optional)</span></label>
-          <input class="inp" id="nbs-callback-url" placeholder="https://yoursite.com/callback"/>
-        </div>
-        <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
-          <div>
-            <div style="font-size:13px;font-weight:600">API Enabled</div>
-            <div style="font-size:11px;color:var(--g400)">Toggle to enable/disable Nellobytesystems API</div>
-          </div>
-          <div class="tsw on" id="nbs-enabled-toggle" onclick="this.classList.toggle('on')"></div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button onclick="testNBSConnection()" style="flex:1;padding:12px;border-radius:10px;background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔗 Test Connection</button>
-          <button onclick="saveNBSConfig()" class="btn-g" style="flex:1;padding:12px;border-radius:10px;font-size:13px">💾 Save</button>
-        </div>
-        <div id="nbs-save-result" style="display:none;border-radius:10px;padding:11px;font-size:13px;margin-top:10px"></div>
-      </div>
-
-      <!-- Endpoints Info Card (read-only) -->
-      <div class="card" style="padding:18px;margin-bottom:14px">
-        <div style="font-weight:700;font-size:14px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #f1f5f9">🌐 API Endpoints (Pre-configured)</div>
-        ${[
-          {lbl:'Airtime',    ep:'APIAirtimeV1.asp',     icon:'📱'},
-          {lbl:'Data',       ep:'APIDatabundleV1.asp',  icon:'📡'},
-          {lbl:'Cable TV',   ep:'APICableTVV1.asp',     icon:'📺'},
-          {lbl:'Electricity',ep:'APIElectricityV1.asp', icon:'⚡'}
-        ].map(e=>`
-          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f8fafc">
-            <div style="width:32px;height:32px;background:#ede9fe;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">${e.icon}</div>
-            <div style="flex:1">
-              <div style="font-weight:600;font-size:13px">${e.lbl}</div>
-              <div style="font-size:11px;color:var(--g400);font-family:monospace">${e.ep}</div>
-            </div>
-            <span style="font-size:10px;font-weight:700;padding:3px 8px;background:#dcfce7;color:#15803d;border-radius:50px">ACTIVE</span>
-          </div>`).join('')}
-      </div>
-
-      <!-- API Diagnostics -->
-      <div class="card" style="padding:18px;margin-bottom:14px">
-        <div style="font-weight:700;font-size:14px;margin-bottom:10px">🔍 API Diagnostics</div>
-        <div style="font-size:12px;color:var(--g600);margin-bottom:12px;line-height:1.6">Run a live connection test to verify your API Key and endpoint availability.</div>
-        <button onclick="runNBSDiagnostics()" style="width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,#312e81,#1e1b4b);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:10px">🧪 Run Full Diagnostics</button>
-        <div id="nbs-diagnostics-result" style="display:none;background:#f8fafc;border-radius:10px;padding:14px;font-size:12px;line-height:1.8"></div>
-      </div>
-
-      <!-- Transaction Status Checker -->
-      <div class="card" style="padding:18px;margin-bottom:14px">
-        <div style="font-weight:700;font-size:14px;margin-bottom:10px">🔎 Transaction Status Checker</div>
-        <div style="margin-bottom:10px">
-          <input class="inp" id="nbs-check-txid" placeholder="Enter Transaction ID or Request ID"/>
-        </div>
-        <button onclick="checkNBSTransactionStatus()" style="width:100%;padding:11px;border-radius:10px;background:#f0fdf4;border:1px solid #86efac;color:#15803d;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:10px">🔍 Check Status</button>
-        <div id="nbs-tx-status-result" style="display:none;background:#f8fafc;border-radius:10px;padding:12px;font-size:12px"></div>
-      </div>
-
-      <!-- API Request Log -->
-      <div class="card" style="padding:18px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div style="font-weight:700;font-size:14px">📋 API Request Log</div>
-          <button onclick="loadNBSApiLogs()" style="padding:6px 12px;background:var(--green-xl);border:1px solid #86efac;color:var(--green-d);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Refresh</button>
-        </div>
-        <div id="nbs-api-log" style="font-size:11px;color:var(--g600)">Click Refresh to load recent API calls</div>
-      </div>
-    </div>`;
-    loadNBSAdminConfig();
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <button onclick="apiSubTab('settings')" id="ast-settings" style="padding:7px 14px;border-radius:50px;background:var(--green);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">⚙️ Settings</button>
+      <button onclick="apiSubTab('diagnostics')" id="ast-diagnostics" style="padding:7px 14px;border-radius:50px;background:#fff;color:var(--g600);border:1.5px solid var(--g200);font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔬 Diagnostics</button>
+      <button onclick="apiSubTab('logs')" id="ast-logs" style="padding:7px 14px;border-radius:50px;background:#fff;color:var(--g600);border:1.5px solid var(--g200);font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">📋 API Logs</button>
+      <button onclick="apiSubTab('txcheck')" id="ast-txcheck" style="padding:7px 14px;border-radius:50px;background:#fff;color:var(--g600);border:1.5px solid var(--g200);font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔍 TX Status</button>
+    </div>
+    <div id="api-sub-content"></div>`;
+    apiSubTab('settings');
   }
 
   // ── Finance Admin Tabs ──
@@ -3272,196 +2862,320 @@ function viewImg(url){
   document.body.appendChild(ov);
 }
 
-// ════════════════════════════════════════════════════════════
-//  NELLOBYTESYSTEMS ADMIN CONFIG FUNCTIONS
-// ════════════════════════════════════════════════════════════
+// ── VTPass Config ──
+// ===== API SETTINGS FUNCTIONS =====
 
-async function loadNBSAdminConfig(){
-  const banner = document.getElementById('nbs-status-banner');
-  try{
-    const s = await db.collection('settings').doc('nellobytesystems').get();
-    if(s.exists){
-      const d = s.data();
-      if(banner){
-        const keySet = d.apiKey && d.apiKey.length > 0;
-        banner.style.background = keySet ? '#dcfce7' : '#fef3c7';
-        banner.style.color = keySet ? '#15803d' : '#92400e';
-        banner.innerHTML = keySet
-          ? '✅ API Key configured · UserID: <strong>'+d.userId+'</strong> · Provider: <strong>Nellobytesystems</strong>'
-          : '⚠ API Key not set. Enter your key below and click Save.';
-      }
-      const url = document.getElementById('nbs-base-url');     if(url) url.value = d.baseUrl || 'https://www.nellobytesystems.com/';
-      const uid = document.getElementById('nbs-user-id');      if(uid) uid.value = d.userId || 'CK100352389';
-      const cb  = document.getElementById('nbs-callback-url'); if(cb)  cb.value  = d.callbackUrl || '';
-      const tog = document.getElementById('nbs-enabled-toggle');
-      if(tog){ tog.classList.remove('on'); if(d.enabled !== false) tog.classList.add('on'); }
-      // API key intentionally NOT pre-filled — admin enters it
-    } else {
-      if(banner){ banner.style.background='#fef3c7'; banner.style.color='#92400e'; banner.textContent='⚠ No config saved yet. Pre-filled values shown below. Enter API Key and Save.'; }
+// Sub-tab switcher
+function apiSubTab(tab){
+  ['settings','diagnostics','logs','txcheck'].forEach(t=>{
+    const btn=document.getElementById('ast-'+t);
+    if(btn){
+      btn.style.background=t===tab?'var(--green)':'#fff';
+      btn.style.color=t===tab?'#fff':'var(--g600)';
+      btn.style.border=t===tab?'none':'1.5px solid var(--g200)';
     }
-  }catch(e){ if(banner) banner.textContent='Error loading config: '+e.message; }
-}
-
-async function saveNBSConfig(){
-  const apiKey     = document.getElementById('nbs-api-key')?.value.trim();
-  const baseUrl    = document.getElementById('nbs-base-url')?.value.trim()    || 'https://www.nellobytesystems.com/';
-  const userId     = document.getElementById('nbs-user-id')?.value.trim()     || 'CK100352389';
-  const callbackUrl= document.getElementById('nbs-callback-url')?.value.trim() || '';
-  const enabled    = document.getElementById('nbs-enabled-toggle')?.classList.contains('on') !== false;
-  const r = document.getElementById('nbs-save-result');
-
-  // Load existing key from Firestore if admin left field blank (key already saved)
-  let finalKey = apiKey;
-  if(!finalKey){
-    try{
-      const existing = await db.collection('settings').doc('nellobytesystems').get();
-      if(existing.exists) finalKey = existing.data().apiKey || '';
-    }catch(e){}
-  }
-  if(!finalKey){ toast('⚠ API Key is required'); return; }
-
-  await db.collection('settings').doc('nellobytesystems').set({
-    providerName: 'Nellobytesystems',
-    baseUrl, userId, apiKey: finalKey, callbackUrl, enabled,
-    endpoints: {
-      airtime:     'APIAirtimeV1.asp',
-      data:        'APIDatabundleV1.asp',
-      cable:       'APICableTVV1.asp',
-      electricity: 'APIElectricityV1.asp'
-    },
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    updatedBy: CU?.email || 'admin'
   });
-
-  // Also update in-memory config
-  NBS.apiKey = finalKey; NBS.baseUrl = baseUrl; NBS.userId = userId;
-  NBS.callbackUrl = callbackUrl; NBS.enabled = enabled;
-
-  toast('✅ API Settings saved!');
-  if(r){ r.style.display='block'; r.style.background='#dcfce7'; r.style.color='#15803d'; r.textContent='✅ Configuration saved! API Key is now active.'; }
-  loadNBSAdminConfig();
+  const el=document.getElementById('api-sub-content');
+  if(!el) return;
+  if(tab==='settings')    renderApiSettings(el);
+  if(tab==='diagnostics') renderApiDiagnostics(el);
+  if(tab==='logs')        renderApiLogs(el);
+  if(tab==='txcheck')     renderTxChecker(el);
 }
 
-async function testNBSConnection(){
-  const r = document.getElementById('nbs-save-result');
-  if(r){ r.style.display='block'; r.style.background='#f1f5f9'; r.style.color='var(--g600)'; r.textContent='⏳ Testing Nellobytesystems connection...'; }
-  await getNBS();
-  if(!NBS.apiKey){
-    if(r){ r.style.background='#fef3c7'; r.style.color='#92400e'; r.textContent='⚠ API Key not set. Enter and save your key first.'; }
-    return;
-  }
+async function renderApiSettings(el){
+  el.innerHTML='<div style="text-align:center;padding:24px;color:var(--g400)">Loading config...</div>';
+  // Load saved config from Firestore, fall back to API_DEFAULTS
+  let cfg = Object.assign({}, API_DEFAULTS);
   try{
-    // Simple test: call airtime endpoint with no real params — just verify the API responds
-    const testUrl = NBS.baseUrl.replace(/\/+$/,'') + '/' + NBS.endpoints.airtime +
-      '?UserID='+NBS.userId+'&APIKey='+NBS.apiKey+'&test=1';
-    const res = await fetch(testUrl, {signal: AbortSignal.timeout(8000)});
-    const text = await res.text();
-    const ok = text.includes('00') || text.includes('STATUS') || res.status < 500;
-    if(r){ r.style.display='block'; r.style.background=ok?'#dcfce7':'#fee2e2'; r.style.color=ok?'#15803d':'#dc2626';
-           r.textContent = ok ? '✅ Connection successful! API is reachable.' : '⚠ Connected but unexpected response. Verify your API Key in Nellobytesystems dashboard.'; }
+    const s = await db.collection('settings').doc('apiconfig').get();
+    if(s.exists) Object.assign(cfg, s.data());
+  }catch(e){}
+  const enabled = typeof cfg.enabled==='undefined' ? true : cfg.enabled;
+  el.innerHTML=`
+  <div class="card" style="padding:18px;margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <div style="font-weight:700;font-size:15px">API Settings</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:var(--g500)">${enabled?'Enabled':'Disabled'}</span>
+        <div class="tsw ${enabled?'on':''}" id="api-enabled-sw" onclick="toggleApiEnabled(this)"></div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--g500);margin-bottom:16px">Nellobytesystems VTU integration — credentials stored securely in database</div>
+
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Provider Name</label>
+      <input class="inp" id="api-providerName" value="${cfg.providerName||API_DEFAULTS.providerName}"/>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label>
+      <input class="inp" id="api-baseUrl" value="${cfg.baseUrl||API_DEFAULTS.baseUrl}"/>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">User ID</label>
+      <input class="inp" id="api-userId" value="${cfg.userId||API_DEFAULTS.userId}"/>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">
+        API Key &nbsp;<span style="color:#dc2626;font-size:10px;background:#fef2f2;padding:2px 7px;border-radius:4px">Enter after deployment</span>
+      </label>
+      <input class="inp" type="password" id="api-apiKey" placeholder="Enter your Nellobytesystems API Key" value="${cfg.apiKey?'••••••••••••':''}" autocomplete="off"/>
+      <div style="font-size:11px;color:var(--g400);margin-top:4px">Stored encrypted in database. Never exposed to users.</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Callback URL <span style="font-size:10px;color:var(--g400)">(optional)</span></label>
+      <input class="inp" id="api-callbackUrl" value="${cfg.callbackUrl||''}" placeholder="https://yourapp.com/callback"/>
+    </div>
+
+    <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--g500);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">API Endpoints</div>
+      ${Object.entries(API_DEFAULTS.endpoints).map(([k,v])=>`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-size:11px;color:var(--g500);min-width:80px;text-transform:capitalize">${k}</span>
+        <input class="inp" id="api-ep-${k}" value="${(cfg.endpoints&&cfg.endpoints[k])||v}" style="padding:7px 10px;font-size:12px"/>
+      </div>`).join('')}
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button onclick="testApiConnection()" style="flex:1;padding:11px;border-radius:10px;background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔗 Test Connection</button>
+      <button onclick="saveApiConfig()" class="btn-g" style="flex:1;padding:11px;border-radius:10px;font-size:13px">💾 Save Config</button>
+    </div>
+    <div id="api-save-result" style="display:none;border-radius:10px;padding:11px;font-size:13px;margin-top:10px"></div>
+  </div>`;
+}
+
+function toggleApiEnabled(el){
+  el.classList.toggle('on');
+}
+
+function clearPlanCache(){ for(const k in planCache) delete planCache[k]; console.log('[PLANS] Cache cleared'); }
+async function saveApiConfig(){
+  const r = document.getElementById('api-save-result');
+  r.style.display='block'; r.style.background='#fef3c7'; r.style.color='#92400e';
+  r.textContent='Saving...';
+  try{
+    const apiKeyInput = (document.getElementById('api-apiKey')?.value||'').trim();
+    const eps = {};
+    Object.keys(API_DEFAULTS.endpoints).forEach(k=>{
+      const v=(document.getElementById('api-ep-'+k)?.value||'').trim();
+      if(v) eps[k]=v;
+    });
+    const data = {
+      providerName : (document.getElementById('api-providerName')?.value||'').trim()||API_DEFAULTS.providerName,
+      baseUrl      : (document.getElementById('api-baseUrl')?.value||'').trim()||API_DEFAULTS.baseUrl,
+      userId       : (document.getElementById('api-userId')?.value||'').trim()||API_DEFAULTS.userId,
+      callbackUrl  : (document.getElementById('api-callbackUrl')?.value||'').trim(),
+      enabled      : document.getElementById('api-enabled-sw')?.classList.contains('on'),
+      endpoints    : eps,
+      updatedAt    : firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy    : CU?.email||''
+    };
+    // Only update apiKey if user typed something new (not the placeholder dots)
+    if(apiKeyInput && !apiKeyInput.includes('•')){ data.apiKey = apiKeyInput; }
+    await db.collection('settings').doc('apiconfig').set(data, {merge:true});
+    // Reload runtime config
+    await loadApiConfig();
+    clearPlanCache();
+    r.style.background='#dcfce7'; r.style.color='#15803d';
+    r.textContent='✅ Configuration saved! System is ready.';
+    toast('API config saved!');
   }catch(e){
-    if(r){ r.style.display='block'; r.style.background='#fee2e2'; r.style.color='#dc2626'; r.textContent='❌ Connection failed: '+e.message; }
+    r.style.background='#fef2f2'; r.style.color='#dc2626';
+    r.textContent='❌ Error: '+e.message;
   }
 }
 
-async function runNBSDiagnostics(){
-  const el = document.getElementById('nbs-diagnostics-result');
-  if(!el) return;
-  el.style.display='block'; el.innerHTML='⏳ Running diagnostics...';
-  await getNBS();
-  const checks = [];
-
-  // Check 1: Config loaded?
-  checks.push({ ok: !!NBS.apiKey, label:'API Key configured', detail: NBS.apiKey ? '✅ API Key is set' : '❌ API Key not set — go to settings and save your key' });
-  checks.push({ ok: !!NBS.userId, label:'UserID configured',  detail: NBS.userId ? '✅ UserID: '+NBS.userId : '❌ UserID missing' });
-  checks.push({ ok: !!NBS.baseUrl, label:'Base URL',          detail: NBS.baseUrl ? '✅ '+NBS.baseUrl : '❌ Missing base URL' });
-  checks.push({ ok: NBS.enabled,   label:'API Enabled',        detail: NBS.enabled ? '✅ API is enabled' : '⚠ API is disabled in settings' });
-
-  // Check 2: Try live ping
+async function testApiConnection(){
+  const r = document.getElementById('api-save-result');
+  if(!r){ toast('Save first, then test.'); return; }
+  r.style.display='block'; r.style.background='#fef3c7'; r.style.color='#92400e';
+  r.innerHTML='⏳ Testing connection...';
+  // Temporarily load what's in the form
+  await loadApiConfig();
+  const startTime = Date.now();
   try{
-    const pingUrl = NBS.baseUrl.replace(/\/+$/,'') + '/' + NBS.endpoints.airtime +
-      '?UserID='+NBS.userId+'&APIKey='+NBS.apiKey+'&test=ping';
-    const r = await fetch(pingUrl, {signal: AbortSignal.timeout(10000)});
-    const txt = await r.text();
-    checks.push({ ok: r.status < 500, label:'Airtime endpoint reachable', detail: r.status < 500 ? '✅ HTTP '+r.status+' — endpoint responded' : '❌ HTTP '+r.status });
-    checks.push({ ok: !!txt, label:'Data endpoint', detail: NBS.endpoints.data });
-    checks.push({ ok: !!txt, label:'Cable TV endpoint', detail: NBS.endpoints.cable });
-    checks.push({ ok: !!txt, label:'Electricity endpoint', detail: NBS.endpoints.electricity });
-  }catch(e){ checks.push({ ok:false, label:'Network connectivity', detail:'❌ '+e.message }); }
-
-  const ok=checks.filter(c=>c.ok).length, fail=checks.filter(c=>!c.ok).length;
-  el.innerHTML = '<div style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--black)">Nellobytesystems Diagnostics — '+ok+' OK · '+fail+' Issue(s)</div>'+
-    checks.map(c=>'<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9">'+
-      '<span style="flex-shrink:0;font-size:13px">'+(c.ok?'✅':'❌')+'</span>'+
-      '<div><div style="font-weight:600;font-size:12px;color:var(--g700)">'+c.label+'</div>'+
-      '<div style="font-size:11px;color:'+(c.ok?'#15803d':'#dc2626')+';margin-top:1px">'+c.detail+'</div></div></div>').join('')+
-    (fail>0?'<div style="margin-top:12px;padding:10px;background:#fef3c7;border-radius:8px;font-size:11px;color:#92400e;line-height:1.8">Fix issues above, then Save &amp; Test again. Make sure your Nellobytesystems account has sufficient balance.</div>':'<div style="margin-top:12px;padding:10px;background:#dcfce7;border-radius:8px;font-size:11px;color:#15803d">All checks passed! Your platform is ready to process transactions.</div>');
+    // Test: check wallet balance — lightest possible call
+    const res = await apiFetch('balance', {}, {type:'test'});
+    const ms  = Date.now()-startTime;
+    const ok  = res && !String(res.status||'').toLowerCase().includes('error') && !String(res.message||'').toLowerCase().includes('invalid');
+    if(ok){
+      r.style.background='#dcfce7'; r.style.color='#15803d';
+      r.innerHTML='✅ Connection successful ('+ms+'ms)<br/><span style="font-size:11px">Balance: '+(res.balance||res.Balance||res.WalletBalance||JSON.stringify(res).slice(0,60))+'</span>';
+    } else {
+      r.style.background='#fef2f2'; r.style.color='#dc2626';
+      r.innerHTML='⚠️ Connected but API returned: <strong>'+JSON.stringify(res).slice(0,120)+'</strong>';
+    }
+  }catch(e){
+    r.style.background='#fef2f2'; r.style.color='#dc2626';
+    r.innerHTML='❌ Connection failed: '+e.message;
+  }
 }
 
-async function checkNBSTransactionStatus(){
-  const txid = document.getElementById('nbs-check-txid')?.value.trim();
-  const el   = document.getElementById('nbs-tx-status-result');
-  if(!txid || !el){ toast('Enter a Transaction ID'); return; }
-  el.style.display='block'; el.textContent='⏳ Checking...';
+async function renderApiDiagnostics(el){
+  el.innerHTML='<div style="text-align:center;padding:24px;color:var(--g400)">⏳ Running diagnostics...</div>';
+  await loadApiConfig();
+  const tests = [
+    {key:'airtime',    label:'Airtime', network:'MTN',    phone:'08011111111', amount:100},
+    {key:'data',       label:'Data',    network:'MTN',    planCode:'',         amount:100},
+    {key:'cable',      label:'Cable TV',network:'DSTV',   smartcard:'',        amount:100},
+    {key:'electricity',label:'Electricity',network:'EKEDC',meter:'',           amount:500},
+  ];
 
-  try{
-    // First check Firestore logs
-    const logs = await db.collection('apiLogs').where('requestId','==',txid).limit(1).get();
-    if(!logs.empty){
-      const d = logs.docs[0].data();
-      el.style.background = d.status==='00'||d.status==='delivered' ? '#dcfce7' : '#fee2e2';
-      el.style.color = d.status==='00'||d.status==='delivered' ? '#15803d' : '#dc2626';
-      el.innerHTML = '<strong>Request ID:</strong> '+txid+'<br/><strong>Status:</strong> '+d.status+'<br/><strong>Endpoint:</strong> '+d.endpoint+'<br/><strong>Time:</strong> '+(d.createdAt?.toDate?d.createdAt.toDate().toLocaleString():'—');
-      return;
+  let html = `
+  <div class="card" style="padding:16px;margin-bottom:12px">
+    <div style="font-weight:700;font-size:14px;margin-bottom:4px">🔬 API Diagnostics</div>
+    <div style="font-size:11px;color:var(--g500);margin-bottom:14px">
+      Provider: <strong>${API_CFG.providerName}</strong> &bull;
+      UserID: <strong>${API_CFG.userId||'⚠ Not set'}</strong> &bull;
+      API Key: <strong>${API_CFG.apiKey?'Set ('+API_CFG.apiKey.length+' chars)':'⚠ NOT SET'}</strong> &bull;
+      Enabled: <strong>${API_CFG.enabled?'Yes':'No'}</strong>
+    </div>
+    ${!API_CFG.apiKey?'<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:#dc2626">⚠️ API Key is not set. Go to Settings tab and enter your API Key.</div>':''}
+    <div style="font-size:11px;color:var(--g500);margin-bottom:12px">Checking all endpoints...</div>`;
+
+  el.innerHTML = html + '<div style="padding:12px;font-size:12px;color:var(--g400)">⏳ Running tests...</div></div>';
+
+  const results = [];
+  for(const t of tests){
+    try{
+      const start = Date.now();
+      let res;
+      if(t.key==='airtime'){
+        res = await apiFetch('airtime',{MobileNumber:t.phone,NetworkID:t.network,Amount:t.amount,RequestID:'DIAG_'+Date.now()},{type:'diag'});
+      } else if(t.key==='data'){
+        res = await apiFetch('dataPlans',{NetworkID:t.network},{type:'diag'});
+      } else if(t.key==='cable'){
+        res = await apiFetch('cablePlans',{NetworkID:t.network},{type:'diag'});
+      } else {
+        res = await apiFetch('balance',{},{type:'diag'});
+      }
+      const ms = Date.now()-start;
+      const rawStr = JSON.stringify(res).slice(0,200);
+      const ok = res && !String(JSON.stringify(res)).toLowerCase().includes('invalid api') && !String(JSON.stringify(res)).toLowerCase().includes('invalid key');
+      results.push({label:t.label, ok, ms, raw:rawStr});
+    }catch(e){
+      results.push({label:t.label, ok:false, ms:0, raw:e.message});
     }
-    // Check transactions collection
-    const txs = await db.collection('transactions').where('ref','==',txid).limit(1).get();
-    if(!txs.empty){
-      const d = txs.docs[0].data();
-      el.style.background = d.status==='success'?'#dcfce7':'#fef3c7';
-      el.style.color = d.status==='success'?'#15803d':'#92400e';
-      el.innerHTML = '<strong>Ref:</strong> '+txid+'<br/><strong>Status:</strong> '+d.status+'<br/><strong>Amount:</strong> NGN '+fmt(d.amount||0)+'<br/><strong>Description:</strong> '+(d.description||'—');
-      return;
-    }
-    el.style.background='#f1f5f9'; el.style.color='var(--g600)';
-    el.textContent = 'No record found for this Transaction ID. It may not exist yet or was not logged.';
-  }catch(e){ el.textContent='Error: '+e.message; }
+  }
+
+  const rows = results.map(r=>`
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9">
+      <span style="font-size:16px">${r.ok?'✅':'❌'}</span>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px">${r.label} ${r.ms?'<span style="font-size:10px;color:var(--g400)">('+r.ms+'ms)</span>':''}</div>
+        <div style="font-size:11px;color:${r.ok?'var(--ok)':'#dc2626'};margin-top:2px">${r.raw}</div>
+      </div>
+    </div>`).join('');
+
+  el.innerHTML = `
+  <div class="card" style="padding:16px;margin-bottom:12px">
+    <div style="font-weight:700;font-size:14px;margin-bottom:4px">🔬 API Diagnostics — ${results.filter(r=>r.ok).length}/${results.length} OK</div>
+    <div style="font-size:11px;color:var(--g500);margin-bottom:14px">
+      Provider: <strong>${API_CFG.providerName}</strong> &bull;
+      UserID: <strong>${API_CFG.userId||'⚠ Not set'}</strong> &bull;
+      API Key: <strong>${API_CFG.apiKey?'✅ Set':'❌ NOT SET'}</strong> &bull;
+      Base URL: <strong>${API_CFG.baseUrl}</strong>
+    </div>
+    ${!API_CFG.apiKey?'<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:#dc2626">⚠️ API Key not set. Enter it in Settings tab then Save.</div>':''}
+    ${rows}
+    <button onclick="renderApiDiagnostics(document.getElementById('api-sub-content'))" style="width:100%;margin-top:14px;padding:10px;background:#f1f5f9;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔄 Re-run Diagnostics</button>
+  </div>`;
 }
 
-async function loadNBSApiLogs(){
-  const el = document.getElementById('nbs-api-log');
-  if(!el) return;
-  el.innerHTML='⏳ Loading...';
+async function renderApiLogs(el){
+  el.innerHTML='<div style="text-align:center;padding:24px;color:var(--g400)">⏳ Loading API logs...</div>';
   try{
-    const snap = await db.collection('apiLogs').orderBy('createdAt','desc').limit(20).get();
-    if(snap.empty){ el.textContent='No API calls logged yet.'; return; }
-    el.innerHTML = snap.docs.map(d=>{
-      const r=d.data();
-      const ok=r.status==='00'||r.status==='delivered'||r.status==='success';
-      return `<div style="padding:8px 0;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;gap:8px">
-        <span style="font-size:13px;flex-shrink:0">${ok?'✅':'⏳'}</span>
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:600;color:var(--g700)">${r.endpoint||'—'}</div>
-          <div style="color:var(--g400)">ID: ${r.requestId||'—'} · Status: <strong style="color:${ok?'#15803d':'#d97706'}">${r.status||'pending'}</strong></div>
-          <div style="color:var(--g400)">${r.createdAt?.toDate?r.createdAt.toDate().toLocaleString():'—'}</div>
+    const snap = await db.collection('api_logs').orderBy('createdAt','desc').limit(50).get();
+    if(snap.empty){ el.innerHTML='<div class="card" style="padding:32px;text-align:center;color:var(--g400)"><div style="font-size:36px;margin-bottom:8px">📋</div><p>No API logs yet. Transactions will appear here.</p></div>'; return; }
+    const logs = snap.docs.map(d=>({id:d.id,...d.data()}));
+    el.innerHTML=`
+    <div style="font-weight:700;font-size:14px;margin-bottom:10px">📋 API Request Logs (last 50)</div>
+    ${logs.map(lg=>{
+      const ok = lg.status==='completed';
+      const parsed = lg.parsed ? JSON.parse(lg.parsed||'{}') : {};
+      const success = isApiSuccess(parsed);
+      return `<div class="card" style="padding:12px;margin-bottom:8px;border-left:4px solid ${success?'var(--green)':lg.status==='pending'?'#d97706':'#dc2626'}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+          <div>
+            <span class="chip ${success?'c-ok':lg.status==='pending'?'c-warn':'c-err'}">${lg.status||'?'}</span>
+            <strong style="font-size:13px;margin-left:6px">${lg.endpoint||lg.type||'?'}</strong>
+          </div>
+          <span style="font-size:10px;color:var(--g400)">${lg.createdAt?.toDate?lg.createdAt.toDate().toLocaleString():''}</span>
         </div>
+        <div style="font-size:11px;color:var(--g500);margin-bottom:4px">Ref: ${lg.requestId||'—'} &bull; HTTP: ${lg.httpStatus||'—'} &bull; User: ${lg.userId?.slice(0,8)||'—'}</div>
+        <details><summary style="font-size:11px;cursor:pointer;color:var(--blue)">View response</summary>
+          <pre style="background:#f8fafc;border-radius:6px;padding:8px;font-size:10px;overflow-x:auto;margin-top:4px;max-height:120px;white-space:pre-wrap;word-break:break-all">${String(lg.rawResponse||lg.parsed||'(no response)').slice(0,500)}</pre>
+        </details>
       </div>`;
-    }).join('');
-  }catch(e){ el.textContent='Error loading logs: '+e.message; }
+    }).join('')}`;
+  }catch(e){
+    el.innerHTML='<div class="card" style="padding:16px;color:#dc2626">Error loading logs: '+e.message+'<br/><span style="font-size:11px">You may need to create a Firestore index for api_logs.</span></div>';
+  }
 }
 
-// Legacy stubs so old references don't break
-async function loadVtpassConfig(){ loadNBSAdminConfig(); }
-async function loadVtpassConfig2(){ loadNBSAdminConfig(); }
-async function saveVtpass(){ saveNBSConfig(); }
-async function saveVtpass2(){ saveNBSConfig(); }
-async function testVtpass(){ testNBSConnection(); }
-async function testVtpass2(){ testNBSConnection(); }
-async function getVtpassConfig(){
-  const s=await db.collection('settings').doc('nellobytesystems').get();
-  if(s.exists) return s.data();
-  return {baseUrl:'https://www.nellobytesystems.com/',userId:'CK100352389',apiKey:'',enabled:true};
+async function renderTxChecker(el){
+  el.innerHTML=`
+  <div class="card" style="padding:18px;margin-bottom:12px">
+    <div style="font-weight:700;font-size:15px;margin-bottom:4px">🔍 Transaction Status Checker</div>
+    <div style="font-size:12px;color:var(--g500);margin-bottom:14px">Check the status of any transaction using its Request ID</div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Request ID / Reference</label>
+      <input class="inp" id="tx-check-id" placeholder="e.g. ZMN178060197..."/>
+    </div>
+    <button onclick="runTxCheck()" class="btn-g" style="width:100%;padding:12px;border-radius:10px;font-size:14px">🔍 Check Status</button>
+    <div id="tx-check-result" style="margin-top:14px"></div>
+  </div>`;
 }
+
+async function runTxCheck(){
+  const rid = document.getElementById('tx-check-id')?.value.trim();
+  const el  = document.getElementById('tx-check-result');
+  if(!rid||!el){ toast('Enter a Request ID'); return; }
+  el.innerHTML='<div style="text-align:center;padding:16px;color:var(--g400)">⏳ Checking...</div>';
+  try{
+    // Check Firestore first
+    const snap = await db.collection('transactions').where('ref','==',rid).limit(1).get();
+    let firestoreRow = '';
+    if(!snap.empty){
+      const tx = {id:snap.docs[0].id, ...snap.docs[0].data()};
+      firestoreRow = `<div style="background:#f0fdf4;border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px">
+        <div style="font-weight:700;margin-bottom:4px">📁 Firestore Record</div>
+        <div>Status: <strong style="color:${tx.status==='success'?'var(--ok)':'#dc2626'}">${tx.status}</strong></div>
+        <div>Type: ${tx.type} · Amount: NGN ${fmt(tx.amount||0)}</div>
+        <div>API Code: ${tx.apiCode||'—'} · ${tx.apiDesc||'—'}</div>
+        <div style="font-size:10px;color:var(--g400);margin-top:3px">${fdate(tx.createdAt)}</div>
+      </div>`;
+    }
+    // Also query provider
+    let providerRow = '';
+    try{
+      const res = await checkTxStatus(rid);
+      providerRow = `<div style="background:#f8fafc;border-radius:8px;padding:10px;font-size:12px">
+        <div style="font-weight:700;margin-bottom:4px">🌐 Provider Response</div>
+        <pre style="font-size:11px;overflow-x:auto">${JSON.stringify(res,null,2).slice(0,400)}</pre>
+      </div>`;
+    }catch(e){
+      providerRow = `<div style="font-size:12px;color:var(--g500);padding:8px;background:#f8fafc;border-radius:8px">Provider query: ${e.message}</div>`;
+    }
+    el.innerHTML = firestoreRow + providerRow || '<div style="font-size:13px;color:var(--g400);text-align:center;padding:16px">No record found for this Request ID.</div>';
+  }catch(e){
+    el.innerHTML='<div style="color:#dc2626;font-size:13px">Error: '+e.message+'</div>';
+  }
+}
+
+// Legacy stubs (no-op) to prevent any remaining references from crashing
+async function loadVtpassConfig(){}
+async function loadVtpassConfig2(){}
+async function saveVtpass(){}
+async function saveVtpass2(){}
+async function testVtpass(){ testApiConnection(); }
+async function testVtpass2(){ testApiConnection(); }
+async function getCK(){ return loadApiConfig(); }
+function vtpGetHeaders(){ return {}; }
+function vtpPostHeaders(){ return {}; }
+async function getVTP(){ return loadApiConfig(); }
+
+
 
 // ── Real-time transaction sync ──
 function startRealtimeSync(){
@@ -4816,16 +4530,17 @@ async function loadRewardsHistoryAdmin(el){
 
 
 <!-- VTPASS SETTINGS MODAL -->
-<div class="modal" id="m-vtpass" style="display:none"><div class="mbox">
+<div class="modal" id="m-vtpass"><div class="mbox">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
     <div><h3 style="font-size:17px;font-weight:700">VTPass API Settings</h3><p style="font-size:11px;color:var(--g400)">Super Admin Only</p></div>
     <button onclick="closeM('m-vtpass')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600)">&#10005;</button>
   </div>
   <div id="vt-current" style="background:#f1f5f9;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--g600)">Loading current config...</div>
   <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Mode</label><select class="inp" id="vt-mode"><option value="sandbox">Sandbox (Testing)</option><option value="live">Live (Production)</option></select></div>
-  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Public Key</label><input class="inp" id="vt-pub" placeholder="Enter public key"/></div>
-  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Secret Key</label><input class="inp" type="password" id="vt-sec" placeholder="Enter secret key"/></div>
-  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label><input class="inp" id="vt-url" placeholder="https://sandbox.vtpass.com/api or https://api-service.vtpass.com/api"/></div>
+  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Key <span style='color:#dc2626;font-size:10px;font-weight:400'>(static key from VTPass profile)</span></label><input class="inp" id="vt-api" placeholder="e.g. 03f401bf628bf9bc9013..."/></div>
+  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Public Key <span style='color:#64748b;font-size:10px;font-weight:400'>(PK_...)</span></label><input class="inp" id="vt-pub" placeholder="PK_510dca003b..."/></div>
+  <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Secret Key <span style='color:#64748b;font-size:10px;font-weight:400'>(SK_...)</span></label><input class="inp" type="password" id="vt-sec" placeholder="SK_..."/></div>
+  <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label><input class="inp" id="vt-url" placeholder="https://sandbox.vtpass.com or https://vtpass.com"/></div>
   <div style="display:flex;gap:8px;margin-bottom:10px">
     <button onclick="testVtpass()" style="flex:1;padding:11px;border-radius:10px;background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔗 Test Connection</button>
     <button onclick="saveVtpass()" class="btn-g" style="flex:1;padding:11px;border-radius:10px;font-size:13px">💾 Save Config</button>
@@ -5034,149 +4749,5 @@ async function loadRewardsHistoryAdmin(el){
   </div>
   <div id="inv-dash-content"><div style="text-align:center;padding:36px;color:var(--g400)"><div style="font-size:32px;margin-bottom:8px">⏳</div><p>Loading investment details...</p></div></div>
 </div></div>
-
-</body>
-</html><script>
-// ═══════════════════════════════════════
-// PWA — Manifest + Install Banner
-// ═══════════════════════════════════════
-
-// Inject manifest via Blob URL
-(function(){
-  try{
-    const manifest={
-      name:"ZMONIE - Smart Money Platform",
-      short_name:"ZMONIE",
-      description:"Nigeria's premium VTU platform. Airtime, data, bills instantly and securely, 24/7.",
-      start_url:"./",
-      display:"standalone",
-      background_color:"#0f172a",
-      theme_color:"#16a34a",
-      orientation:"portrait-primary",
-      icons:[
-        {src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='38' fill='%2316a34a'/%3E%3Ctext x='96' y='130' text-anchor='middle' font-family='Arial Black,sans-serif' font-size='110' font-weight='900' fill='white'%3EZ%3C/text%3E%3C/svg%3E",sizes:"192x192",type:"image/svg+xml",purpose:"any maskable"},
-        {src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%2316a34a'/%3E%3Ctext x='256' y='360' text-anchor='middle' font-family='Arial Black,sans-serif' font-size='310' font-weight='900' fill='white'%3EZ%3C/text%3E%3C/svg%3E",sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}
-      ],
-      categories:["finance","utilities"],
-      shortcuts:[
-        {name:"Buy Airtime",short_name:"Airtime",description:"Quick airtime top-up",url:"./"},
-        {name:"Buy Data",short_name:"Data",description:"Buy data bundle",url:"./"}
-      ]
-    };
-    const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
-    const manifestEl=document.getElementById('pwa-manifest');
-    if(manifestEl) manifestEl.href=URL.createObjectURL(blob);
-  }catch(e){console.warn('[PWA] Manifest injection failed:',e);}
-})();
-
-// Service Worker — only register on real https:// origin (GitHub Pages, not local file)
-(function(){
-  if(!('serviceWorker' in navigator)) return;
-  if(location.protocol !== 'https:' && location.hostname !== 'localhost') return;
-  const swCode=[
-    "const CACHE='zmonie-v2';",
-    "self.addEventListener('install',e=>{self.skipWaiting();});",
-    "self.addEventListener('activate',e=>{",
-    "  e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));",
-    "  self.clients.claim();",
-    "});",
-    "self.addEventListener('fetch',e=>{",
-    "  if(e.request.method!=='GET'||!e.request.url.startsWith('http'))return;",
-    "  e.respondWith(fetch(e.request).then(r=>{",
-    "    const c=r.clone();",
-    "    caches.open(CACHE).then(cache=>cache.put(e.request,c));",
-    "    return r;",
-    "  }).catch(()=>caches.match(e.request)));",
-    "});"
-  ].join('\n');
-  try{
-    const swBlob=new Blob([swCode],{type:'text/javascript'});
-    const swUrl=URL.createObjectURL(swBlob);
-    navigator.serviceWorker.register(swUrl,{scope:'./'})
-      .then(()=>console.log('[PWA] SW registered'))
-      .catch(e=>console.warn('[PWA] SW failed:',e.message));
-  }catch(e){console.warn('[PWA] SW setup error:',e);}
-})();
-
-// ── Install prompt logic ──
-let _pwaPrompt=null;
-let _pwaDismissed=(sessionStorage.getItem('pwa-dismissed')==='1');
-
-window.addEventListener('beforeinstallprompt',function(e){
-  e.preventDefault();
-  _pwaPrompt=e;
-  if(!_pwaDismissed && !window.matchMedia('(display-mode: standalone)').matches){
-    var b=document.getElementById('pwa-banner');
-    if(b) b.style.display='block';
-  }
-});
-
-window.addEventListener('appinstalled',function(){
-  var b=document.getElementById('pwa-banner');
-  if(b) b.style.display='none';
-  _pwaPrompt=null;
-});
-
-function pwaTriggerInstall(){
-  if(!_pwaPrompt){toast('To install: tap browser menu → Add to Home Screen');return;}
-  _pwaPrompt.prompt();
-  _pwaPrompt.userChoice.then(function(r){
-    if(r.outcome==='accepted'){
-      var b=document.getElementById('pwa-banner');
-      if(b) b.style.display='none';
-    }
-    _pwaPrompt=null;
-  });
-}
-
-function pwaDismiss(){
-  _pwaDismissed=true;
-  sessionStorage.setItem('pwa-dismissed','1');
-  var b=document.getElementById('pwa-banner');
-  if(b){b.style.opacity='0';setTimeout(function(){b.style.display='none';},300);}
-}
-
-function pwaDismissIos(){
-  sessionStorage.setItem('pwa-ios-dismissed','1');
-  var b=document.getElementById('pwa-ios-banner');
-  if(b){b.style.opacity='0';setTimeout(function(){b.style.display='none';},300);}
-}
-
-// iOS detection
-window.addEventListener('load',function(){
-  var isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
-  var isSafari=/safari/i.test(navigator.userAgent)&&!/chrome|crios|fxios/i.test(navigator.userAgent);
-  var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
-  if(isStandalone){
-    var b1=document.getElementById('pwa-banner');
-    var b2=document.getElementById('pwa-ios-banner');
-    if(b1)b1.style.display='none';
-    if(b2)b2.style.display='none';
-    return;
-  }
-  if(isIos&&isSafari&&!sessionStorage.getItem('pwa-ios-dismissed')){
-    var b=document.getElementById('pwa-ios-banner');
-    if(b) b.style.display='block';
-  }
-});
-
-// Hide banners when not on landing page
-document.addEventListener('DOMContentLoaded',function(){
-  var _orig=window.goPg;
-  if(typeof _orig==='function'){
-    window.goPg=function(id){
-      _orig(id);
-      var b1=document.getElementById('pwa-banner');
-      var b2=document.getElementById('pwa-ios-banner');
-      if(id!=='pg-land'){
-        if(b1)b1.style.display='none';
-        if(b2)b2.style.display='none';
-      } else if(!_pwaDismissed&&_pwaPrompt&&!window.matchMedia('(display-mode: standalone)').matches){
-        if(b1)b1.style.display='block';
-      }
-    };
-  }
-});
-</script>
 </body>
 </html>
