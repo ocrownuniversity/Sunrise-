@@ -1614,41 +1614,28 @@ function extractNBSPlans(res, networkId){
   const wrapperKey = Object.keys(res).find(k => /MOBILE_NETWORK|CABLE_TV|NETWORK/i.test(k));
   if(wrapperKey){
     const wrapper = res[wrapperKey];
-    console.log('[NBS] Found wrapper:', wrapperKey, '| inner keys:', Object.keys(wrapper||{}));
-    // Find the network key inside (MTN, AIRTEL, GLO, ETISALAT, DSTV, etc.)
-    const netKey = Object.keys(wrapper).find(k =>
-      k.toUpperCase() === networkId.toUpperCase() ||
-      networkId.toUpperCase().includes(k.toUpperCase()) ||
-      k.toUpperCase().includes(networkId.toUpperCase())
-    ) || Object.keys(wrapper)[0];
-    if(netKey && Array.isArray(wrapper[netKey])){
-      const providers = wrapper[netKey]; // array of provider objects
-      console.log('[NBS] Provider array length:', providers.length);
-      // Each provider has PRODUCT array
-      // CRITICAL: read the ID field — this is the MobileNetwork value for purchases
-      const allPlans = [];
-      providers.forEach(prov => {
-        // Store provider ID so purchases use the right code
+    const wrapperKeys = Object.keys(wrapper||{});
+    console.log('[NBS] Found wrapper:', wrapperKey, '| inner keys:', wrapperKeys);
+
+    // Helper: extract plans array from a single network entry
+    function extractFromProviders(providers, netName, nId){
+      const plans = [];
+      (providers||[]).forEach(prov => {
         const provId = prov.ID || prov.id || prov.NetworkID || prov.network_id;
         if(provId){
-          nbsNetworkIds[networkId] = String(provId);
-          nbsNetworkIds[netKey]    = String(provId);
-          console.log('[NBS] Stored purchase ID for', networkId, '→', provId);
+          nbsNetworkIds[nId]    = String(provId);
+          nbsNetworkIds[netName]= String(provId);
+          console.log('[NBS] Stored purchase ID for', nId, '(', netName, ') →', provId);
         }
         const products = prov.PRODUCT || prov.products || prov.Plans || [];
-        console.log('[NBS] Provider:', JSON.stringify(prov).slice(0,80), '| products:', products.length);
-        products.forEach((prod,idx) => {
-          // Log first plan so we can see exact field values
-          if(idx===0) console.log('[NBS] First product raw:', JSON.stringify(prod));
-          // ClubKonnect support confirmed: DataPlan param must be PRODUCT_ID
-          // PRODUCT_CODE / PRODUCT_SNO are for grouping/display only — NOT for purchase
-          const pid   = prod.PRODUCT_ID  || prod.product_id  || '';
-          const pcode = prod.PRODUCT_CODE|| prod.product_code|| prod.code || '';
-          const psno  = prod.PRODUCT_SNO || prod.SNO         || '';
-          // Use PRODUCT_ID as the value sent to DataPlan; fall back only if truly absent
+        products.forEach((prod, idx) => {
+          if(idx===0) console.log('[NBS] First product raw ('+netName+'):', JSON.stringify(prod));
+          const pid   = prod.PRODUCT_ID   || prod.product_id   || '';
+          const pcode = prod.PRODUCT_CODE || prod.product_code || prod.code || '';
+          const psno  = prod.PRODUCT_SNO  || prod.SNO          || '';
           const planId = pid || pcode || psno || String(idx+1);
-          if(idx===0) console.log('[NBS] IDs for first plan → PRODUCT_ID:',pid,' PRODUCT_CODE:',pcode,' PRODUCT_SNO:',psno,' → sending:',planId);
-          allPlans.push({
+          if(idx===0) console.log('[NBS] IDs → PRODUCT_ID:',pid,' CODE:',pcode,' SNO:',psno,' → SENDING:',planId);
+          plans.push({
             variation_code   : String(planId),
             variation_sno    : String(psno),
             variation_name   : String(prod.PRODUCT_NAME || prod.product_name || prod.name || prod.PLAN || ''),
@@ -1657,7 +1644,38 @@ function extractNBSPlans(res, networkId){
           });
         });
       });
-      if(allPlans.length) return allPlans;
+      return plans;
+    }
+
+    // Find the key in wrapper that matches the requested networkId
+    // Exact case-insensitive match first, then substring match — NO silent fallback to [0]
+    const netKey = wrapperKeys.find(k => k.toUpperCase() === networkId.toUpperCase())
+                || wrapperKeys.find(k => k.toUpperCase().includes(networkId.toUpperCase()))
+                || wrapperKeys.find(k => networkId.toUpperCase().includes(k.toUpperCase()));
+
+    console.log('[NBS] networkId:', networkId, '→ matched key:', netKey||'NONE', '| all keys:', wrapperKeys);
+
+    if(netKey && Array.isArray(wrapper[netKey])){
+      const plans = extractFromProviders(wrapper[netKey], netKey, networkId);
+      if(plans.length){
+        console.log('[NBS] Extracted', plans.length, 'plans for', networkId);
+        return plans;
+      }
+    }
+
+    // No match found — log all keys so we can debug
+    if(!netKey){
+      console.warn('[NBS] No key matched networkId "'+networkId+'" in wrapper keys:', wrapperKeys);
+      // Try every key and return the first non-empty result
+      for(const k of wrapperKeys){
+        if(Array.isArray(wrapper[k])){
+          const plans = extractFromProviders(wrapper[k], k, networkId);
+          if(plans.length){
+            console.warn('[NBS] Using fallback key "'+k+'" for networkId "'+networkId+'"');
+            return plans;
+          }
+        }
+      }
     }
   }
 
@@ -1720,26 +1738,46 @@ async function fetchPlansForNetwork(networkId){
       plans = res;
       console.log('[PLANS] Format: top-level array, length:', plans.length);
     } else if(res && typeof res === 'object'){
-      // Try every known wrapper key
       const keys = Object.keys(res);
       console.log('[PLANS] Probing object keys:', keys);
+      // First: try to find array directly under a key matching networkId
       for(const key of keys){
-        if(Array.isArray(res[key]) && res[key].length > 0){
+        if(key.toUpperCase() === networkId.toUpperCase() && Array.isArray(res[key]) && res[key].length > 0){
           plans = res[key];
-          console.log('[PLANS] Found array under key "'+key+'", length:', plans.length);
+          console.log('[PLANS] Matched networkId key "'+key+'", length:', plans.length);
           break;
         }
       }
-      // Still nothing — check for nested object one level deeper
+      // Second: any top-level array
+      if(!plans){
+        for(const key of keys){
+          if(Array.isArray(res[key]) && res[key].length > 0){
+            plans = res[key];
+            console.log('[PLANS] Found array under key "'+key+'", length:', plans.length);
+            break;
+          }
+        }
+      }
+      // Third: nested one level deeper — prefer key matching networkId
       if(!plans){
         for(const key of keys){
           if(res[key] && typeof res[key]==='object' && !Array.isArray(res[key])){
             const subKeys = Object.keys(res[key]);
+            // Try matching subkey first
             for(const sk of subKeys){
-              if(Array.isArray(res[key][sk]) && res[key][sk].length > 0){
+              if(sk.toUpperCase() === networkId.toUpperCase() && Array.isArray(res[key][sk]) && res[key][sk].length > 0){
                 plans = res[key][sk];
-                console.log('[PLANS] Found array under key "'+key+'.'+sk+'", length:', plans.length);
+                console.log('[PLANS] Matched networkId nested key "'+key+'.'+sk+'", length:', plans.length);
                 break;
+              }
+            }
+            if(!plans){
+              for(const sk of subKeys){
+                if(Array.isArray(res[key][sk]) && res[key][sk].length > 0){
+                  plans = res[key][sk];
+                  console.log('[PLANS] Found array under nested key "'+key+'.'+sk+'", length:', plans.length);
+                  break;
+                }
               }
             }
           }
