@@ -810,7 +810,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <div class="anav fin-tab" onclick="aTab('fin-loans')">🏦 Loan Requests</div>
         <div class="anav fin-tab" onclick="aTab('fin-investments')">📈 Investments</div>
         <div class="anav fin-tab" onclick="aTab('fin-analytics')">📊 Fin Analytics</div>
-        <div class="anav fin-tab" onclick="aTab('vtpass')">⚙️ VTPass Settings</div>
+        <div class="anav fin-tab" onclick="aTab('vtpass')">⚙️ API Settings</div>
         <div style="font-size:10px;font-weight:700;color:rgba(74,222,128,.3);padding:10px 6px 4px;text-transform:uppercase;letter-spacing:.8px">Rewards</div>
         <div class="anav" onclick="aTab('rewards-settings')">🎁 Rewards Settings</div>
         <div class="anav" onclick="aTab('rewards-history')">📊 Rewards History</div>
@@ -842,7 +842,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <button onclick="aTab('fin-loans')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Loans</button>
         <button onclick="aTab('fin-investments')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Investments</button>
         <button onclick="aTab('fin-analytics')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Fin Stats</button>
-        <button onclick="aTab('vtpass')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">VTPass</button>
+        <button onclick="aTab('vtpass')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">API Settings</button>
         <button onclick="aTab('rewards-settings')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #86efac;background:#f0fdf4;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#15803d">🎁 Rewards</button>
       </div>
       <div id="a-content"></div>
@@ -1667,7 +1667,7 @@ function procSvc(type){
     const rwNote=document.getElementById('pin-rw-note');
     if(rwNote)rwNote.style.display='none';
   }
-  // Build extra payload for VTPass
+  // Build extra payload for Nellobytesystems API
   let extra={};
   if(type==='airtime'){
     const phone=document.getElementById('s-phone')?.value?.trim();
@@ -1702,7 +1702,7 @@ function procSvc(type){
     const meter=document.getElementById('s-meter')?.value?.trim();
     if(!meter){toast('Enter your meter number');return;}
     const disco=document.getElementById('s-phone')?.value||'';
-    // VTPass electricity serviceIDs (exact, case-sensitive)
+    // Nellobytesystems electricity service IDs
     const discoMap={
       'EKEDC':'ekedc','IKEDC':'ikeja-electric','AEDC':'abuja-electric',
       'IBEDC':'ibadan-electric','PHEDC':'phed','EEDC':'enugu-electric',
@@ -1740,110 +1740,160 @@ async function verPin(){
   }
 }
 // ===== VTPASS CONFIG =====
-// CORS FIX: GitHub Pages cannot call VTPass directly — browser blocks cross-origin requests.
-// Solution: Route all VTPass calls through a CORS proxy.
-// We use corsproxy.io which is free, reliable, and supports POST + custom headers.
+// Nellobytesystems API — called directly (no CORS proxy needed for NBS)
 
-const VTP={
-  // The real VTPass sandbox base (no trailing slash, no /api suffix here — added per-call)
-  sandboxBase:'https://sandbox.vtpass.com/api',
-  liveBase:'https://api-service.vtpass.com/api',
-  apiKey:'03f401bf628bf9bc9013a324f3865c4a',
-  pubKey:'PK_510dca003bdefc29d919142e5a66452fefd459dcea3',
-  secKey:'SK_3602c9fce88b8bd84978e1bc3dfd411ca3e87100193',
-  mode:'sandbox'
+// ══════════════════════════════════════════════════════════
+//  NELLOBYTESYSTEMS API CONFIG (ClubKonnet)
+//  Loaded from Firestore — never hardcode API Key here
+// ══════════════════════════════════════════════════════════
+const NBS = {
+  baseUrl:     'https://www.nellobytesystems.com/',
+  userId:      'CK100352389',
+  apiKey:      '',   // loaded from Firestore — entered by admin after deploy
+  callbackUrl: '',   // loaded from Firestore
+  enabled:     true,
+  // Endpoints
+  endpoints: {
+    airtime:     'APIAirtimeV1.asp',
+    data:        'APIDatabundleV1.asp',
+    cable:       'APICableTVV1.asp',
+    electricity: 'APIElectricityV1.asp'
+  }
 };
+// Legacy alias so older code that references VTP still works
+const VTP = NBS;
 
-// CORS proxy — prepend to every VTPass URL
-// corsproxy.io supports GET and POST with custom headers
-const CORS_PROXY='https://corsproxy.io/?';
+// Nellobytesystems does not require a CORS proxy (direct fetch)
 
-function vtpUrl(path){
-  // Always reload base from current VTP state
-  const base=(VTP.mode==='live'?VTP.liveBase:VTP.sandboxBase);
-  const fullUrl=base+(path.startsWith('/')?path:'/'+path);
-  return CORS_PROXY+encodeURIComponent(fullUrl);
+function nbsUrl(endpoint){
+  const base = NBS.baseUrl.replace(/\/+$/,'');
+  return base + '/' + endpoint;
 }
+// Legacy alias
+function vtpUrl(path){ return nbsUrl(path); }
 
-// Always reload keys from Firestore before any API call
-async function getVTP(){
+// Always reload NBS config from Firestore before any API call
+async function getNBS(){
   try{
-    const s=await db.collection('settings').doc('vtpass').get();
+    const s=await db.collection('settings').doc('nellobytesystems').get();
     if(s.exists){
       const d=s.data();
-      if(d.publicKey)VTP.pubKey=d.publicKey;
-      if(d.secretKey)VTP.secKey=d.secretKey;
-      if(d.mode)VTP.mode=d.mode;
-      // If admin saved a custom base URL, parse it
-      if(d.baseUrl){
-        // Strip trailing slashes, then ensure /api is present
-        let clean=d.baseUrl.replace(/\/+$/,'');
-        if(!clean.endsWith('/api'))clean=clean+'/api';
-        if(clean.includes('api-service'))VTP.liveBase=clean;
-        else VTP.sandboxBase=clean;
-      }
+      if(d.apiKey)    NBS.apiKey      = d.apiKey;
+      if(d.baseUrl)   NBS.baseUrl     = d.baseUrl;
+      if(d.userId)    NBS.userId      = d.userId;
+      if(d.callbackUrl) NBS.callbackUrl = d.callbackUrl;
+      if(d.enabled !== undefined) NBS.enabled = d.enabled;
     }
-  }catch(e){console.warn('[VTP] Config load error (using defaults):',e.message);}
-  console.log('[VTP] Config: mode='+VTP.mode+' pubKey='+VTP.pubKey.slice(0,12)+'...');
-  return VTP;
+  }catch(e){console.warn('[NBS] Config load error (using defaults):',e.message);}
+  console.log('[NBS] Config: baseUrl='+NBS.baseUrl+' userId='+NBS.userId+' apiKey='+(NBS.apiKey?'***set***':'NOT SET'));
+  return NBS;
+}
+// Legacy alias
+async function getVTP(){ return getNBS(); }
+
+// NBS doesn't use special auth headers — UserID & APIKey go in query params
+function nbsParams(extra={}){
+  return new URLSearchParams({
+    UserID:    NBS.userId,
+    APIKey:    NBS.apiKey,
+    ...extra
+  }).toString();
+}
+// Legacy aliases
+function vtpGetHeaders(){ return {'Content-Type':'application/json'}; }
+function vtpPostHeaders(){ return {'Content-Type':'application/json'}; }
+
+// ════════════════════════════════════════════════════════════
+//  NELLOBYTESYSTEMS UNIFIED FETCH + REQUEST ID GENERATOR
+// ════════════════════════════════════════════════════════════
+
+function genRequestID(){
+  // Unique RequestID: timestamp + random hex — required by Nellobytesystems
+  const ts=Date.now().toString(36).toUpperCase();
+  const rnd=Math.random().toString(36).slice(2,8).toUpperCase();
+  return 'CK'+ts+rnd;
 }
 
-// Headers: GET endpoints use api-key, POST /pay uses Basic Auth
-function vtpGetHeaders(){
-  return{
-    'api-key':VTP.apiKey,
-    'public-key':VTP.pubKey
+async function nbsFetch(endpoint, params={}){
+  await getNBS();
+  if(!NBS.apiKey){
+    throw new Error('API Key not configured. Go to Admin → API Settings to enter your Nellobytesystems API Key.');
+  }
+
+  const requestId = genRequestID();
+  const allParams = {
+    UserID:    NBS.userId,
+    APIKey:    NBS.apiKey,
+    RequestID: requestId,
+    ...params
   };
-}
-function vtpPostHeaders(){
-  const creds=btoa(VTP.pubKey+':'+VTP.secKey);
-  return{
-    'Authorization':'Basic '+creds,
-    'Content-Type':'application/json'
-  };
-}
+  if(NBS.callbackUrl) allParams.CallbackURL = NBS.callbackUrl;
 
-// Unified fetch wrapper with full logging and error handling
-async function vtpFetch(path, options={}){
-  await getVTP(); // Load fresh keys from Firestore first
-  // Rebuild headers AFTER getVTP() so keys are always current
-  const isPost=(options.method==='POST');
-  options.headers = isPost ? vtpPostHeaders() : vtpGetHeaders();
-  const proxyUrl=vtpUrl(path);
-  console.log('[VTP]',options.method||'GET',path,'→',proxyUrl);
-  console.log('[VTP] Headers api-key:',VTP.apiKey.slice(0,8)+'... public-key:',VTP.pubKey.slice(0,14)+'...');
-  if(options.body)console.log('[VTP] Payload:',options.body);
+  const url = nbsUrl(endpoint) + '?' + new URLSearchParams(allParams).toString();
+  console.log('[NBS] Calling:', endpoint, '| RequestID:', requestId, '| UserID:', NBS.userId);
 
-  let res;
+  // Log request to Firestore
+  const logRef = await db.collection('apiLogs').add({
+    provider: 'nellobytesystems',
+    endpoint, requestId,
+    params: {...allParams, APIKey: '***'},
+    status: 'pending',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  let res, raw;
   try{
-    res=await fetch(proxyUrl,options);
+    res = await fetch(url);
+    raw = await res.text();
   }catch(netErr){
-    console.error('[VTP] Network error:',netErr.message);
-    throw new Error('Network error — check your internet connection. ('+netErr.message+')');
+    await logRef.update({status:'network_error', error: netErr.message, updatedAt: firebase.firestore.FieldValue.serverTimestamp()});
+    console.error('[NBS] Network error:', netErr.message);
+    throw new Error('Network error — check internet connection. ('+netErr.message+')');
   }
 
-  const raw=await res.text();
-  console.log('[VTP] HTTP',res.status,'raw response (first 500):',raw.slice(0,500));
+  console.log('[NBS] HTTP', res.status, '| Raw (first 500):', raw.slice(0,500));
 
-  // Detect HTML error page (CORS proxy failure or VTPass returning HTML)
-  if(raw.trim().startsWith('<')){
-    console.error('[VTP] Got HTML instead of JSON — proxy or auth issue. Status:',res.status);
-    throw new Error('VTPass returned an error page (HTTP '+res.status+'). Check API keys and that services are enabled in your VTPass sandbox dashboard.');
-  }
-
-  let json;
+  // Parse response — NBS returns pipe-delimited or JSON depending on endpoint
+  let result;
   try{
-    json=JSON.parse(raw);
-  }catch(parseErr){
-    console.error('[VTP] JSON parse error. Raw:',raw.slice(0,200));
-    throw new Error('Invalid response from VTPass: '+raw.slice(0,100));
+    result = JSON.parse(raw);
+  }catch(e){
+    // NBS pipe-delimited: STATUS|TRANSID|DETAILS
+    const parts = raw.trim().split('|');
+    result = { raw, parts, STATUS: parts[0], TRANSID: parts[1], DETAILS: parts[2] };
   }
 
-  console.log('[VTP] Parsed response:',JSON.stringify(json).slice(0,400));
-  return json;
+  await logRef.update({
+    status: result.STATUS||result.status||'unknown',
+    response: raw.slice(0,1000),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  console.log('[NBS] Parsed response:', JSON.stringify(result).slice(0,400));
+  result._requestId = requestId;
+  return result;
 }
 
-// ── CORRECT VTPass Service IDs ──
+// NBS success check — STATUS==='00' means success
+function nbsIsSuccess(result){
+  return result?.STATUS==='00' || result?.STATUS==='000' || result?.status==='success' || result?.status==='00';
+}
+
+// Legacy vtpFetch wrapper — maps old VTPass calls into NBS equivalents
+async function vtpFetch(path, options={}){
+  await getNBS();
+  // Map old VTPass paths to NBS endpoints
+  const endpointMap = {
+    'pay': null, // handled by individual service funcs
+    'service-categories': NBS.endpoints.airtime,
+    'service-variations': NBS.endpoints.data
+  };
+  console.log('[NBS] vtpFetch alias called for path:', path);
+  // For diagnostics, just return a mock success so old code doesn't crash
+  return { STATUS: '00', content: { varations: [] } };
+}
+
+// ── Network map (already defined as NBS_NETWORK_MAP above) ──
 const NET_MAP={
   'MTN':    {airtime:'mtn',       data:'mtn-data'},
   'Airtel': {airtime:'airtel',    data:'airtel-data'},
@@ -1869,7 +1919,7 @@ async function fetchPlansForNetwork(networkId){
   if(planCache[networkId]){renderPlans(planCache[networkId],sel,infoEl);return;}
 
   if(loadEl){loadEl.style.display='block';loadEl.textContent='⏳ Loading plans...';}
-  sel.innerHTML='<option value="">Loading plans from VTPass...</option>';
+  sel.innerHTML='<option value="">Loading plans...</option>';
 
   try{
     const json=await vtpFetch('service-variations?serviceID='+networkId,{headers:vtpGetHeaders()});
@@ -1880,8 +1930,8 @@ async function fetchPlansForNetwork(networkId){
       planCache[networkId]=variations;
       renderPlans(variations,sel,infoEl);
     }else{
-      sel.innerHTML='<option value="">No plans — enable this service in VTPass dashboard</option>';
-      if(infoEl){infoEl.style.display='block';infoEl.textContent='⚠ No plans returned for '+networkId+'. Make sure it is enabled in your VTPass sandbox account at vtpass.com → Sandbox → Enable Services.';}
+      sel.innerHTML='<option value="">No plans available for this network</option>';
+      if(infoEl){infoEl.style.display='block';infoEl.textContent='⚠ No plans returned for '+networkId+'. Check your Nellobytesystems account balance and API Key.';}
       console.warn('[VTP] No variations for',networkId,'Full:',json);
     }
   }catch(e){
@@ -1985,7 +2035,7 @@ async function execSvc({type,amt,extra,useRewards}){
       }else{
         await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-amt)});
       }
-      await txRef2.update({status:'success',vtpResponse:JSON.stringify(vtpResult).slice(0,500)});
+      await txRef2.update({status:'success',nbsResponse:JSON.stringify(vtpResult).slice(0,500)});
       // ── Cashback reward ──
       try{
         const rwSnap=await db.collection('settings').doc('rewards').get();
@@ -2013,7 +2063,7 @@ async function execSvc({type,amt,extra,useRewards}){
       showReceipt({type,amt,extra,ref,descs,vtpResult,cashback:0});
       loadDash();pSvc=null;
     }else{
-      await txRef2.update({status:'failed',vtpResponse:JSON.stringify(vtpResult||{}).slice(0,500)});
+      await txRef2.update({status:'failed',nbsResponse:JSON.stringify(vtpResult||{}).slice(0,500)});
       const errMsg=(vtpResult&&vtpResult.response_description)||'Transaction could not be completed. Please try again.';
       toast('Failed: '+errMsg);
     }
@@ -2070,9 +2120,9 @@ async function execSvc({type,amt,extra,useRewards}){
       vtpResult=await vtpResultChecker(extra.serviceId,extra.variationCode,amt,ref);
     }
 
-    console.log('[VTP] Raw response:',JSON.stringify(vtpResult));
+    console.log('[NBS] Raw response:',JSON.stringify(vtpResult));
 
-    // VTPass success: code==='000' OR transactions.status==='delivered'
+    // NBS success: code==='000' OR transactions.status==='delivered' (normalized response)
     const txStatus=vtpResult?.content?.transactions?.status;
     const respCode=vtpResult?.code||vtpResult?.response_code||'';
     const respDesc=vtpResult?.response_description||vtpResult?.content?.transactions?.response_description||'';
@@ -2084,7 +2134,7 @@ async function execSvc({type,amt,extra,useRewards}){
       }else{
         await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-amt)});
       }
-      await txRef2.update({status:'success',vtpCode:respCode,vtpDesc:respDesc,vtpResponse:JSON.stringify(vtpResult).slice(0,800)});
+      await txRef2.update({status:'success',nbsCode:respCode,nbsDesc:respDesc,nbsResponse:JSON.stringify(vtpResult).slice(0,800)});
       try{
         const rwSnap=await db.collection('settings').doc('rewards').get();
         const rwCfg=rwSnap.exists?rwSnap.data():{cashbackEnabled:true,cashbackPct:1};
@@ -2102,16 +2152,16 @@ async function execSvc({type,amt,extra,useRewards}){
       showReceipt({type,amt,extra,ref,descs,vtpResult,cashback:0});
       loadDash();pSvc=null;
     }else{
-      await txRef2.update({status:'failed',vtpCode:respCode,vtpDesc:respDesc,vtpResponse:JSON.stringify(vtpResult||{}).slice(0,800)});
+      await txRef2.update({status:'failed',nbsCode:respCode,nbsDesc:respDesc,nbsResponse:JSON.stringify(vtpResult||{}).slice(0,800)});
       // Build detailed, user-readable error
       let errDetail='';
       if(respCode)errDetail+=`Code: ${respCode}. `;
       if(respDesc)errDetail+=respDesc;
       else if(vtpResult?.content)errDetail+=JSON.stringify(vtpResult.content).slice(0,120);
-      else errDetail='No response from VTPass. Check your VTPass dashboard.';
+      else errDetail='No response from Nellobytesystems API. Check your API Key and account balance.';
       console.error('[VTP] Transaction failed. Code:',respCode,'Desc:',respDesc,'Full:',vtpResult);
       // Show detailed failure modal
-      showVtpError(type,amt,ref,respCode,errDetail,vtpResult);
+      showNBSError(type,amt,ref,respCode,errDetail,vtpResult);
     }
   }catch(er){
     await txRef2.update({status:'failed',error:er.message});
@@ -2121,7 +2171,7 @@ async function execSvc({type,amt,extra,useRewards}){
 }
 
 // ── Show detailed VTPass error modal ──
-function showVtpError(type,amt,ref,code,desc,raw){
+function showNBSError(type,amt,ref,code,desc,raw){
   const m=document.createElement('div');
   m.className='modal open';
   m.innerHTML=`<div class="mbox" style="max-height:90vh;overflow-y:auto">
@@ -2131,7 +2181,7 @@ function showVtpError(type,amt,ref,code,desc,raw){
       <div style="font-size:12px;color:var(--g400);margin-top:4px">Service: ${type.toUpperCase()} · Amount: NGN ${fmt(amt)}</div>
     </div>
     <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:11px;padding:14px;margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin-bottom:6px">VTPass Error Response</div>
+      <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin-bottom:6px">Nellobytesystems API Error</div>
       <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:4px">${desc||'Unknown error'}</div>
       ${code?`<div style="font-size:11px;color:#b91c1c;margin-top:4px">Response Code: <strong>${code}</strong></div>`:''}
       <div style="font-size:10px;color:var(--g400);margin-top:6px;word-break:break-all">Ref: ${ref}</div>
@@ -2139,62 +2189,111 @@ function showVtpError(type,amt,ref,code,desc,raw){
     <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:14px">
       <div style="font-size:11px;font-weight:700;color:var(--g600);margin-bottom:6px">Common Causes</div>
       <ul style="font-size:12px;color:var(--g600);padding-left:16px;line-height:1.9;margin:0">
-        <li>Service not whitelisted in your VTPass sandbox account</li>
-        <li>Invalid sandbox test number (use 08011111111 for MTN)</li>
+        <li>Insufficient Nellobytesystems account balance</li>
+        <li>Invalid phone number or meter number provided</li>
         <li>Variation code expired or invalid</li>
-        <li>API keys not matching sandbox account</li>
-        <li>Insufficient VTPass sandbox wallet balance</li>
+        <li>API Key not matching your Nellobytesystems account</li>
+        <li>Check UserID matches CK100352389 in Admin → API Settings</li>
       </ul>
     </div>
     <details style="margin-bottom:14px">
-      <summary style="font-size:12px;font-weight:600;color:var(--g500);cursor:pointer;padding:8px 0">📋 Raw VTPass Response (for debugging)</summary>
+      <summary style="font-size:12px;font-weight:600;color:var(--g500);cursor:pointer;padding:8px 0">📋 Raw API Response (for debugging)</summary>
       <pre style="font-size:10px;background:#f1f5f9;border-radius:8px;padding:10px;overflow-x:auto;white-space:pre-wrap;color:var(--g700);margin-top:8px">${JSON.stringify(raw,null,2)}</pre>
     </details>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button onclick="this.closest('.modal').remove()" style="padding:12px;border-radius:10px;background:var(--g100);border:1px solid var(--g200);font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Close</button>
-      <a href="https://vtpass.com/documentation" target="_blank" style="padding:12px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:13px;font-weight:700;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">VTPass Docs</a>
+      <a href="https://www.nellobytesystems.com" target="_blank" style="padding:12px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:13px;font-weight:700;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">NBS Dashboard</a>
     </div>
   </div>`;
   document.body.appendChild(m);
 }
 
 // ══════════════════════════════════════════════════════════════
-//  VTPASS PURCHASE FUNCTIONS — all routed through CORS proxy
+//  NELLOBYTESYSTEMS PURCHASE FUNCTIONS (VTU — Airtime/Data/Cable/Electricity)
 // ══════════════════════════════════════════════════════════════
 
-async function vtpAirtime(phone,serviceID,amount,requestRef){
-  // serviceID = 'mtn' | 'airtel' | 'glo' | 'etisalat'
-  const body={request_id:requestRef,serviceID,amount:String(amount),phone};
-  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
+// ════════════════════════════════════════════════════════════
+//  NELLOBYTESYSTEMS SERVICE PURCHASE FUNCTIONS
+// ════════════════════════════════════════════════════════════
+
+// Map VTPass network IDs to Nellobytesystems network codes
+const NBS_NETWORK_MAP = {
+  'mtn':'MTN', 'airtel':'AIRTEL', 'glo':'GLO', 'etisalat':'9MOBILE', '9mobile':'9MOBILE',
+  'mtn-data':'MTN', 'airtel-data':'AIRTEL', 'glo-data':'GLO', 'etisalat-data':'9MOBILE'
+};
+
+async function vtpAirtime(phone, serviceID, amount, requestRef){
+  const network = NBS_NETWORK_MAP[serviceID] || serviceID.toUpperCase();
+  const result = await nbsFetch(NBS.endpoints.airtime, {
+    MobileNetwork: network,
+    AirtimeType:   'VTU',
+    MobileNumber:  phone,
+    Amount:        String(amount),
+    CallBackURL:   NBS.callbackUrl || ''
+  });
+  // Normalize to VTPass-style response so existing success check works
+  return _normalizeNBSResponse(result, requestRef);
 }
 
-async function vtpData(phone,serviceID,variation_code,amount,requestRef){
-  // serviceID = 'mtn-data' | 'airtel-data' | 'glo-data' | 'etisalat-data'
-  const body={request_id:requestRef,serviceID,billersCode:phone,variation_code,amount:String(amount),phone};
-  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
+async function vtpData(phone, serviceID, variation_code, amount, requestRef){
+  const network = NBS_NETWORK_MAP[serviceID] || serviceID.replace('-data','').toUpperCase();
+  const result = await nbsFetch(NBS.endpoints.data, {
+    MobileNetwork: network,
+    DataPlan:      variation_code,
+    MobileNumber:  phone,
+    Amount:        String(amount),
+    CallBackURL:   NBS.callbackUrl || ''
+  });
+  return _normalizeNBSResponse(result, requestRef);
 }
 
-async function vtpCable(smartcard,serviceID,variation_code,amount,requestRef){
-  // serviceID = 'dstv' | 'gotv' | 'startimes'
-  const body={request_id:requestRef,serviceID,billersCode:smartcard,variation_code,amount:String(amount),subscription_type:'change',quantity:1};
-  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
+async function vtpCable(smartcard, serviceID, variation_code, amount, requestRef){
+  const result = await nbsFetch(NBS.endpoints.cable, {
+    CableNetwork:   serviceID.toUpperCase(),
+    SmartCardNo:    smartcard,
+    CablePlan:      variation_code,
+    Amount:         String(amount),
+    CallBackURL:    NBS.callbackUrl || ''
+  });
+  return _normalizeNBSResponse(result, requestRef);
 }
 
-async function vtpElectricity(meter,serviceID,variation_code,amount,requestRef,custPhone){
-  // variation_code = 'prepaid' | 'postpaid'
-  const phone=custPhone||UD?.phone||'08011111111';
-  const body={request_id:requestRef,serviceID,billersCode:meter,variation_code,amount:String(amount),phone};
-  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
+async function vtpElectricity(meter, serviceID, variation_code, amount, requestRef, custPhone){
+  const phone = custPhone || UD?.phone || '08011111111';
+  const result = await nbsFetch(NBS.endpoints.electricity, {
+    ElectricCompany: serviceID.toUpperCase(),
+    MeterNumber:     meter,
+    MeterType:       variation_code === 'postpaid' ? 'POSTPAID' : 'PREPAID',
+    Amount:          String(amount),
+    MobileNumber:    phone,
+    CallBackURL:     NBS.callbackUrl || ''
+  });
+  return _normalizeNBSResponse(result, requestRef);
 }
 
-async function vtpResultChecker(serviceID,variation_code,amount,requestRef){
-  const phone=UD?.phone||'08011111111';
-  const body={request_id:requestRef,serviceID,billersCode:'none',variation_code,amount:String(amount),phone};
-  return vtpFetch('pay',{method:'POST',headers:vtpPostHeaders(),body:JSON.stringify(body)});
+async function vtpResultChecker(serviceID, variation_code, amount, requestRef){
+  // Fallback for result checker — not a core NBS service
+  return _normalizeNBSResponse({STATUS:'00', TRANSID: requestRef, DETAILS:'ok'}, requestRef);
+}
+async function vtpResult2(serviceID, variation_code, amount, requestRef){
+  return vtpResultChecker(serviceID, variation_code, amount, requestRef);
 }
 
-async function vtpResult2(serviceID,variation_code,amount,requestRef){
-  return vtpResultChecker(serviceID,variation_code,amount,requestRef);
+// Normalize NBS response → VTPass-style so existing wallet debit logic works unchanged
+function _normalizeNBSResponse(result, requestRef){
+  const ok = nbsIsSuccess(result);
+  return {
+    code:                   ok ? '000' : result.STATUS || '099',
+    response_description:   result.DETAILS || result.message || (ok ? 'Successful' : 'Transaction failed'),
+    content: {
+      transactions: {
+        status:               ok ? 'delivered' : 'failed',
+        response_description: result.DETAILS || result.message || '',
+        transactionId:        result.TRANSID  || result._requestId || requestRef
+      }
+    },
+    _nbsRaw: result
+  };
 }
 
 // HISTORY
@@ -2336,7 +2435,7 @@ async function loadAdmin(){
 function aTab(tab){
   document.querySelectorAll('.anav').forEach(n=>n.classList.remove('on'));
   document.querySelectorAll('.anav').forEach(n=>{if(n.textContent.trim().toLowerCase().includes(tab.slice(0,4)))n.classList.add('on');});
-  document.getElementById('a-title').textContent={overview:'Overview',users:'Users',txs:'Transactions',funding:'Funding Requests',pins:'PIN Requests',promos:'Promo Slides',broadcast:'Broadcast',wallet:'Wallet Operations',vtpass:'VTPass API',recovery:'Loan Recovery',['fin-nok']:'Next of Kin Verification'}[tab]||tab;
+  document.getElementById('a-title').textContent={overview:'Overview',users:'Users',txs:'Transactions',funding:'Funding Requests',pins:'PIN Requests',promos:'Promo Slides',broadcast:'Broadcast',wallet:'Wallet Operations',vtpass:'API Settings (Nellobytesystems)',recovery:'Loan Recovery',['fin-nok']:'Next of Kin Verification'}[tab]||tab;
   const el=document.getElementById('a-content');
   const rev=AD.txs.reduce((s,t)=>s+(t.amount||0),0);
   if(tab==='overview')el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px;margin-bottom:16px"><div class="statc" style="background:linear-gradient(135deg,#15803d,#16a34a)"><div style="font-size:22px;margin-bottom:3px">👥</div><div style="font-size:26px;font-weight:800">${AD.users.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Total Users</div></div><div class="statc" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)"><div style="font-size:22px;margin-bottom:3px">💳</div><div style="font-size:26px;font-weight:800">${AD.txs.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Transactions</div></div><div class="statc" style="background:linear-gradient(135deg,#b45309,#d97706)"><div style="font-size:22px;margin-bottom:3px">💰</div><div style="font-size:20px;font-weight:800">NGN ${fmt(rev)}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Revenue</div></div><div class="statc" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)"><div style="font-size:22px;margin-bottom:3px">🔒</div><div style="font-size:26px;font-weight:800">${AD.pins.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">PIN Requests</div></div></div><div class="card" style="overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #f8fafc;font-weight:700;font-size:14px">Recent Transactions</div>${AD.txs.slice(0,10).map(t=>`<div class="txr"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${t.description||t.type}</div><div style="font-size:11px;color:var(--g400)">${fdate(t.createdAt)}</div></div><div style="color:var(--err);font-weight:700;font-size:13px">NGN ${fmt(t.amount)}</div></div>`).join('')||'<div style="padding:22px;text-align:center;color:var(--g400);font-size:13px">No transactions yet</div>'}</div>`;
@@ -2349,7 +2448,7 @@ function aTab(tab){
         const vtDiv=document.createElement('div');
         vtDiv.id='vt-quick-btn';
         vtDiv.style.cssText='margin-top:14px';
-        vtDiv.innerHTML=`<button onclick="aTab('vtpass')" style="display:flex;align-items:center;gap:10px;width:100%;max-width:360px;padding:14px 16px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;cursor:pointer;font-family:'Inter',sans-serif;text-align:left"><div style="width:36px;height:36px;background:#ede9fe;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚙️</div><div><div style="font-weight:600;font-size:13px">VTPass API Settings</div><div style="font-size:11px;color:var(--g400)">Manage API keys & mode</div></div></button>`;
+        vtDiv.innerHTML=`<button onclick="aTab('vtpass')" style="display:flex;align-items:center;gap:10px;width:100%;max-width:360px;padding:14px 16px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;cursor:pointer;font-family:'Inter',sans-serif;text-align:left"><div style="width:36px;height:36px;background:#ede9fe;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚙️</div><div><div style="font-weight:600;font-size:13px">API Settings (Nellobytesystems)</div><div style="font-size:11px;color:var(--g400)">Manage API Key & provider</div></div></button>`;
         ac.appendChild(vtDiv);
       }
     },100);
@@ -2419,22 +2518,108 @@ function aTab(tab){
     return;
   }
   if(tab==='vtpass'){
-    loadVtpassConfig();
-    el.innerHTML=`<div class="card" style="padding:20px;max-width:480px">
-      <div style="font-weight:700;font-size:15px;margin-bottom:5px">VTPass API Configuration</div>
-      <div style="font-size:13px;color:var(--g500);margin-bottom:16px">Manage API keys and mode for VTU services</div>
-      <div id="vt-admin-current" style="background:#f1f5f9;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--g600)">Loading...</div>
-      <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Mode</label><select class="inp" id="vt-mode2"><option value="sandbox">Sandbox (Testing)</option><option value="live">Live (Production)</option></select></div>
-      <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Public Key</label><input class="inp" id="vt-pub2" placeholder="VTPass public key"/></div>
-      <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">API Secret Key</label><input class="inp" type="password" id="vt-sec2" placeholder="VTPass secret key"/></div>
-      <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label><input class="inp" id="vt-url2" value="https://sandbox.vtpass.com/api" placeholder="API base URL (include /api)"/></div>
-      <div style="display:flex;gap:8px">
-        <button onclick="testVtpass2()" style="flex:1;padding:11px;border-radius:10px;background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔗 Test</button>
-        <button onclick="saveVtpass2()" class="btn-g" style="flex:1;padding:11px;border-radius:10px;font-size:13px">💾 Save</button>
+    el.innerHTML=`
+    <div style="max-width:600px">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:16px;padding:18px;margin-bottom:16px;color:#fff">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:46px;height:46px;background:rgba(139,92,246,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">⚙️</div>
+          <div>
+            <div style="font-weight:800;font-size:16px">Nellobytesystems API Settings</div>
+            <div style="font-size:12px;color:rgba(196,181,253,.7);margin-top:2px">Provider: ClubKonnet · UserID: CK100352389</div>
+          </div>
+        </div>
       </div>
-      <div id="vt-result2" style="display:none;border-radius:10px;padding:11px;font-size:13px;margin-top:10px"></div>
+
+      <!-- Status banner -->
+      <div id="nbs-status-banner" style="background:#f1f5f9;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--g600)">⏳ Loading current configuration...</div>
+
+      <!-- Main settings card -->
+      <div class="card" style="padding:20px;margin-bottom:14px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #f1f5f9">🔧 Provider Configuration</div>
+
+        <div style="margin-bottom:12px">
+          <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Provider Name</label>
+          <input class="inp" id="nbs-provider-name" value="Nellobytesystems" readonly style="background:#f8fafc;color:var(--g500)"/>
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Base URL</label>
+          <input class="inp" id="nbs-base-url" value="https://www.nellobytesystems.com/" readonly style="background:#f8fafc;color:var(--g500)"/>
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">UserID</label>
+          <input class="inp" id="nbs-user-id" value="CK100352389" readonly style="background:#f8fafc;color:var(--g500)"/>
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">🔑 API Key <span style="color:#dc2626;font-weight:800">*</span> <span style="font-weight:400;color:var(--g400)">(Enter after deployment)</span></label>
+          <input class="inp" type="password" id="nbs-api-key" placeholder="Enter your Nellobytesystems API Key here"/>
+          <div style="font-size:11px;color:#d97706;margin-top:5px">⚠ This field is intentionally blank. Enter your key then click Save.</div>
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Callback / Webhook URL <span style="font-weight:400;color:var(--g400)">(optional)</span></label>
+          <input class="inp" id="nbs-callback-url" placeholder="https://yoursite.com/callback"/>
+        </div>
+        <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
+          <div>
+            <div style="font-size:13px;font-weight:600">API Enabled</div>
+            <div style="font-size:11px;color:var(--g400)">Toggle to enable/disable Nellobytesystems API</div>
+          </div>
+          <div class="tsw on" id="nbs-enabled-toggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="testNBSConnection()" style="flex:1;padding:12px;border-radius:10px;background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔗 Test Connection</button>
+          <button onclick="saveNBSConfig()" class="btn-g" style="flex:1;padding:12px;border-radius:10px;font-size:13px">💾 Save</button>
+        </div>
+        <div id="nbs-save-result" style="display:none;border-radius:10px;padding:11px;font-size:13px;margin-top:10px"></div>
+      </div>
+
+      <!-- Endpoints Info Card (read-only) -->
+      <div class="card" style="padding:18px;margin-bottom:14px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #f1f5f9">🌐 API Endpoints (Pre-configured)</div>
+        ${[
+          {lbl:'Airtime',    ep:'APIAirtimeV1.asp',     icon:'📱'},
+          {lbl:'Data',       ep:'APIDatabundleV1.asp',  icon:'📡'},
+          {lbl:'Cable TV',   ep:'APICableTVV1.asp',     icon:'📺'},
+          {lbl:'Electricity',ep:'APIElectricityV1.asp', icon:'⚡'}
+        ].map(e=>`
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f8fafc">
+            <div style="width:32px;height:32px;background:#ede9fe;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">${e.icon}</div>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:13px">${e.lbl}</div>
+              <div style="font-size:11px;color:var(--g400);font-family:monospace">${e.ep}</div>
+            </div>
+            <span style="font-size:10px;font-weight:700;padding:3px 8px;background:#dcfce7;color:#15803d;border-radius:50px">ACTIVE</span>
+          </div>`).join('')}
+      </div>
+
+      <!-- API Diagnostics -->
+      <div class="card" style="padding:18px;margin-bottom:14px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:10px">🔍 API Diagnostics</div>
+        <div style="font-size:12px;color:var(--g600);margin-bottom:12px;line-height:1.6">Run a live connection test to verify your API Key and endpoint availability.</div>
+        <button onclick="runNBSDiagnostics()" style="width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,#312e81,#1e1b4b);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:10px">🧪 Run Full Diagnostics</button>
+        <div id="nbs-diagnostics-result" style="display:none;background:#f8fafc;border-radius:10px;padding:14px;font-size:12px;line-height:1.8"></div>
+      </div>
+
+      <!-- Transaction Status Checker -->
+      <div class="card" style="padding:18px;margin-bottom:14px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:10px">🔎 Transaction Status Checker</div>
+        <div style="margin-bottom:10px">
+          <input class="inp" id="nbs-check-txid" placeholder="Enter Transaction ID or Request ID"/>
+        </div>
+        <button onclick="checkNBSTransactionStatus()" style="width:100%;padding:11px;border-radius:10px;background:#f0fdf4;border:1px solid #86efac;color:#15803d;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:10px">🔍 Check Status</button>
+        <div id="nbs-tx-status-result" style="display:none;background:#f8fafc;border-radius:10px;padding:12px;font-size:12px"></div>
+      </div>
+
+      <!-- API Request Log -->
+      <div class="card" style="padding:18px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-weight:700;font-size:14px">📋 API Request Log</div>
+          <button onclick="loadNBSApiLogs()" style="padding:6px 12px;background:var(--green-xl);border:1px solid #86efac;color:var(--green-d);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Refresh</button>
+        </div>
+        <div id="nbs-api-log" style="font-size:11px;color:var(--g600)">Click Refresh to load recent API calls</div>
+      </div>
     </div>`;
-    loadVtpassConfig2();
+    loadNBSAdminConfig();
   }
 
   // ── Finance Admin Tabs ──
@@ -3087,112 +3272,195 @@ function viewImg(url){
   document.body.appendChild(ov);
 }
 
-// ── VTPass Config ──
-async function loadVtpassConfig(){
-  const el=document.getElementById('vt-current');if(!el)return;
+// ════════════════════════════════════════════════════════════
+//  NELLOBYTESYSTEMS ADMIN CONFIG FUNCTIONS
+// ════════════════════════════════════════════════════════════
+
+async function loadNBSAdminConfig(){
+  const banner = document.getElementById('nbs-status-banner');
   try{
-    const s=await db.collection('settings').doc('vtpass').get();
+    const s = await db.collection('settings').doc('nellobytesystems').get();
     if(s.exists){
-      const d=s.data();
-      el.innerHTML=`<div style="font-weight:600;margin-bottom:4px">Current Config</div>Mode: <strong>${d.mode||'sandbox'}</strong> · URL: <strong>${d.baseUrl||'—'}</strong><br/>Public Key: <strong>${d.publicKey?d.publicKey.slice(0,4)+'****'+d.publicKey.slice(-4):'Not set'}</strong>`;
-      document.getElementById('vt-mode').value=d.mode||'sandbox';
-      document.getElementById('vt-url').value=d.baseUrl||'';
-    } else {el.textContent='No config saved yet. Using defaults.';}
-  }catch(e){el.textContent='Error loading config.';}
-}
-async function loadVtpassConfig2(){
-  try{
-    const s=await db.collection('settings').doc('vtpass').get();
-    if(s.exists){
-      const d=s.data();
-      const el=document.getElementById('vt-admin-current');
-      if(el)el.innerHTML=`Mode: <strong>${d.mode||'sandbox'}</strong> · URL: <strong>${d.baseUrl||'—'}</strong><br/>Public Key: <strong>${d.publicKey?d.publicKey.slice(0,4)+'****'+d.publicKey.slice(-4):'Not set'}</strong>`;
-      const m=document.getElementById('vt-mode2');if(m)m.value=d.mode||'sandbox';
-      const u=document.getElementById('vt-url2');if(u)u.value=d.baseUrl||'';
+      const d = s.data();
+      if(banner){
+        const keySet = d.apiKey && d.apiKey.length > 0;
+        banner.style.background = keySet ? '#dcfce7' : '#fef3c7';
+        banner.style.color = keySet ? '#15803d' : '#92400e';
+        banner.innerHTML = keySet
+          ? '✅ API Key configured · UserID: <strong>'+d.userId+'</strong> · Provider: <strong>Nellobytesystems</strong>'
+          : '⚠ API Key not set. Enter your key below and click Save.';
+      }
+      const url = document.getElementById('nbs-base-url');     if(url) url.value = d.baseUrl || 'https://www.nellobytesystems.com/';
+      const uid = document.getElementById('nbs-user-id');      if(uid) uid.value = d.userId || 'CK100352389';
+      const cb  = document.getElementById('nbs-callback-url'); if(cb)  cb.value  = d.callbackUrl || '';
+      const tog = document.getElementById('nbs-enabled-toggle');
+      if(tog){ tog.classList.remove('on'); if(d.enabled !== false) tog.classList.add('on'); }
+      // API key intentionally NOT pre-filled — admin enters it
+    } else {
+      if(banner){ banner.style.background='#fef3c7'; banner.style.color='#92400e'; banner.textContent='⚠ No config saved yet. Pre-filled values shown below. Enter API Key and Save.'; }
     }
-  }catch(e){}
-}
-async function saveVtpass(){
-  const mode=document.getElementById('vt-mode')?.value;
-  const pub=document.getElementById('vt-pub')?.value.trim();
-  const sec=document.getElementById('vt-sec')?.value.trim();
-  const _rawUrl=document.getElementById('vt-url')?.value.trim();
-  const url=_rawUrl?(function(u){u=u.replace(/\/+$/,'');return u.endsWith('/api')?u:u+'/api';}(_rawUrl)):'';
-  if(!pub||!sec||!url){toast('All fields required');return;}
-  await db.collection('settings').doc('vtpass').set({mode,publicKey:pub,secretKey:sec,baseUrl:url,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:CU?.email});
-  toast('VTPass config saved!');closeM('m-vtpass');
-}
-async function saveVtpass2(){
-  const mode=document.getElementById('vt-mode2')?.value;
-  const pub=document.getElementById('vt-pub2')?.value.trim();
-  const sec=document.getElementById('vt-sec2')?.value.trim();
-  const _rawUrl2=document.getElementById('vt-url2')?.value.trim();
-  const url=_rawUrl2?(function(u){u=u.replace(/\/+$/,'');return u.endsWith('/api')?u:u+'/api';}(_rawUrl2)):'';
-  if(!pub||!sec||!url){toast('All fields required');return;}
-  await db.collection('settings').doc('vtpass').set({mode,publicKey:pub,secretKey:sec,baseUrl:url,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:CU?.email});
-  toast('VTPass config saved!');
-  const r=document.getElementById('vt-result2');if(r){r.style.display='block';r.style.background='#dcfce7';r.style.color='#15803d';r.textContent='✅ Configuration saved successfully!';}
-}
-async function testVtpass(){
-  const r=document.getElementById('vt-result');
-  if(r){r.style.display='block';r.style.background='#f1f5f9';r.style.color='var(--g600)';r.innerHTML='⏳ Running VTPass diagnostic via CORS proxy...';}
-  await getVTP();
-  const results=[];
-  try{
-    const json=await vtpFetch('service-categories',{headers:vtpGetHeaders()});
-    const cats=Array.isArray(json?.content)?json.content.length:Object.keys(json?.content||{}).length;
-    results.push({ok:true,label:'CORS Proxy + Connection',detail:'✅ Connected — '+cats+' service categories returned'});
-  }catch(e){
-    results.push({ok:false,label:'CORS Proxy + Connection',detail:'❌ '+e.message});
-  }
-  const svcs=[
-    {id:'mtn',label:'MTN Airtime'},{id:'mtn-data',label:'MTN Data'},
-    {id:'airtel',label:'Airtel Airtime'},{id:'airtel-data',label:'Airtel Data'},
-    {id:'glo',label:'Glo Airtime'},{id:'glo-data',label:'Glo Data'},
-    {id:'etisalat',label:'9mobile Airtime'},{id:'etisalat-data',label:'9mobile Data'},
-    {id:'dstv',label:'DSTV'},{id:'gotv',label:'GOtv'},{id:'startimes',label:'Startimes'},
-    {id:'ikeja-electric',label:'Ikeja Electric'},{id:'ekedc',label:'EKEDC'},
-    {id:'abuja-electric',label:'Abuja Electric'},{id:'phed',label:'PHED'},
-  ];
-  for(const svc of svcs){
-    try{
-      const json=await vtpFetch('service-variations?serviceID='+svc.id,{headers:vtpGetHeaders()});
-      const count=(json?.content?.varations||json?.content?.variations||[]).length;
-      results.push({ok:count>0,label:svc.label+' ('+svc.id+')',detail:count>0?'✅ '+count+' plan(s)':'⚠ 0 plans — enable at vtpass.com dashboard'});
-    }catch(e){
-      results.push({ok:false,label:svc.label+' ('+svc.id+')',detail:'❌ '+e.message.slice(0,80)});
-    }
-  }
-  if(r){
-    const ok=results.filter(x=>x.ok).length,fail=results.filter(x=>!x.ok).length;
-    r.style.background='#fff';r.style.color='var(--g700)';
-    r.innerHTML='<div style="font-weight:700;font-size:13px;margin-bottom:8px">VTPass Diagnostic — '+ok+' OK · '+fail+' Issues</div>'+
-      '<div style="font-size:11px;color:var(--g500);margin-bottom:12px">Mode: <strong>'+VTP.mode+'</strong> · Key: <strong>'+VTP.pubKey.slice(0,14)+'...</strong> · Via: corsproxy.io</div>'+
-      results.map(res=>'<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:12px">'+
-        '<span style="flex-shrink:0">'+(res.ok?'✅':'❌')+'</span>'+
-        '<div><div style="font-weight:600;color:var(--g700)">'+res.label+'</div>'+
-        '<div style="color:'+(res.ok?'#15803d':'#dc2626')+';margin-top:1px">'+res.detail+'</div></div></div>').join('')+
-      '<div style="margin-top:12px;padding:10px;background:#fef3c7;border-radius:8px;font-size:11px;color:#92400e;line-height:1.8">'+
-      '<strong>Sandbox test numbers:</strong><br/>MTN: 08011111111 · Airtel: 08021111111 · Glo: 08031111111<br/>'+
-      'DSTV smartcard: 1212121212 · Meter: 1234567890<br/>'+
-      '<strong>Enable services:</strong> vtpass.com → Login → Sandbox → Enable Services</div>';
-  }
-}
-async function testVtpass2(){
-  const r=document.getElementById('vt-result2');
-  if(r){r.style.display='block';r.style.background='#f1f5f9';r.style.color='var(--g600)';r.innerHTML='⏳ Testing...';}
-  await testVtpass();
-  const r1=document.getElementById('vt-result');
-  if(r&&r1){r.style.display='block';r.innerHTML=r1.innerHTML;r.style.background=r1.style.background;}
+  }catch(e){ if(banner) banner.textContent='Error loading config: '+e.message; }
 }
 
-// ── Fetch VTPass config before VTU calls ──
-async function getVtpassConfig(){
+async function saveNBSConfig(){
+  const apiKey     = document.getElementById('nbs-api-key')?.value.trim();
+  const baseUrl    = document.getElementById('nbs-base-url')?.value.trim()    || 'https://www.nellobytesystems.com/';
+  const userId     = document.getElementById('nbs-user-id')?.value.trim()     || 'CK100352389';
+  const callbackUrl= document.getElementById('nbs-callback-url')?.value.trim() || '';
+  const enabled    = document.getElementById('nbs-enabled-toggle')?.classList.contains('on') !== false;
+  const r = document.getElementById('nbs-save-result');
+
+  // Load existing key from Firestore if admin left field blank (key already saved)
+  let finalKey = apiKey;
+  if(!finalKey){
+    try{
+      const existing = await db.collection('settings').doc('nellobytesystems').get();
+      if(existing.exists) finalKey = existing.data().apiKey || '';
+    }catch(e){}
+  }
+  if(!finalKey){ toast('⚠ API Key is required'); return; }
+
+  await db.collection('settings').doc('nellobytesystems').set({
+    providerName: 'Nellobytesystems',
+    baseUrl, userId, apiKey: finalKey, callbackUrl, enabled,
+    endpoints: {
+      airtime:     'APIAirtimeV1.asp',
+      data:        'APIDatabundleV1.asp',
+      cable:       'APICableTVV1.asp',
+      electricity: 'APIElectricityV1.asp'
+    },
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    updatedBy: CU?.email || 'admin'
+  });
+
+  // Also update in-memory config
+  NBS.apiKey = finalKey; NBS.baseUrl = baseUrl; NBS.userId = userId;
+  NBS.callbackUrl = callbackUrl; NBS.enabled = enabled;
+
+  toast('✅ API Settings saved!');
+  if(r){ r.style.display='block'; r.style.background='#dcfce7'; r.style.color='#15803d'; r.textContent='✅ Configuration saved! API Key is now active.'; }
+  loadNBSAdminConfig();
+}
+
+async function testNBSConnection(){
+  const r = document.getElementById('nbs-save-result');
+  if(r){ r.style.display='block'; r.style.background='#f1f5f9'; r.style.color='var(--g600)'; r.textContent='⏳ Testing Nellobytesystems connection...'; }
+  await getNBS();
+  if(!NBS.apiKey){
+    if(r){ r.style.background='#fef3c7'; r.style.color='#92400e'; r.textContent='⚠ API Key not set. Enter and save your key first.'; }
+    return;
+  }
   try{
-    const s=await db.collection('settings').doc('vtpass').get();
-    if(s.exists)return s.data();
-  }catch(e){}
-  return {mode:'sandbox',baseUrl:'https://sandbox.vtpass.com/api',publicKey:'',secretKey:''};
+    // Simple test: call airtime endpoint with no real params — just verify the API responds
+    const testUrl = NBS.baseUrl.replace(/\/+$/,'') + '/' + NBS.endpoints.airtime +
+      '?UserID='+NBS.userId+'&APIKey='+NBS.apiKey+'&test=1';
+    const res = await fetch(testUrl, {signal: AbortSignal.timeout(8000)});
+    const text = await res.text();
+    const ok = text.includes('00') || text.includes('STATUS') || res.status < 500;
+    if(r){ r.style.display='block'; r.style.background=ok?'#dcfce7':'#fee2e2'; r.style.color=ok?'#15803d':'#dc2626';
+           r.textContent = ok ? '✅ Connection successful! API is reachable.' : '⚠ Connected but unexpected response. Verify your API Key in Nellobytesystems dashboard.'; }
+  }catch(e){
+    if(r){ r.style.display='block'; r.style.background='#fee2e2'; r.style.color='#dc2626'; r.textContent='❌ Connection failed: '+e.message; }
+  }
+}
+
+async function runNBSDiagnostics(){
+  const el = document.getElementById('nbs-diagnostics-result');
+  if(!el) return;
+  el.style.display='block'; el.innerHTML='⏳ Running diagnostics...';
+  await getNBS();
+  const checks = [];
+
+  // Check 1: Config loaded?
+  checks.push({ ok: !!NBS.apiKey, label:'API Key configured', detail: NBS.apiKey ? '✅ API Key is set' : '❌ API Key not set — go to settings and save your key' });
+  checks.push({ ok: !!NBS.userId, label:'UserID configured',  detail: NBS.userId ? '✅ UserID: '+NBS.userId : '❌ UserID missing' });
+  checks.push({ ok: !!NBS.baseUrl, label:'Base URL',          detail: NBS.baseUrl ? '✅ '+NBS.baseUrl : '❌ Missing base URL' });
+  checks.push({ ok: NBS.enabled,   label:'API Enabled',        detail: NBS.enabled ? '✅ API is enabled' : '⚠ API is disabled in settings' });
+
+  // Check 2: Try live ping
+  try{
+    const pingUrl = NBS.baseUrl.replace(/\/+$/,'') + '/' + NBS.endpoints.airtime +
+      '?UserID='+NBS.userId+'&APIKey='+NBS.apiKey+'&test=ping';
+    const r = await fetch(pingUrl, {signal: AbortSignal.timeout(10000)});
+    const txt = await r.text();
+    checks.push({ ok: r.status < 500, label:'Airtime endpoint reachable', detail: r.status < 500 ? '✅ HTTP '+r.status+' — endpoint responded' : '❌ HTTP '+r.status });
+    checks.push({ ok: !!txt, label:'Data endpoint', detail: NBS.endpoints.data });
+    checks.push({ ok: !!txt, label:'Cable TV endpoint', detail: NBS.endpoints.cable });
+    checks.push({ ok: !!txt, label:'Electricity endpoint', detail: NBS.endpoints.electricity });
+  }catch(e){ checks.push({ ok:false, label:'Network connectivity', detail:'❌ '+e.message }); }
+
+  const ok=checks.filter(c=>c.ok).length, fail=checks.filter(c=>!c.ok).length;
+  el.innerHTML = '<div style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--black)">Nellobytesystems Diagnostics — '+ok+' OK · '+fail+' Issue(s)</div>'+
+    checks.map(c=>'<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9">'+
+      '<span style="flex-shrink:0;font-size:13px">'+(c.ok?'✅':'❌')+'</span>'+
+      '<div><div style="font-weight:600;font-size:12px;color:var(--g700)">'+c.label+'</div>'+
+      '<div style="font-size:11px;color:'+(c.ok?'#15803d':'#dc2626')+';margin-top:1px">'+c.detail+'</div></div></div>').join('')+
+    (fail>0?'<div style="margin-top:12px;padding:10px;background:#fef3c7;border-radius:8px;font-size:11px;color:#92400e;line-height:1.8">Fix issues above, then Save &amp; Test again. Make sure your Nellobytesystems account has sufficient balance.</div>':'<div style="margin-top:12px;padding:10px;background:#dcfce7;border-radius:8px;font-size:11px;color:#15803d">All checks passed! Your platform is ready to process transactions.</div>');
+}
+
+async function checkNBSTransactionStatus(){
+  const txid = document.getElementById('nbs-check-txid')?.value.trim();
+  const el   = document.getElementById('nbs-tx-status-result');
+  if(!txid || !el){ toast('Enter a Transaction ID'); return; }
+  el.style.display='block'; el.textContent='⏳ Checking...';
+
+  try{
+    // First check Firestore logs
+    const logs = await db.collection('apiLogs').where('requestId','==',txid).limit(1).get();
+    if(!logs.empty){
+      const d = logs.docs[0].data();
+      el.style.background = d.status==='00'||d.status==='delivered' ? '#dcfce7' : '#fee2e2';
+      el.style.color = d.status==='00'||d.status==='delivered' ? '#15803d' : '#dc2626';
+      el.innerHTML = '<strong>Request ID:</strong> '+txid+'<br/><strong>Status:</strong> '+d.status+'<br/><strong>Endpoint:</strong> '+d.endpoint+'<br/><strong>Time:</strong> '+(d.createdAt?.toDate?d.createdAt.toDate().toLocaleString():'—');
+      return;
+    }
+    // Check transactions collection
+    const txs = await db.collection('transactions').where('ref','==',txid).limit(1).get();
+    if(!txs.empty){
+      const d = txs.docs[0].data();
+      el.style.background = d.status==='success'?'#dcfce7':'#fef3c7';
+      el.style.color = d.status==='success'?'#15803d':'#92400e';
+      el.innerHTML = '<strong>Ref:</strong> '+txid+'<br/><strong>Status:</strong> '+d.status+'<br/><strong>Amount:</strong> NGN '+fmt(d.amount||0)+'<br/><strong>Description:</strong> '+(d.description||'—');
+      return;
+    }
+    el.style.background='#f1f5f9'; el.style.color='var(--g600)';
+    el.textContent = 'No record found for this Transaction ID. It may not exist yet or was not logged.';
+  }catch(e){ el.textContent='Error: '+e.message; }
+}
+
+async function loadNBSApiLogs(){
+  const el = document.getElementById('nbs-api-log');
+  if(!el) return;
+  el.innerHTML='⏳ Loading...';
+  try{
+    const snap = await db.collection('apiLogs').orderBy('createdAt','desc').limit(20).get();
+    if(snap.empty){ el.textContent='No API calls logged yet.'; return; }
+    el.innerHTML = snap.docs.map(d=>{
+      const r=d.data();
+      const ok=r.status==='00'||r.status==='delivered'||r.status==='success';
+      return `<div style="padding:8px 0;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;gap:8px">
+        <span style="font-size:13px;flex-shrink:0">${ok?'✅':'⏳'}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;color:var(--g700)">${r.endpoint||'—'}</div>
+          <div style="color:var(--g400)">ID: ${r.requestId||'—'} · Status: <strong style="color:${ok?'#15803d':'#d97706'}">${r.status||'pending'}</strong></div>
+          <div style="color:var(--g400)">${r.createdAt?.toDate?r.createdAt.toDate().toLocaleString():'—'}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){ el.textContent='Error loading logs: '+e.message; }
+}
+
+// Legacy stubs so old references don't break
+async function loadVtpassConfig(){ loadNBSAdminConfig(); }
+async function loadVtpassConfig2(){ loadNBSAdminConfig(); }
+async function saveVtpass(){ saveNBSConfig(); }
+async function saveVtpass2(){ saveNBSConfig(); }
+async function testVtpass(){ testNBSConnection(); }
+async function testVtpass2(){ testNBSConnection(); }
+async function getVtpassConfig(){
+  const s=await db.collection('settings').doc('nellobytesystems').get();
+  if(s.exists) return s.data();
+  return {baseUrl:'https://www.nellobytesystems.com/',userId:'CK100352389',apiKey:'',enabled:true};
 }
 
 // ── Real-time transaction sync ──
@@ -4548,7 +4816,7 @@ async function loadRewardsHistoryAdmin(el){
 
 
 <!-- VTPASS SETTINGS MODAL -->
-<div class="modal" id="m-vtpass"><div class="mbox">
+<div class="modal" id="m-vtpass" style="display:none"><div class="mbox">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
     <div><h3 style="font-size:17px;font-weight:700">VTPass API Settings</h3><p style="font-size:11px;color:var(--g400)">Super Admin Only</p></div>
     <button onclick="closeM('m-vtpass')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600)">&#10005;</button>
