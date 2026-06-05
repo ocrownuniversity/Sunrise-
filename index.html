@@ -1970,6 +1970,156 @@ async function fetchCablePlans(cableType) {
   }
 }
 
+// ═══════════════════════════════════════════════════
+// ADMIN — loadAdmin + aTab
+// ═══════════════════════════════════════════════════
+let AD={users:[],txs:[],funds:[],pins:[],loans:[],investments:[],pwdResets:[]};
+
+async function loadAdmin(){
+  const el=document.getElementById('a-content');
+  if(!el)return;
+  el.innerHTML='<div style="padding:40px;text-align:center;color:var(--g400)"><div style="font-size:32px;margin-bottom:8px">⏳</div><p>Loading admin data...</p></div>';
+  try{
+    const [us,txs,fs,ps,ls,ivs]=await Promise.all([
+      db.collection('users').orderBy('createdAt','desc').get(),
+      db.collection('transactions').orderBy('createdAt','desc').limit(200).get(),
+      db.collection('fundRequests').orderBy('createdAt','desc').get(),
+      db.collection('pinRequests').orderBy('createdAt','desc').get(),
+      db.collection('loans').orderBy('createdAt','desc').get(),
+      db.collection('investments').orderBy('createdAt','desc').get()
+    ]);
+    AD.users=us.docs.map(d=>({id:d.id,...d.data()}));
+    AD.txs=txs.docs.map(d=>({id:d.id,...d.data()}));
+    AD.funds=fs.docs.map(d=>({id:d.id,...d.data()}));
+    AD.pins=ps.docs.map(d=>({id:d.id,...d.data()}));
+    AD.loans=ls.docs.map(d=>({id:d.id,...d.data()}));
+    AD.investments=ivs.docs.map(d=>({id:d.id,...d.data()}));
+    try{const pr=await db.collection('passwordResets').orderBy('createdAt','desc').get();AD.pwdResets=pr.docs.map(d=>({id:d.id,...d.data()}));}catch(e){AD.pwdResets=[];}
+    aTab('overview');
+  }catch(e){
+    el.innerHTML='<div style="padding:20px;color:#dc2626">Error loading admin data: '+e.message+'</div>';
+  }
+}
+
+function aTab(tab){
+  const el=document.getElementById('a-content');
+  if(!el)return;
+  const titleEl=document.getElementById('a-title');
+  const titles={overview:'Overview',users:'Users',txs:'Transactions',funding:'Funding Requests',
+    pins:'PIN Requests',promos:'Promo Slides',broadcast:'Broadcast',wallet:'Wallet Operations',
+    apiset:'API Settings',recovery:'Loan Recovery','fin-nok':'Next of Kin Verification',
+    withdrawals:'Withdrawals','fin-loans':'Loans','fin-investments':'Investments',
+    'rewards-history':'Rewards History',pwdreset:'Pwd Reset Requests'};
+  if(titleEl) titleEl.textContent=titles[tab]||tab;
+
+  if(tab==='overview'){
+    const tu=AD.users.length, tt=AD.txs.length;
+    const totalVol=AD.txs.filter(t=>t.status==='success').reduce((s,t)=>s+(t.amount||0),0);
+    const pFunds=AD.funds.filter(f=>f.status==='pending').length;
+    const pPins=AD.pins.filter(p=>p.status==='pending').length;
+    let html=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="card" style="padding:14px;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--green)">${tu}</div><div style="font-size:11px;color:var(--g500)">Total Users</div></div>
+      <div class="card" style="padding:14px;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--green)">${tt}</div><div style="font-size:11px;color:var(--g500)">Transactions</div></div>
+      <div class="card" style="padding:14px;text-align:center"><div style="font-size:18px;font-weight:800;color:var(--green)">₦${fmt(totalVol)}</div><div style="font-size:11px;color:var(--g500)">Total Volume</div></div>
+      <div class="card" style="padding:14px;text-align:center"><div style="font-size:22px;font-weight:800;color:#d97706">${pFunds+pPins}</div><div style="font-size:11px;color:var(--g500)">Pending Actions</div></div>
+    </div>`;
+    // Add API Settings quick access
+    const vtDiv=document.createElement('div');
+    vtDiv.style.marginBottom='14px';
+    vtDiv.innerHTML=`<button onclick="aTab('apiset')" style="display:flex;align-items:center;gap:10px;width:100%;max-width:360px;padding:14px 16px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;cursor:pointer;font-family:'Inter',sans-serif;text-align:left"><div style="width:36px;height:36px;background:#ede9fe;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚙️</div><div><div style="font-weight:600;font-size:13px">API Settings (Nellobytesystems)</div><div style="font-size:11px;color:var(--g400)">Manage API keys & provider config</div></div></button>`;
+    el.innerHTML=html;
+    el.appendChild(vtDiv);
+    return;
+  }
+
+  if(tab==='users'){
+    let h='<div style="margin-bottom:10px;font-weight:700;font-size:14px">'+AD.users.length+' Users</div>';
+    AD.users.forEach(u=>{
+      h+=`<div class="card" style="padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
+        <div style="width:40px;height:40px;background:var(--green-l);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--green-d);flex-shrink:0">${(u.name||'U')[0].toUpperCase()}</div>
+        <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px">${u.name||'Unknown'}</div>
+        <div style="font-size:11px;color:var(--g500)">${u.email||''}</div>
+        <div style="font-size:11px;color:var(--g500)">Bal: ₦${fmt(u.balance||0)} · Phone: ${u.phone||'—'}</div></div>
+        <span class="status-badge ${u.suspended?'sb-rejected':'sb-approved'}">${u.suspended?'Suspended':'Active'}</span>
+      </div>`;
+    });
+    el.innerHTML=h||'<p style="color:var(--g400);padding:20px">No users yet</p>';
+    return;
+  }
+
+  if(tab==='txs'){
+    let h='<div style="margin-bottom:10px;font-weight:700;font-size:14px">'+AD.txs.length+' Transactions</div>';
+    AD.txs.slice(0,100).forEach(t=>{
+      const ok=t.status==='success';
+      h+=`<div style="padding:12px 0;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">${ok?'✅':'🔴'}</span>
+        <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${t.type||'tx'} — ₦${fmt(t.amount||0)}</div>
+        <div style="font-size:11px;color:var(--g400)">${t.userEmail||''} · ${fdate(t.createdAt)}</div></div>
+        <span class="status-badge ${ok?'sb-approved':'sb-rejected'}">${t.status||'—'}</span>
+      </div>`;
+    });
+    el.innerHTML=h;
+    return;
+  }
+
+  if(tab==='funding'){
+    let h='';
+    const pending=AD.funds.filter(f=>f.status==='pending');
+    const done=AD.funds.filter(f=>f.status!=='pending');
+    if(pending.length){
+      h+='<div style="font-weight:700;font-size:14px;color:#d97706;margin-bottom:10px">'+pending.length+' Pending Funding</div>';
+      pending.forEach(f=>{
+        h+=`<div class="card" style="padding:14px;margin-bottom:10px;border-left:4px solid #d97706">
+          <div style="font-weight:600">${f.userName||f.userEmail||'User'} — ₦${fmt(f.amount||0)}</div>
+          <div style="font-size:12px;color:var(--g500);margin:4px 0">${fdate(f.createdAt)} · Ref: ${f.ref||'—'}</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button onclick="approveF('${f.id}','${f.userId}',${f.amount||0})" style="flex:1;padding:8px;background:#dcfce7;border:1px solid #86efac;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;color:#15803d;font-family:'Inter',sans-serif">✅ Approve</button>
+            <button onclick="rejectF('${f.id}')" style="flex:1;padding:8px;background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;color:#dc2626;font-family:'Inter',sans-serif">❌ Reject</button>
+          </div></div>`;
+      });
+    }else{h='<div class="card" style="padding:20px;text-align:center;color:var(--g400)">No pending funding requests</div>';}
+    el.innerHTML=h;
+    return;
+  }
+
+  if(tab==='pins'){
+    let h='';
+    const pending=AD.pins.filter(p=>p.status==='pending');
+    if(pending.length){
+      h='<div style="font-weight:700;font-size:14px;color:#d97706;margin-bottom:10px">'+pending.length+' Pending PIN Requests</div>';
+      pending.forEach(p=>{
+        h+=`<div class="card" style="padding:14px;margin-bottom:10px">
+          <div style="font-weight:600">${p.userName||p.userEmail||'User'}</div>
+          <div style="font-size:12px;color:var(--g500);margin:4px 0">${fdate(p.createdAt)}</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button onclick="approvePin('${p.id}','${p.userId}')" style="flex:1;padding:8px;background:#dcfce7;border:1px solid #86efac;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;color:#15803d;font-family:'Inter',sans-serif">✅ Approve</button>
+            <button onclick="rejectPin('${p.id}')" style="flex:1;padding:8px;background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;color:#dc2626;font-family:'Inter',sans-serif">❌ Reject</button>
+          </div></div>`;
+      });
+    }else{h='<div class="card" style="padding:20px;text-align:center;color:var(--g400)">No pending PIN requests</div>';}
+    el.innerHTML=h;
+    return;
+  }
+
+  if(tab==='pwdreset'){renderAdminPwdResets(el);}
+  if(tab==='apiset'){renderApiSettingsTab(el);}
+  if(tab==='rewards-history'){loadRewardsHistoryAdmin(el);}
+
+  if(tab==='promos'||tab==='broadcast'||tab==='wallet'||tab==='recovery'||
+     tab==='fin-nok'||tab==='withdrawals'||tab==='fin-loans'||tab==='fin-investments'){
+    el.innerHTML='<div style="padding:40px;text-align:center;color:var(--g400)"><div style="font-size:32px;margin-bottom:8px">⚙️</div><p style="font-size:13px">Loading '+tab+'...</p></div>';
+    // Delegate to existing specific loaders
+    if(tab==='withdrawals') loadAdminWithdrawals(el);
+    if(tab==='fin-loans'){
+      db.collection('loans').orderBy('createdAt','desc').get().then(snap=>{
+        AD.loans=snap.docs.map(d=>({id:d.id,...d.data()}));
+        el.innerHTML='<div style="padding:14px;color:var(--g600);font-size:13px">'+AD.loans.length+' loan records loaded. Use the Loan Recovery tab for actions.</div>';
+      });
+    }
+  }
+}
+
+
 // ── Admin: render API Settings tab ──
 function renderApiSettingsTab(el) {
   el.innerHTML = `
