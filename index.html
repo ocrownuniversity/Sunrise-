@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="theme-color" content="#16a34a"/>
-<title>ZMONIE - Smart Money Platform</title>
+<title>ZMONIE - Save Smart Platform</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -164,7 +164,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <div class="pulse"></div>
         <span style="color:#4ade80;font-size:11px;font-weight:600">CAC Registered - No: 9576761</span>
       </div>
-      <h1 style="font-size:clamp(30px,7.5vw,54px);font-weight:900;color:#fff;line-height:1.1;margin-bottom:12px;letter-spacing:-.03em">Smart Money<br/><span style="color:#4ade80">Starts Here</span></h1>
+      <h1 style="font-size:clamp(30px,7.5vw,54px);font-weight:900;color:#fff;line-height:1.1;margin-bottom:12px;letter-spacing:-.03em">Save Smart<br/><span style="color:#4ade80">Starts Here</span></h1>
       <p style="color:rgba(255,255,255,.6);font-size:15px;line-height:1.7;margin-bottom:28px">Nigeria's premium VTU platform. Airtime, data, bills instantly and securely, 24/7.</p>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
         <button onclick="goPg('pg-reg')" class="btn-g" style="padding:13px 28px;border-radius:13px;font-size:15px">Get Started Free</button>
@@ -692,6 +692,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <div class="anav" onclick="aTab('users')">👥 Users</div>
         <div class="anav" onclick="aTab('txs')">💳 Transactions</div>
         <div class="anav" onclick="aTab('funding')">💰 Funding</div>
+        <div class="anav" onclick="aTab('fund-accounts')">🏦 Funding Accounts</div>
+        <div class="anav" onclick="aTab('data-plans')">📡 Data Plan Mgmt</div>
         <div class="anav" onclick="aTab('withdrawals')">💸 Withdrawals</div>
         <div class="anav" onclick="aTab('pins')">🔒 PIN Requests</div>
         <div class="anav" onclick="aTab('promos')">🎯 Promo Slides</div>
@@ -724,6 +726,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <button onclick="aTab('overview')" style="padding:7px 13px;border-radius:50px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Overview</button>
         <button onclick="aTab('users')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Users</button>
         <button onclick="aTab('funding')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Funding</button>
+        <button onclick="aTab('fund-accounts')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #86efac;background:#f0fdf4;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#15803d">🏦 Fund Accounts</button>
+        <button onclick="aTab('data-plans')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #bfdbfe;background:#eff6ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#1d4ed8">📡 Data Plans</button>
         <button onclick="aTab('withdrawals')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #fce7f3;background:#fdf2f8;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#9d174d">💸 Withdrawals</button>
         <button onclick="aTab('pins')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">PINs</button>
         <button onclick="aTab('promos')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Promos</button>
@@ -747,26 +751,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
     <button onclick="closeM('m-fund')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600)">✕</button>
   </div>
   <p style="color:var(--g600);font-size:13px;margin-bottom:14px;line-height:1.6">Transfer to any account below then send proof via WhatsApp. Admin credits your wallet within 30 minutes.</p>
-  <div class="card" style="padding:14px;margin-bottom:10px;border-left:3px solid var(--green)">
-    <div style="font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Moniepoint</div>
-    <div style="font-weight:600;font-size:14px;margin-bottom:8px">OgaBuy Online Shopping</div>
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:22px;font-weight:800;color:var(--green-d);letter-spacing:.04em">5101670209</div>
-      <button onclick="cpn('5101670209')" class="btn-g" style="padding:7px 14px;border-radius:9px;font-size:12px">Copy</button>
-    </div>
-  </div>
-  <div class="card" style="padding:14px;margin-bottom:16px;border-left:3px solid #dc2626">
-    <div style="font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Zenith Bank</div>
-    <div style="font-weight:600;font-size:14px;margin-bottom:8px">OgaBuy Online Shopping</div>
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:22px;font-weight:800;color:var(--green-d);letter-spacing:.04em">1310344253</div>
-      <button onclick="cpn('1310344253')" class="btn-g" style="padding:7px 14px;border-radius:9px;font-size:12px">Copy</button>
-    </div>
-  </div>
+  <div id="fund-accounts-list"><div style="text-align:center;padding:20px;color:var(--g400)"><div style="font-size:24px">⏳</div><p style="font-size:12px">Loading accounts...</p></div></div>
   <a href="https://wa.me/2348068886569?text=Hello%20ZMONIE%2C%20I%20have%20made%20a%20payment%20and%20I%27m%20sending%20my%20proof." target="_blank" class="btn-g" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:12px;font-size:14px;font-weight:600;text-decoration:none;color:#fff">
     <svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
     Send Proof via WhatsApp
   </a>
+</div></div>
+
+<!-- Modal: Add/Edit Funding Account (Admin) -->
+<div class="modal" id="m-fund-acct"><div class="mbox">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h3 style="font-size:17px;font-weight:700" id="fa-modal-title">Add Funding Account</h3>
+    <button onclick="closeM('m-fund-acct')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600)">✕</button>
+  </div>
+  <input type="hidden" id="fa-edit-id"/>
+  <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Bank Name</label><input class="inp" id="fa-bank" placeholder="e.g. Moniepoint, Zenith Bank"/></div>
+  <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Account Name</label><input class="inp" id="fa-acct-name" placeholder="e.g. OgaBuy Online Shopping"/></div>
+  <div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Account Number</label><input class="inp" id="fa-acct-num" placeholder="10-digit account number" maxlength="10"/></div>
+  <button onclick="saveFundAcct()" class="btn-g" style="width:100%;padding:13px;border-radius:11px;font-size:15px">Save Account</button>
 </div></div>
 
 <div class="modal" id="m-pin"><div class="mbox">
@@ -1011,7 +1013,7 @@ function goPg(id){
 function navTo(id,el){document.querySelectorAll('.bni').forEach(n=>n.classList.remove('on'));if(el)el.classList.add('on');goPg(id);if(id==='pg-hist')loadHist();if(id==='pg-notif')loadNotifs();if(id==='pg-profile')chkPinStatus();}
 
 // MODALS
-function openM(id){document.getElementById(id).classList.add('open');}
+function openM(id){document.getElementById(id).classList.add('open');if(id==='m-fund')loadFundAccountsForUser();}
 function closeM(id){document.getElementById(id).classList.remove('open');}
 document.addEventListener('click',e=>{if(e.target.classList.contains('modal'))e.target.classList.remove('open');});
 
@@ -1744,7 +1746,8 @@ async function fetchPlansForNetwork(networkId){
     if(norm.length > 0){
       console.log('[PLANS] Sample plan:', JSON.stringify(norm[0]));
       planCache[networkId] = norm;
-      renderPlans(norm, sel, infoEl);
+      // Apply admin-managed sell prices and active/disabled filter
+      renderPlansWithAdminSettings(norm, sel, infoEl, networkId);
     } else {
       const rawStr = JSON.stringify(res).slice(0, 400);
       sel.innerHTML = '<option value="">No plans returned</option>';
@@ -2097,7 +2100,7 @@ setInterval(animLive,3200);animLive();
 
 // FAQ
 const faqs=[
-  {q:'How do I fund my wallet?',a:'Go to Add Money, transfer to our Moniepoint or Zenith Bank account, then send proof via WhatsApp. Wallet credited within 30 minutes.'},
+  {q:'How do I fund my wallet?',a:'Go to Add Money, transfer to any of our listed bank accounts, then send proof via WhatsApp. Wallet credited within 30 minutes.'},
   {q:'What is a transaction PIN?',a:'A 4-digit security PIN required before every transaction. Set it during registration or update anytime in Profile.'},
   {q:'What if I forget my PIN?',a:'Go to Profile, tap Forgot PIN and submit a reset request. Admin approves it and you will see a prompt to set a new PIN from your Profile page.'},
   {q:'How do I apply for a loan?',a:'Tap Loan on your dashboard, select amount and purpose, submit. Admin reviews within 24 hours and credits your wallet on approval.'},
@@ -2119,7 +2122,7 @@ async function loadAdmin(){
 function aTab(tab){
   document.querySelectorAll('.anav').forEach(n=>n.classList.remove('on'));
   document.querySelectorAll('.anav').forEach(n=>{if(n.textContent.trim().toLowerCase().includes(tab.slice(0,4)))n.classList.add('on');});
-  document.getElementById('a-title').textContent={overview:'Overview',users:'Users',txs:'Transactions',funding:'Funding Requests',pins:'PIN Requests',promos:'Promo Slides',broadcast:'Broadcast',wallet:'Wallet Operations',vtpass:'VTPass API',recovery:'Loan Recovery',['fin-nok']:'Next of Kin Verification'}[tab]||tab;
+  document.getElementById('a-title').textContent={overview:'Overview',users:'Users',txs:'Transactions',funding:'Funding Requests',pins:'PIN Requests',promos:'Promo Slides',broadcast:'Broadcast',wallet:'Wallet Operations',vtpass:'VTPass API',recovery:'Loan Recovery',['fin-nok']:'Next of Kin Verification',['fund-accounts']:'Funding Accounts',['data-plans']:'Data Plan Management'}[tab]||tab;
   const el=document.getElementById('a-content');
   const rev=AD.txs.reduce((s,t)=>s+(t.amount||0),0);
   if(tab==='overview')el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px;margin-bottom:16px"><div class="statc" style="background:linear-gradient(135deg,#15803d,#16a34a)"><div style="font-size:22px;margin-bottom:3px">👥</div><div style="font-size:26px;font-weight:800">${AD.users.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Total Users</div></div><div class="statc" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)"><div style="font-size:22px;margin-bottom:3px">💳</div><div style="font-size:26px;font-weight:800">${AD.txs.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Transactions</div></div><div class="statc" style="background:linear-gradient(135deg,#b45309,#d97706)"><div style="font-size:22px;margin-bottom:3px">💰</div><div style="font-size:20px;font-weight:800">NGN ${fmt(rev)}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Revenue</div></div><div class="statc" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)"><div style="font-size:22px;margin-bottom:3px">🔒</div><div style="font-size:26px;font-weight:800">${AD.pins.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">PIN Requests</div></div></div><div class="card" style="overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #f8fafc;font-weight:700;font-size:14px">Recent Transactions</div>${AD.txs.slice(0,10).map(t=>`<div class="txr"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${t.description||t.type}</div><div style="font-size:11px;color:var(--g400)">${fdate(t.createdAt)}</div></div><div style="color:var(--err);font-weight:700;font-size:13px">NGN ${fmt(t.amount)}</div></div>`).join('')||'<div style="padding:22px;text-align:center;color:var(--g400);font-size:13px">No transactions yet</div>'}</div>`;
@@ -2149,6 +2152,8 @@ function aTab(tab){
   // ── VTPass Settings tab ──
   if(tab==='rewards-settings'){loadRewardsSettings(el);}
   if(tab==='rewards-history'){loadRewardsHistoryAdmin(el);}
+  if(tab==='fund-accounts'){loadAdminFundAccounts(el);}
+  if(tab==='data-plans'){loadAdminDataPlans(el);}
   if(tab==='recovery'){
     el.innerHTML='<div style="padding:20px;text-align:center;color:var(--g400)">Loading...</div>';
     db.collection('recoveryLog').orderBy('createdAt','desc').get().then(snap=>{
@@ -2407,6 +2412,225 @@ async function loadAdminPromos(el){
   const slides=s.docs.map(d=>({id:d.id,...d.data()}));
   el.innerHTML=`<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button onclick="openM('m-addpromo')" class="btn-g" style="padding:10px 18px;border-radius:10px;font-size:13px">+ Add Slide</button></div><div class="card" style="overflow:hidden"><div style="padding:10px 16px;background:var(--green-xl);border-bottom:1px solid #bbf7d0"><p style="font-size:12px;color:var(--green-d)">Slides added here appear on user dashboards in real time. Toggle to enable or disable.</p></div>${slides.map(s=>`<div class="txr"><div style="width:38px;height:38px;background:${s.bg||'var(--green)'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${s.icon||'⭐'}</div><div style="flex:1;min-width:0;margin-left:10px"><div style="font-weight:600;font-size:13px">${s.title}</div><div style="font-size:11px;color:var(--g400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.desc}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="tsw${s.active?' on':''}" onclick="togP('${s.id}',${!!s.active})"></div><button onclick="delP('${s.id}')" style="background:#fee2e2;border:none;color:#dc2626;padding:5px 9px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;font-family:'Inter',sans-serif">Del</button></div></div>`).join('')||'<div style="padding:28px;text-align:center;color:var(--g400);font-size:13px">No slides yet. Add one above.</div>'}</div>`;
 }
+// ══════════════════════════════════════════════════
+// FUNDING ACCOUNTS MANAGEMENT
+// ══════════════════════════════════════════════════
+async function loadAdminFundAccounts(el){
+  el.innerHTML='<div style="padding:20px;text-align:center;color:var(--g400)"><div style="font-size:24px">⏳</div><p style="font-size:13px">Loading...</p></div>';
+  try{
+    const s=await db.collection('fundingAccounts').orderBy('createdAt').get();
+    const accts=s.docs.map(d=>({id:d.id,...d.data()}));
+    el.innerHTML=`<div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <button onclick="openAddFundAcct()" class="btn-g" style="padding:10px 18px;border-radius:10px;font-size:13px">+ Add Account</button>
+    </div>
+    <div class="card" style="overflow:hidden">
+      <div style="padding:10px 16px;background:var(--green-xl);border-bottom:1px solid #bbf7d0">
+        <p style="font-size:12px;color:var(--green-d)">Active accounts are shown to users on the Fund Wallet screen. Toggle to enable/disable instantly.</p>
+      </div>
+      ${accts.length?accts.map(a=>`
+      <div class="txr" style="flex-wrap:wrap;gap:8px">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:13px">${a.bankName}</div>
+          <div style="font-size:12px;color:var(--g600)">${a.accountName}</div>
+          <div style="font-size:14px;font-weight:800;color:var(--green-d);letter-spacing:.04em">${a.accountNumber}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="tsw${a.active?' on':''}" onclick="togFundAcct('${a.id}',${!!a.active})" title="${a.active?'Active - click to disable':'Disabled - click to enable'}"></div>
+          <button onclick="editFundAcct('${a.id}','${a.bankName}','${a.accountName}','${a.accountNumber}')" style="background:#dbeafe;border:none;color:#1d4ed8;padding:5px 9px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;font-family:'Inter',sans-serif">Edit</button>
+          <button onclick="delFundAcct('${a.id}')" style="background:#fee2e2;border:none;color:#dc2626;padding:5px 9px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;font-family:'Inter',sans-serif">Del</button>
+        </div>
+      </div>`).join(''):'<div style="padding:28px;text-align:center;color:var(--g400);font-size:13px">No accounts yet. Add one above.</div>'}
+    </div>`;
+  }catch(e){el.innerHTML='<div class="card" style="padding:16px;color:#dc2626">Error: '+e.message+'</div>';}
+}
+function openAddFundAcct(){
+  document.getElementById('fa-edit-id').value='';
+  document.getElementById('fa-bank').value='';
+  document.getElementById('fa-acct-name').value='';
+  document.getElementById('fa-acct-num').value='';
+  document.getElementById('fa-modal-title').textContent='Add Funding Account';
+  openM('m-fund-acct');
+}
+function editFundAcct(id,bank,name,num){
+  document.getElementById('fa-edit-id').value=id;
+  document.getElementById('fa-bank').value=bank;
+  document.getElementById('fa-acct-name').value=name;
+  document.getElementById('fa-acct-num').value=num;
+  document.getElementById('fa-modal-title').textContent='Edit Funding Account';
+  openM('m-fund-acct');
+}
+async function saveFundAcct(){
+  const id=document.getElementById('fa-edit-id').value;
+  const bank=document.getElementById('fa-bank').value.trim();
+  const name=document.getElementById('fa-acct-name').value.trim();
+  const num=document.getElementById('fa-acct-num').value.trim();
+  if(!bank||!name||!num){toast('Please fill all fields');return;}
+  if(id){
+    await db.collection('fundingAccounts').doc(id).update({bankName:bank,accountName:name,accountNumber:num});
+    toast('Account updated!');
+  }else{
+    await db.collection('fundingAccounts').add({bankName:bank,accountName:name,accountNumber:num,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    toast('Account added!');
+  }
+  closeM('m-fund-acct');
+  aTab('fund-accounts');
+}
+async function togFundAcct(id,cur){
+  await db.collection('fundingAccounts').doc(id).update({active:!cur});
+  aTab('fund-accounts');
+}
+async function delFundAcct(id){
+  if(!confirm('Delete this funding account?'))return;
+  await db.collection('fundingAccounts').doc(id).delete();
+  toast('Account deleted.');
+  aTab('fund-accounts');
+}
+
+// Load fund accounts for user deposit modal
+async function loadFundAccountsForUser(){
+  const el=document.getElementById('fund-accounts-list');
+  if(!el)return;
+  try{
+    const s=await db.collection('fundingAccounts').where('active','==',true).get();
+    const accts=s.docs.map(d=>({id:d.id,...d.data()}));
+    if(!accts.length){
+      el.innerHTML='<div style="text-align:center;padding:16px;color:var(--g500);font-size:13px">No funding accounts available. Contact admin.</div>';
+      return;
+    }
+    const colors=['var(--green)','#2563eb','#7c3aed','#d97706','#dc2626','#0891b2'];
+    el.innerHTML=accts.map((a,i)=>`<div class="card" style="padding:14px;margin-bottom:10px;border-left:3px solid ${colors[i%colors.length]}">
+      <div style="font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">${a.bankName}</div>
+      <div style="font-weight:600;font-size:14px;margin-bottom:8px">${a.accountName}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:22px;font-weight:800;color:var(--green-d);letter-spacing:.04em">${a.accountNumber}</div>
+        <button onclick="cpn('${a.accountNumber}')" class="btn-g" style="padding:7px 14px;border-radius:9px;font-size:12px">Copy</button>
+      </div>
+    </div>`).join('');
+  }catch(e){
+    el.innerHTML='<div style="color:#dc2626;font-size:13px;padding:12px">Error loading accounts</div>';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// DATA PLAN MANAGEMENT
+// ══════════════════════════════════════════════════
+async function loadAdminDataPlans(el){
+  el.innerHTML='<div style="padding:20px;text-align:center;color:var(--g400)"><div style="font-size:24px">⏳</div><p style="font-size:13px">Loading data plans...</p></div>';
+  try{
+    const s=await db.collection('dataPlans').orderBy('network').get();
+    const plans=s.docs.map(d=>({id:d.id,...d.data()}));
+    const networks=['MTN','Airtel','Glo','9mobile'];
+    let html=`<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      ${networks.map(n=>`<button onclick="filterDataPlanAdmin('${n}')" class="admin-net-filter chip" style="background:var(--g100);color:var(--g600);cursor:pointer;white-space:nowrap;padding:7px 14px;border:none">${n}</button>`).join('')}
+      <button onclick="filterDataPlanAdmin('all')" class="admin-net-filter chip" style="background:var(--green);color:#fff;cursor:pointer;white-space:nowrap;padding:7px 14px;border:none">All</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button onclick="importClubKonnectPlans()" style="padding:9px 16px;background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔄 Import/Sync ClubKonnect Plans</button>
+    </div>
+    <div class="info-box" style="margin-bottom:12px"><p style="font-size:12px;color:var(--green-d)">Set custom selling prices and enable/disable individual plans. Disabled plans won't appear for users. ClubKonnect plan IDs and API logic are unchanged.</p></div>
+    <div id="dp-admin-list">
+    ${plans.length?plans.map(p=>`
+    <div class="card dp-row" data-network="${p.network||''}" style="padding:12px 14px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:13px">${p.name||'Unknown'}</div>
+          <div style="font-size:11px;color:var(--g400)">${p.network||''} &bull; Code: ${p.planCode||''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="text-align:center">
+            <div style="font-size:10px;color:var(--g400);margin-bottom:3px">Provider Price</div>
+            <div style="font-size:13px;font-weight:600;color:var(--g600)">NGN ${fmt(p.providerPrice||p.price||0)}</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:10px;color:var(--g400);margin-bottom:3px">Sell Price</div>
+            <input type="number" value="${p.sellPrice||p.price||0}" style="width:80px;padding:5px 7px;border:1.5px solid var(--g200);border-radius:8px;font-size:13px;font-weight:700;color:var(--green-d);font-family:'Inter',sans-serif;text-align:center" onchange="updatePlanPrice('${p.id}',this.value)"/>
+          </div>
+          <div class="tsw${p.active!==false?' on':''}" onclick="togDataPlan('${p.id}',${p.active!==false})" title="${p.active!==false?'Active':'Disabled'}"></div>
+        </div>
+      </div>
+    </div>`).join(''):'<div style="padding:28px;text-align:center;color:var(--g400);font-size:13px"><div style="font-size:32px;margin-bottom:8px">📡</div><p>No plans yet. Click "Import/Sync ClubKonnect Plans" to get started.</p></div>'}
+    </div>`;
+    el.innerHTML=html;
+    // bind filter
+    document.querySelectorAll('.admin-net-filter').forEach(b=>{
+      b.addEventListener('click',function(){
+        document.querySelectorAll('.admin-net-filter').forEach(x=>{x.style.background='var(--g100)';x.style.color='var(--g600)';});
+        this.style.background='var(--green)';this.style.color='#fff';
+      });
+    });
+  }catch(e){el.innerHTML='<div class="card" style="padding:16px;color:#dc2626">Error: '+e.message+'</div>';}
+}
+function filterDataPlanAdmin(net){
+  document.querySelectorAll('.dp-row').forEach(r=>{
+    r.style.display=(net==='all'||r.dataset.network===net)?'block':'none';
+  });
+}
+async function togDataPlan(id,cur){
+  await db.collection('dataPlans').doc(id).update({active:!cur});
+  toast(!cur?'Plan enabled':'Plan disabled');
+  aTab('data-plans');
+}
+async function updatePlanPrice(id,val){
+  const price=parseFloat(val)||0;
+  await db.collection('dataPlans').doc(id).update({sellPrice:price});
+  toast('Price updated');
+}
+async function importClubKonnectPlans(){
+  toast('Fetching plans from ClubKonnect...');
+  const networks=['MTN','Airtel','Glo','Etisalat'];
+  let total=0;
+  try{
+    for(const net of networks){
+      const res=await apiFetch('dataPlans',{MobileNetwork:net});
+      const plans=extractNBSPlans(res,net);
+      for(const p of plans){
+        const code=p.variation_code||'';
+        const name=p.variation_name||'';
+        const price=parseFloat(p.variation_amount||0);
+        if(!code)continue;
+        // Check if exists
+        const ex=await db.collection('dataPlans').where('planCode','==',code).where('network','==',net).get();
+        if(ex.empty){
+          await db.collection('dataPlans').add({
+            network:net,planCode:code,name,
+            providerPrice:price,sellPrice:price,
+            active:false, // disabled by default per spec
+            createdAt:firebase.firestore.FieldValue.serverTimestamp()
+          });
+          total++;
+        }
+        // existing plans are NOT modified (preserve admin's custom prices)
+      }
+    }
+    toast('Imported '+total+' new plans (disabled by default). Enable them in the list.');
+    aTab('data-plans');
+  }catch(e){toast('Import error: '+e.message);}
+}
+
+// Override renderPlans to respect admin-managed plan settings
+const _origRenderPlans=renderPlans;
+async function renderPlansWithAdminSettings(plans,sel,infoEl,networkId){
+  try{
+    // Fetch managed plans for this network
+    const net=networkId||currentNetworkId||'';
+    const s=await db.collection('dataPlans').where('network','==',net).get();
+    const managed=s.docs.map(d=>({id:d.id,...d.data()}));
+    if(!managed.length){_origRenderPlans(plans,sel,infoEl);return;}
+    // Build lookup by planCode
+    const mgMap={};managed.forEach(m=>mgMap[m.planCode]=m);
+    // Filter + override prices
+    const filtered=plans.filter(p=>{
+      const m=mgMap[p.variation_code];
+      return !m||(m.active!==false);
+    }).map(p=>{
+      const m=mgMap[p.variation_code];
+      if(m&&m.sellPrice>0)return{...p,variation_amount:String(m.sellPrice)};
+      return p;
+    });
+    _origRenderPlans(filtered,sel,infoEl);
+  }catch(e){_origRenderPlans(plans,sel,infoEl);}
+}
+
 async function savePromo(){
   const t=document.getElementById('pm-t').value.trim(),d=document.getElementById('pm-d').value.trim();
   const ic=document.getElementById('pm-i').value||'⭐',cta=document.getElementById('pm-c').value.trim(),bg=document.getElementById('pm-b').value;
