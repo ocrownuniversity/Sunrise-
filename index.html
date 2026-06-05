@@ -91,8 +91,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
 .chip{display:inline-flex;padding:3px 9px;border-radius:50px;font-size:10px;font-weight:700}
 .status-badge{display:inline-block;padding:3px 9px;border-radius:50px;font-size:10px;font-weight:800;letter-spacing:.04em}
 /* ── PWA Install Banner ── */
-#pwa-banner{position:sticky;top:0;left:0;right:0;z-index:9999;background:#fff;border-bottom:1px solid #e5e7eb;display:none;align-items:center;gap:10px;padding:10px 14px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
-#pwa-banner.show{display:flex}
+#pwa-banner{position:sticky;top:0;left:0;right:0;z-index:9999;background:#fff;border-bottom:1.5px solid #e5e7eb;display:none;align-items:center;gap:10px;padding:10px 14px;box-shadow:0 2px 16px rgba(0,0,0,.10)}
 .pwa-icon{width:40px;height:40px;background:linear-gradient(135deg,#16a34a,#15803d);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .pwa-info{flex:1;min-width:0}
 .pwa-info strong{display:block;font-size:13px;font-weight:700;color:#111;line-height:1.3}
@@ -4995,32 +4994,48 @@ window.addEventListener('load', () => {
 // ══════════════════════════════════════════════════
 let _pwaPrompt = null;
 const PWA_DISMISSED_KEY = 'zmonie_pwa_dismissed';
+const PWA_INSTALLED_KEY = 'zmonie_pwa_installed';
 
-// Catch the browser's beforeinstallprompt event
+// Detect if already running as installed PWA
+function isRunningAsPwa() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true
+    || document.referrer.includes('android-app://');
+}
+
+// Show banner immediately on page load — no waiting for browser event
+function initPwaBanner() {
+  // Don't show if already installed as PWA
+  if (isRunningAsPwa()) return;
+  if (localStorage.getItem(PWA_INSTALLED_KEY)) return;
+  // Don't show if dismissed within 3 days
+  const dismissed = localStorage.getItem(PWA_DISMISSED_KEY);
+  if (dismissed && Date.now() - parseInt(dismissed) < 3 * 24 * 60 * 60 * 1000) return;
+  // Show immediately
+  showPwaBanner();
+}
+
+// Capture the native prompt when available (Android Chrome)
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   _pwaPrompt = e;
-  // Don't show if user already dismissed within 7 days
-  const dismissed = localStorage.getItem(PWA_DISMISSED_KEY);
-  if (dismissed && Date.now() - parseInt(dismissed) < 7 * 24 * 60 * 60 * 1000) return;
-  showPwaBanner();
+  // Already shown, just store the prompt for when user taps Install
 });
 
-// Hide banner if app is already installed
+// Hide permanently if installed
 window.addEventListener('appinstalled', () => {
   hidePwaBanner();
-  _pwaPrompt = null;
-  localStorage.setItem(PWA_DISMISSED_KEY, Date.now().toString());
+  localStorage.setItem(PWA_INSTALLED_KEY, '1');
 });
 
 function showPwaBanner() {
   const banner = document.getElementById('pwa-banner');
-  if (banner) banner.classList.add('show');
+  if (banner) { banner.style.display = 'flex'; }
 }
 
 function hidePwaBanner() {
   const banner = document.getElementById('pwa-banner');
-  if (banner) banner.classList.remove('show');
+  if (banner) { banner.style.display = 'none'; }
 }
 
 function dismissPwaBanner() {
@@ -5030,18 +5045,25 @@ function dismissPwaBanner() {
 
 async function triggerPwaInstall() {
   if (_pwaPrompt) {
-    // Native install prompt (Android Chrome, Edge, etc.)
+    // Android Chrome — trigger native install dialog
     _pwaPrompt.prompt();
     const { outcome } = await _pwaPrompt.userChoice;
     if (outcome === 'accepted') {
       hidePwaBanner();
-      localStorage.setItem(PWA_DISMISSED_KEY, Date.now().toString());
+      localStorage.setItem(PWA_INSTALLED_KEY, '1');
     }
     _pwaPrompt = null;
   } else {
-    // iOS / Safari — show manual instructions
+    // iOS / Samsung / other browsers — show manual guide
     showIosInstallModal();
   }
+}
+
+// Run on DOM ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPwaBanner);
+} else {
+  initPwaBanner();
 }
 
 // iOS install instructions modal
