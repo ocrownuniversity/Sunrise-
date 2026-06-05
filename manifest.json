@@ -2,13 +2,14 @@
   "name": "ZMONIE",
   "short_name": "ZMONIE",
   "description": "Nigeria's premium VTU platform. Airtime, data, bills instantly and securely, 24/7.",
-  "start_url": "./index.html",
-  "scope": "./",
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#16a34a",
-  "categories": ["finance", "utilities"],
+  "categories": ["finance"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icon-192.png",

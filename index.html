@@ -11,7 +11,6 @@
 <meta name="application-name" content="ZMONIE"/>
 <meta name="description" content="Nigeria's premium VTU platform. Airtime, data, bills instantly and securely, 24/7."/>
 <link rel="manifest" href="manifest.json"/>
-<link rel="apple-touch-icon" href="icon-192.png"/>
 <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png"/>
 <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png"/>
 <title>ZMONIE - Save Smart Platform</title>
@@ -5106,9 +5105,9 @@ function showIosInstallModal() {
 // Register Service Worker for offline support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js', { scope: './' })
+    navigator.serviceWorker.register('./sw.js')
       .then(reg => console.log('[SW] Registered:', reg.scope))
-      .catch(err => console.log('[SW] Registration skipped:', err.message));
+      .catch(err => console.warn('[SW] Failed:', err.message));
   });
 }
 
