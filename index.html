@@ -10,7 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="ZMONIE"/>
 <meta name="application-name" content="ZMONIE"/>
 <meta name="description" content="Nigeria's premium VTU platform. Airtime, data, bills instantly and securely, 24/7."/>
-<link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22ZMONIE%22%2C%22short_name%22%3A%22ZMONIE%22%2C%22description%22%3A%22Nigeria%27s%20premium%20VTU%20platform%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%2316a34a%22%2C%22orientation%22%3A%22portrait%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxOTIgMTkyJz48cmVjdCB3aWR0aD0nMTkyJyBoZWlnaHQ9JzE5Micgcng9JzQwJyBmaWxsPScjMTZhMzRhJy8%2BPHRleHQgeD0nOTYnIHk9JzEyOCcgZm9udC1zaXplPScxMTAnIGZvbnQtd2VpZ2h0PSc5MDAnIGZvbnQtZmFtaWx5PSdBcmlhbCcgdGV4dC1hbmNob3I9J21pZGRsZScgZmlsbD0nd2hpdGUnPlo8L3RleHQ%2BPC9zdmc%2B%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png"/>
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png"/>
 <title>ZMONIE - Save Smart Platform</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -5081,24 +5084,7 @@ function showIosInstallModal() {
 // Register Service Worker for offline support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    const swCode = `
-const CACHE = 'zmonie-v1';
-const OFFLINE = ['/'];
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(OFFLINE)));
-  self.skipWaiting();
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
-  self.clients.claim();
-});
-self.addEventListener('fetch', e => {
-  if(e.request.method !== 'GET') return;
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-});`;
-    const blob = new Blob([swCode], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl, { scope: './' })
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
       .then(reg => console.log('[SW] Registered:', reg.scope))
       .catch(err => console.log('[SW] Registration skipped:', err.message));
   });
