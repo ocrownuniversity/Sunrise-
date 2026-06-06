@@ -160,6 +160,22 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
 <body>
 
 <!-- ======== PWA INSTALL BANNER ======== -->
+<script>
+// Safe stubs — defined immediately so onclick never throws before main script loads
+window.triggerPwaInstall = window.triggerPwaInstall || function(){
+  var m=document.getElementById('pwa-guide-modal');
+  if(m){m.style.display='flex';}
+};
+window.dismissPwaBanner = window.dismissPwaBanner || function(){
+  var b=document.getElementById('pwa-banner');
+  if(b) b.style.display='none';
+  try{localStorage.setItem('zmonie_banner_dismissed', Date.now());}catch(e){}
+};
+window.closePwaGuide = window.closePwaGuide || function(){
+  var m=document.getElementById('pwa-guide-modal');
+  if(m) m.style.display='none';
+};
+</script>
 <div id="pwa-banner" role="banner" aria-label="Install ZMONIE App">
   <div class="pwa-icon"><span style="font-weight:800;font-size:18px;color:#fff">Z</span></div>
   <div class="pwa-info">
@@ -730,6 +746,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <div class="anav" onclick="aTab('withdrawals')">💸 Withdrawals</div>
         <div class="anav" onclick="aTab('pins')">🔒 PIN Requests</div>
         <div class="anav" onclick="aTab('pw-reset')">🔑 Password Resets</div>
+        <div class="anav" onclick="aTab('api-mgmt')">🔐 API Management</div>
         <div class="anav" onclick="aTab('promos')">🎯 Promo Slides</div>
         <div class="anav" onclick="aTab('broadcast')">📢 Broadcast</div>
         <div class="anav" onclick="aTab('wallet')">👛 Wallet Ops</div>
@@ -765,6 +782,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
         <button onclick="aTab('withdrawals')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #fce7f3;background:#fdf2f8;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#9d174d">💸 Withdrawals</button>
         <button onclick="aTab('pins')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">PINs</button>
         <button onclick="aTab('pw-reset')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #fca5a5;background:#fef2f2;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#dc2626">🔑 PW Resets</button>
+        <button onclick="aTab('api-mgmt')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#f5f3ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#7c3aed">🔐 API Mgmt</button>
         <button onclick="aTab('promos')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Promos</button>
         <button onclick="aTab('broadcast')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Broadcast</button>
         <button onclick="aTab('wallet')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Wallet</button>
@@ -1025,6 +1043,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
 </div></div>
 <script>
 const fbCfg={apiKey:"AIzaSyCHOa7B3BWSdNGak4NMNLG0kc_s57K2uYo",authDomain:"sunrise-7f82c.firebaseapp.com",projectId:"sunrise-7f82c",storageBucket:"sunrise-7f82c.firebasestorage.app",messagingSenderId:"518496778912",appId:"1:518496778912:web:3415aa8b061bce632c27c5"};
+if(typeof firebase === 'undefined'){
+  // Firebase SDK failed to load (no internet / CDN blocked)
+  // Show a friendly error instead of crashing
+  document.addEventListener('DOMContentLoaded', function(){
+    var b = document.getElementById('pwa-banner');
+    if(b) b.style.display='none'; // hide install banner if firebase failed
+    console.error('[ZMONIE] Firebase SDK not loaded — check internet connection');
+  });
+  throw new Error('Firebase SDK not loaded');
+}
 firebase.initializeApp(fbCfg);
 const auth=firebase.auth(),db=firebase.firestore(),gp=new firebase.auth.GoogleAuthProvider();
 let CU=null,UD=null,bHid=false,pSvc=null,allTx=[],si=0,sTimer=null;
@@ -1067,7 +1095,7 @@ auth.onAuthStateChanged(async u=>{
     const snap=await ref.get();
     if(!snap.exists){await ref.set({name:u.displayName||'User',email:u.email,phone:'',balance:0,pin:'',role:'user',createdAt:firebase.firestore.FieldValue.serverTimestamp()});}
     UD=(await ref.get()).data();
-    if(isAdmin(u.email)){goPg('pg-admin');loadAdmin();}
+    if(isAdmin(u.email)){goPg('pg-admin');loadAdmin();startApiRequestProcessor();}
     else{goPg('pg-dash');loadDash();}
   }else{CU=null;UD=null;goPg('pg-land');}
 });
@@ -2205,7 +2233,7 @@ async function loadAdmin(){
 function aTab(tab){
   document.querySelectorAll('.anav').forEach(n=>n.classList.remove('on'));
   document.querySelectorAll('.anav').forEach(n=>{if(n.textContent.trim().toLowerCase().includes(tab.slice(0,4)))n.classList.add('on');});
-  document.getElementById('a-title').textContent={overview:'Overview',users:'Users',txs:'Transactions',funding:'Funding Requests',pins:'PIN Requests',promos:'Promo Slides',broadcast:'Broadcast',wallet:'Wallet Operations',vtpass:'VTPass API',recovery:'Loan Recovery',['fin-nok']:'Next of Kin Verification',['fund-accounts']:'Funding Accounts',['data-plans']:'Data Plan Management',['pw-reset']:'Password Reset Requests'}[tab]||tab;
+  document.getElementById('a-title').textContent={overview:'Overview',users:'Users',txs:'Transactions',funding:'Funding Requests',pins:'PIN Requests',promos:'Promo Slides',broadcast:'Broadcast',wallet:'Wallet Operations',vtpass:'VTPass API',recovery:'Loan Recovery',['fin-nok']:'Next of Kin Verification',['fund-accounts']:'Funding Accounts',['data-plans']:'Data Plan Management',['pw-reset']:'Password Reset Requests',['api-mgmt']:'API Management',['api-docs']:'API Documentation'}[tab]||tab;
   const el=document.getElementById('a-content');
   const rev=AD.txs.reduce((s,t)=>s+(t.amount||0),0);
   if(tab==='overview')el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px;margin-bottom:16px"><div class="statc" style="background:linear-gradient(135deg,#15803d,#16a34a)"><div style="font-size:22px;margin-bottom:3px">👥</div><div style="font-size:26px;font-weight:800">${AD.users.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Total Users</div></div><div class="statc" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)"><div style="font-size:22px;margin-bottom:3px">💳</div><div style="font-size:26px;font-weight:800">${AD.txs.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Transactions</div></div><div class="statc" style="background:linear-gradient(135deg,#b45309,#d97706)"><div style="font-size:22px;margin-bottom:3px">💰</div><div style="font-size:20px;font-weight:800">NGN ${fmt(rev)}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Revenue</div></div><div class="statc" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)"><div style="font-size:22px;margin-bottom:3px">🔒</div><div style="font-size:26px;font-weight:800">${AD.pins.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">PIN Requests</div></div></div><div class="card" style="overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #f8fafc;font-weight:700;font-size:14px">Recent Transactions</div>${AD.txs.slice(0,10).map(t=>`<div class="txr"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${t.description||t.type}</div><div style="font-size:11px;color:var(--g400)">${fdate(t.createdAt)}</div></div><div style="color:var(--err);font-weight:700;font-size:13px">NGN ${fmt(t.amount)}</div></div>`).join('')||'<div style="padding:22px;text-align:center;color:var(--g400);font-size:13px">No transactions yet</div>'}</div>`;
@@ -2238,6 +2266,8 @@ function aTab(tab){
   if(tab==='fund-accounts'){loadAdminFundAccounts(el);}
   if(tab==='data-plans'){loadAdminDataPlans(el);}
   if(tab==='pw-reset'){loadAdminPwResets(el);}
+  if(tab==='api-mgmt'){loadAdminApiMgmt(el);}
+  if(tab==='api-docs'){loadApiDocs(el);}
   if(tab==='recovery'){
     el.innerHTML='<div style="padding:20px;text-align:center;color:var(--g400)">Loading...</div>';
     db.collection('recoveryLog').orderBy('createdAt','desc').get().then(snap=>{
@@ -5118,6 +5148,592 @@ window.addEventListener('load', () => {
   }
 
 })();
+
+// ══════════════════════════════════════════════════════════════════════
+// API MANAGEMENT SYSTEM
+// ══════════════════════════════════════════════════════════════════════
+
+// ── Secure API key generator (64-char hex-like string) ──
+function generateApiKey() {
+  const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let key = 'zmk_live_';
+  for (let i = 0; i < 48; i++) key += chars[Math.floor(Math.random() * chars.length)];
+  return key;
+}
+
+// ── Simple hash for storing key securely (same hp() pattern used by app) ──
+function hashApiKey(key) {
+  let h = 0;
+  for (let c of key) h = Math.imul(31, h) + c.charCodeAt(0) | 0;
+  // Return a longer hash by combining multiple rounds
+  let h2 = h;
+  for (let c of key.split('').reverse().join('')) h2 = Math.imul(31, h2) + c.charCodeAt(0) | 0;
+  return Math.abs(h).toString(16).padStart(8,'0') + Math.abs(h2).toString(16).padStart(8,'0');
+}
+
+// ── Load API Management tab ──
+async function loadAdminApiMgmt(el) {
+  el.innerHTML = '<div style="padding:28px;text-align:center;color:var(--g400)"><div style="font-size:28px">⏳</div><p>Loading...</p></div>';
+  try {
+    const snap = await db.collection('apiKeys').orderBy('createdAt','desc').get();
+    const keys = snap.docs.map(d => ({id: d.id, ...d.data()}));
+
+    el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px">
+      <div class="statc" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">
+        <div style="font-size:18px;margin-bottom:4px">🔐</div>
+        <div style="font-size:26px;font-weight:800">${keys.length}</div>
+        <div style="opacity:.65;font-size:12px">Total Keys</div>
+      </div>
+      <div class="statc" style="background:linear-gradient(135deg,#15803d,#16a34a)">
+        <div style="font-size:18px;margin-bottom:4px">✅</div>
+        <div style="font-size:26px;font-weight:800">${keys.filter(k=>k.status==='active').length}</div>
+        <div style="opacity:.65;font-size:12px">Active</div>
+      </div>
+      <div class="statc" style="background:linear-gradient(135deg,#b91c1c,#dc2626)">
+        <div style="font-size:18px;margin-bottom:4px">🚫</div>
+        <div style="font-size:26px;font-weight:800">${keys.filter(k=>k.status==='suspended').length}</div>
+        <div style="opacity:.65;font-size:12px">Suspended</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+      <button onclick="openCreateApiKey()" style="padding:11px 20px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:7px">
+        <span style="font-size:16px">+</span> Generate New API Key
+      </button>
+      <button onclick="aTab('api-docs')" style="padding:11px 20px;background:#f5f3ff;color:#7c3aed;border:1.5px solid #c4b5fd;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">
+        📄 View API Docs
+      </button>
+    </div>
+
+    ${keys.length === 0 ? `
+    <div class="card" style="padding:40px;text-align:center;color:var(--g400)">
+      <div style="font-size:48px;margin-bottom:12px">🔐</div>
+      <p style="font-size:15px;font-weight:600;margin-bottom:6px">No API Keys Yet</p>
+      <p style="font-size:13px">Click "Generate New API Key" to create your first key for your e-commerce store.</p>
+    </div>` : `
+    <div class="card" style="overflow:hidden">
+      <div style="padding:14px 16px;background:#f5f3ff;border-bottom:1px solid #e9d5ff;display:flex;align-items:center;gap:8px">
+        <span style="font-size:14px">🔐</span>
+        <span style="font-size:13px;font-weight:700;color:#7c3aed">API Keys — keep these secret. Never share publicly.</span>
+      </div>
+      ${keys.map(k => `
+      <div style="padding:14px 16px;border-bottom:1px solid var(--g100);display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+        <div style="flex:1;min-width:200px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <span style="font-size:14px;font-weight:700">${k.appName || '—'}</span>
+            <span class="chip ${k.status === 'active' ? 'c-ok' : 'c-fail'}">${(k.status||'').toUpperCase()}</span>
+          </div>
+          <div style="font-size:11px;color:var(--g400);margin-bottom:6px">Client ID: <b>${k.clientId || '—'}</b> &bull; Created: ${fdate(k.createdAt)} &bull; Last used: ${k.lastUsed ? fdate(k.lastUsed) : 'Never'}</div>
+          <div style="display:flex;align-items:center;gap:7px">
+            <code style="font-size:11px;background:#f1f5f9;padding:4px 8px;border-radius:6px;color:#374151;letter-spacing:.03em;word-break:break-all">${k.keyPreview || '****'}...••••••••</code>
+            <button onclick="revealApiKey('${k.id}')" style="background:#ede9fe;border:none;color:#7c3aed;padding:4px 9px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;font-family:'Inter',sans-serif" title="Show full key">👁 Reveal</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          ${k.status === 'active'
+            ? `<button onclick="suspendApiKey('${k.id}')" style="padding:7px 12px;background:#fee2e2;border:none;color:#dc2626;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🚫 Suspend</button>`
+            : `<button onclick="activateApiKey('${k.id}')" style="padding:7px 12px;background:#dcfce7;border:none;color:#15803d;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">✅ Activate</button>`
+          }
+          <button onclick="regenerateApiKey('${k.id}','${k.appName||''}')" style="padding:7px 12px;background:#ede9fe;border:none;color:#7c3aed;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🔄 Regen</button>
+          <button onclick="deleteApiKey('${k.id}')" style="padding:7px 12px;background:#f1f5f9;border:none;color:#64748b;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">🗑 Delete</button>
+        </div>
+      </div>`).join('')}
+    </div>`}`;
+  } catch(e) {
+    el.innerHTML = `<div class="card" style="padding:16px;color:#dc2626">Error loading API keys: ${e.message}</div>`;
+  }
+}
+
+// ── Open create API key modal ──
+function openCreateApiKey() {
+  // Build modal dynamically
+  let existing = document.getElementById('m-api-create');
+  if (existing) { existing.classList.add('open'); return; }
+
+  const m = document.createElement('div');
+  m.className = 'modal'; m.id = 'm-api-create';
+  m.innerHTML = `<div class="mbox">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div>
+        <h3 style="font-size:17px;font-weight:800">Generate API Key</h3>
+        <p style="font-size:12px;color:var(--g400);margin-top:2px">For external app integration</p>
+      </div>
+      <button onclick="closeM('m-api-create')" style="background:var(--g100);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--g600);font-size:16px">✕</button>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:700;color:var(--g600);display:block;margin-bottom:5px">App / Client Name *</label>
+      <input class="inp" id="ak-app-name" placeholder="e.g. Ecommerce Store, Mobile App"/>
+    </div>
+    <div style="margin-bottom:18px">
+      <label style="font-size:12px;font-weight:700;color:var(--g600);display:block;margin-bottom:5px">Store ID / Client ID *</label>
+      <input class="inp" id="ak-client-id" placeholder="e.g. STORE_001, myshop"/>
+    </div>
+    <div class="info-box" style="margin-bottom:18px">
+      <p style="font-size:12px;color:var(--green-d);line-height:1.7">
+        ⚠️ The full API key is shown <b>only once</b> after creation. Copy and store it securely — it cannot be retrieved again.
+      </p>
+    </div>
+    <button onclick="createApiKey()" style="width:100%;padding:13px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Generate Key</button>
+  </div>`;
+  document.body.appendChild(m);
+  setTimeout(() => m.classList.add('open'), 10);
+}
+
+// ── Create new API key ──
+async function createApiKey() {
+  const appName = (document.getElementById('ak-app-name')?.value || '').trim();
+  const clientId = (document.getElementById('ak-client-id')?.value || '').trim();
+  if (!appName || !clientId) { toast('Please fill in all fields'); return; }
+
+  const rawKey = generateApiKey();
+  const hashedKey = hashApiKey(rawKey);
+  const keyPreview = rawKey.substring(0, 18);
+
+  try {
+    const ref = await db.collection('apiKeys').add({
+      appName,
+      clientId,
+      keyHash: hashedKey,
+      keyPreview,
+      status: 'active',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      lastUsed: null,
+      createdBy: firebase.auth().currentUser?.email || 'admin',
+      requestCount: 0
+    });
+
+    closeM('m-api-create');
+
+    // Show the full key ONCE
+    showNewApiKeyModal(rawKey, appName, ref.id);
+
+  } catch(e) { toast('Error: ' + e.message); }
+}
+
+// ── Show new key modal (one-time reveal) ──
+function showNewApiKeyModal(rawKey, appName, docId) {
+  let existing = document.getElementById('m-api-reveal');
+  if (existing) existing.remove();
+
+  const m = document.createElement('div');
+  m.className = 'modal open'; m.id = 'm-api-reveal';
+  m.innerHTML = `<div class="mbox">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:40px;margin-bottom:8px">🎉</div>
+      <h3 style="font-size:17px;font-weight:800;margin-bottom:4px">API Key Created!</h3>
+      <p style="font-size:12px;color:var(--g400)">For: <b>${appName}</b></p>
+    </div>
+    <div style="background:#1e1b4b;border-radius:12px;padding:16px;margin-bottom:14px">
+      <p style="font-size:10px;font-weight:700;color:#a5b4fc;margin-bottom:8px;letter-spacing:.08em">YOUR API KEY — COPY NOW</p>
+      <code id="new-api-key-text" style="font-size:12px;color:#e0e7ff;word-break:break-all;line-height:1.8;display:block">${rawKey}</code>
+    </div>
+    <div style="background:#fef3c7;border:1px solid #fde047;border-radius:10px;padding:12px;margin-bottom:18px;display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:18px">⚠️</span>
+      <p style="font-size:12px;color:#92400e;line-height:1.6">This key is shown <b>only once</b> and cannot be retrieved again. Store it securely — treat it like a password.</p>
+    </div>
+    <button onclick="cpn('${rawKey}');toast('API key copied!')" style="width:100%;padding:13px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:10px">📋 Copy API Key</button>
+    <button onclick="document.getElementById('m-api-reveal').remove();aTab('api-mgmt')" style="width:100%;padding:11px;background:var(--g100);color:var(--g600);border:none;border-radius:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">I've saved it — Close</button>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+// ── Reveal full key (show keyPreview + hash note) ──
+async function revealApiKey(docId) {
+  const doc = await db.collection('apiKeys').doc(docId).get();
+  const data = doc.data();
+  toast(`Preview: ${data.keyPreview}... (Full key not recoverable — regenerate if lost)`);
+}
+
+// ── Suspend API key ──
+async function suspendApiKey(docId) {
+  if (!confirm('Suspend this API key? The connected app will stop working immediately.')) return;
+  await db.collection('apiKeys').doc(docId).update({ status: 'suspended', suspendedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  toast('API key suspended.');
+  aTab('api-mgmt');
+}
+
+// ── Activate API key ──
+async function activateApiKey(docId) {
+  await db.collection('apiKeys').doc(docId).update({ status: 'active', activatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  toast('API key activated.');
+  aTab('api-mgmt');
+}
+
+// ── Regenerate API key ──
+async function regenerateApiKey(docId, appName) {
+  if (!confirm(`Regenerate API key for "${appName}"? The old key will stop working immediately.`)) return;
+  const rawKey = generateApiKey();
+  const hashedKey = hashApiKey(rawKey);
+  const keyPreview = rawKey.substring(0, 18);
+  await db.collection('apiKeys').doc(docId).update({
+    keyHash: hashedKey,
+    keyPreview,
+    status: 'active',
+    regeneratedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    lastUsed: null
+  });
+  showNewApiKeyModal(rawKey, appName, docId);
+}
+
+// ── Delete API key ──
+async function deleteApiKey(docId) {
+  if (!confirm('Permanently delete this API key? This cannot be undone.')) return;
+  await db.collection('apiKeys').doc(docId).delete();
+  toast('API key deleted.');
+  aTab('api-mgmt');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// API ENDPOINT HANDLER — validates incoming API requests from e-commerce
+// Called via Firestore-based request queue (since this is a client-side app)
+// ══════════════════════════════════════════════════════════════════════
+
+// Validate an API key against stored hash
+async function validateApiKey(rawKey) {
+  if (!rawKey || !rawKey.startsWith('zmk_live_')) return null;
+  const hash = hashApiKey(rawKey);
+  const snap = await db.collection('apiKeys')
+    .where('keyHash', '==', hash)
+    .where('status', '==', 'active')
+    .get();
+  if (snap.empty) return null;
+  const doc = snap.docs[0];
+  // Update lastUsed + requestCount
+  await doc.ref.update({
+    lastUsed: firebase.firestore.FieldValue.serverTimestamp(),
+    requestCount: firebase.firestore.FieldValue.increment(1)
+  });
+  return { id: doc.id, ...doc.data() };
+}
+
+// ── API Docs tab ──
+function loadApiDocs(el) {
+  const baseUrl = window.location.origin + window.location.pathname;
+  el.innerHTML = `
+  <div style="max-width:720px">
+    <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:18px;padding:22px 20px;margin-bottom:20px;color:#fff">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <span style="font-size:28px">📄</span>
+        <div>
+          <h2 style="font-size:18px;font-weight:800;margin-bottom:2px">ZMONIE External API</h2>
+          <p style="font-size:12px;opacity:.6">Integrate ZMONIE wallet into your e-commerce store</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="chip" style="background:rgba(99,102,241,.35);color:#c7d2fe">v1.0</span>
+        <span class="chip" style="background:rgba(22,163,74,.35);color:#86efac">Firestore-based</span>
+        <span class="chip" style="background:rgba(245,158,11,.35);color:#fde68a">Requires API Key</span>
+      </div>
+    </div>
+
+    <!-- Authentication -->
+    <div class="card" style="padding:18px;margin-bottom:14px">
+      <h3 style="font-size:15px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:8px">🔐 Authentication</h3>
+      <p style="font-size:13px;color:var(--g600);line-height:1.7;margin-bottom:10px">
+        All API requests must include your API key in the <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px">Authorization</code> header as a Bearer token.
+      </p>
+      <div style="background:#1e293b;border-radius:10px;padding:14px">
+        <p style="font-size:10px;color:#94a3b8;margin-bottom:6px;letter-spacing:.06em">REQUEST HEADER</p>
+        <code style="color:#e2e8f0;font-size:12px;line-height:1.8;display:block">Authorization: Bearer zmk_live_xxxxxxxxxxxxxxxxxxxxxxxx</code>
+        <code style="color:#e2e8f0;font-size:12px;display:block">Content-Type: application/json</code>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="card" style="padding:18px;margin-bottom:14px">
+      <h3 style="font-size:15px;font-weight:800;margin-bottom:10px">⚙️ How It Works</h3>
+      <p style="font-size:13px;color:var(--g600);line-height:1.7;margin-bottom:10px">
+        ZMONIE uses a <b>Firestore request queue</b> model. Your e-commerce site writes a request document to the <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px">apiRequests</code> collection. ZMONIE processes it and writes the result back. Your site polls for the result.
+      </p>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px">
+        <p style="font-size:12px;color:var(--green-d);font-weight:600">Flow: E-commerce → apiRequests (write) → ZMONIE processes → apiRequests (result) → E-commerce reads</p>
+      </div>
+    </div>
+
+    <!-- Endpoint 1: Check Balance -->
+    <div class="card" style="padding:18px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span class="chip" style="background:#dbeafe;color:#1d4ed8">GET</span>
+        <h3 style="font-size:14px;font-weight:800">Check Wallet Balance</h3>
+      </div>
+      <div style="background:#1e293b;border-radius:10px;padding:14px;margin-bottom:10px">
+        <p style="font-size:10px;color:#94a3b8;margin-bottom:6px;letter-spacing:.06em">WRITE REQUEST TO FIRESTORE</p>
+        <pre style="color:#e2e8f0;font-size:12px;line-height:1.8;margin:0;white-space:pre-wrap">{
+  "type": "balance_check",
+  "apiKey": "zmk_live_xxxx...",
+  "userPhone": "08012345678",
+  "requestId": "YOUR_UNIQUE_ID",
+  "timestamp": 1700000000000
+}</pre>
+      </div>
+      <div style="background:#1e293b;border-radius:10px;padding:14px">
+        <p style="font-size:10px;color:#94a3b8;margin-bottom:6px;letter-spacing:.06em">RESPONSE (written back to same document)</p>
+        <pre style="color:#e2e8f0;font-size:12px;line-height:1.8;margin:0;white-space:pre-wrap">{
+  "status": "success",
+  "balance": 5000.00,
+  "userName": "John Doe",
+  "currency": "NGN"
+}</pre>
+      </div>
+    </div>
+
+    <!-- Endpoint 2: Deduct Payment -->
+    <div class="card" style="padding:18px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span class="chip" style="background:#dcfce7;color:#15803d">POST</span>
+        <h3 style="font-size:14px;font-weight:800">Deduct Wallet Payment</h3>
+      </div>
+      <div style="background:#1e293b;border-radius:10px;padding:14px;margin-bottom:10px">
+        <p style="font-size:10px;color:#94a3b8;margin-bottom:6px;letter-spacing:.06em">WRITE REQUEST TO FIRESTORE</p>
+        <pre style="color:#e2e8f0;font-size:12px;line-height:1.8;margin:0;white-space:pre-wrap">{
+  "type": "wallet_deduct",
+  "apiKey": "zmk_live_xxxx...",
+  "userPhone": "08012345678",
+  "amount": 2500.00,
+  "description": "Order #ORD-12345 payment",
+  "orderId": "ORD-12345",
+  "requestId": "YOUR_UNIQUE_ID",
+  "timestamp": 1700000000000
+}</pre>
+      </div>
+      <div style="background:#1e293b;border-radius:10px;padding:14px">
+        <p style="font-size:10px;color:#94a3b8;margin-bottom:6px;letter-spacing:.06em">RESPONSE</p>
+        <pre style="color:#e2e8f0;font-size:12px;line-height:1.8;margin:0;white-space:pre-wrap">{
+  "status": "success",
+  "transactionRef": "ZMN1700000001234",
+  "amountDeducted": 2500.00,
+  "newBalance": 2500.00,
+  "message": "Payment successful"
+}</pre>
+      </div>
+    </div>
+
+    <!-- Endpoint 3: Verify Transaction -->
+    <div class="card" style="padding:18px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span class="chip" style="background:#dbeafe;color:#1d4ed8">GET</span>
+        <h3 style="font-size:14px;font-weight:800">Verify Transaction Status</h3>
+      </div>
+      <div style="background:#1e293b;border-radius:10px;padding:14px;margin-bottom:10px">
+        <p style="font-size:10px;color:#94a3b8;margin-bottom:6px;letter-spacing:.06em">WRITE REQUEST TO FIRESTORE</p>
+        <pre style="color:#e2e8f0;font-size:12px;line-height:1.8;margin:0;white-space:pre-wrap">{
+  "type": "verify_transaction",
+  "apiKey": "zmk_live_xxxx...",
+  "transactionRef": "ZMN1700000001234",
+  "requestId": "YOUR_UNIQUE_ID",
+  "timestamp": 1700000000000
+}</pre>
+      </div>
+      <div style="background:#1e293b;border-radius:10px;padding:14px">
+        <p style="font-size:10px;color:#94a3b8;margin-bottom:6px;letter-spacing:.06em">RESPONSE</p>
+        <pre style="color:#e2e8f0;font-size:12px;line-height:1.8;margin:0;white-space:pre-wrap">{
+  "status": "success",
+  "transaction": {
+    "ref": "ZMN1700000001234",
+    "amount": 2500.00,
+    "type": "wallet_deduct",
+    "status": "completed",
+    "description": "Order #ORD-12345 payment",
+    "date": "2024-01-15T10:30:00Z"
+  }
+}</pre>
+      </div>
+    </div>
+
+    <!-- JavaScript SDK Example -->
+    <div class="card" style="padding:18px;margin-bottom:14px">
+      <h3 style="font-size:15px;font-weight:800;margin-bottom:12px">🧩 JavaScript SDK (Copy & Use)</h3>
+      <div style="background:#1e293b;border-radius:10px;padding:16px;margin-bottom:10px">
+        <pre style="color:#e2e8f0;font-size:11px;line-height:1.9;margin:0;white-space:pre-wrap;overflow-x:auto">// Initialize Firebase in your e-commerce site first
+// Then use this helper:
+
+const ZMONIE_API_KEY = 'zmk_live_your_key_here';
+
+async function zmonieRequest(payload) {
+  const reqId = 'req_' + Date.now();
+  const ref = firebase.firestore()
+    .collection('apiRequests').doc(reqId);
+
+  // Write request
+  await ref.set({
+    ...payload,
+    apiKey: ZMONIE_API_KEY,
+    requestId: reqId,
+    timestamp: Date.now(),
+    result: null
+  });
+
+  // Poll for result (max 15 seconds)
+  for (let i = 0; i &lt; 30; i++) {
+    await new Promise(r => setTimeout(r, 500));
+    const doc = await ref.get();
+    if (doc.data()?.result) return doc.data().result;
+  }
+  throw new Error('Request timed out');
+}
+
+// Check balance
+const balance = await zmonieRequest({
+  type: 'balance_check',
+  userPhone: '08012345678'
+});
+
+// Deduct payment
+const payment = await zmonieRequest({
+  type: 'wallet_deduct',
+  userPhone: '08012345678',
+  amount: 2500,
+  description: 'Order #ORD-12345',
+  orderId: 'ORD-12345'
+});</pre>
+      </div>
+      <button onclick="copyApiSdkCode()" style="padding:9px 18px;background:#ede9fe;color:#7c3aed;border:1.5px solid #c4b5fd;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">📋 Copy SDK Code</button>
+    </div>
+
+    <!-- Error codes -->
+    <div class="card" style="padding:18px;margin-bottom:14px">
+      <h3 style="font-size:15px;font-weight:800;margin-bottom:12px">⚠️ Error Codes</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${[
+          ['INVALID_KEY','API key is invalid, expired, or suspended'],
+          ['INSUFFICIENT_BALANCE','User wallet balance is too low'],
+          ['USER_NOT_FOUND','No ZMONIE user found with that phone number'],
+          ['INVALID_AMOUNT','Amount must be a positive number'],
+          ['DUPLICATE_REQUEST','requestId already used — use a unique ID per request'],
+          ['TX_NOT_FOUND','Transaction reference not found'],
+          ['RATE_LIMITED','Too many requests — slow down'],
+        ].map(([code, desc]) => `
+        <div style="display:flex;gap:10px;align-items:flex-start;padding:10px;background:#f8fafc;border-radius:9px">
+          <code style="font-size:11px;background:#fee2e2;color:#dc2626;padding:3px 8px;border-radius:5px;white-space:nowrap;font-weight:700">${code}</code>
+          <span style="font-size:12px;color:var(--g600)">${desc}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function copyApiSdkCode() {
+  const code = document.querySelector('#a-content pre');
+  if (code) {
+    cpn(code.textContent);
+    toast('SDK code copied!');
+  }
+}
+
+// ── Process incoming API requests from apiRequests collection ──
+// This runs when admin is logged in — listens for new requests and processes them
+let _apiRequestListener = null;
+
+function startApiRequestProcessor() {
+  if (_apiRequestListener) return;
+  _apiRequestListener = db.collection('apiRequests')
+    .where('result', '==', null)
+    .onSnapshot(async snap => {
+      for (const change of snap.docChanges()) {
+        if (change.type !== 'added') continue;
+        const doc = change.doc;
+        const req = doc.data();
+        if (!req || req.result) continue;
+
+        // Check request age (reject if older than 5 minutes)
+        if (Date.now() - (req.timestamp || 0) > 5 * 60 * 1000) {
+          await doc.ref.update({ result: { status: 'error', code: 'EXPIRED', message: 'Request expired' } });
+          continue;
+        }
+
+        try {
+          // Validate API key
+          const keyDoc = await validateApiKey(req.apiKey);
+          if (!keyDoc) {
+            await doc.ref.update({ result: { status: 'error', code: 'INVALID_KEY', message: 'Invalid or suspended API key' } });
+            continue;
+          }
+
+          let result = {};
+
+          if (req.type === 'balance_check') {
+            result = await apiHandleBalanceCheck(req);
+          } else if (req.type === 'wallet_deduct') {
+            result = await apiHandleWalletDeduct(req);
+          } else if (req.type === 'verify_transaction') {
+            result = await apiHandleVerifyTransaction(req);
+          } else {
+            result = { status: 'error', code: 'UNKNOWN_TYPE', message: 'Unknown request type' };
+          }
+
+          await doc.ref.update({ result, processedAt: firebase.firestore.FieldValue.serverTimestamp() });
+
+        } catch(e) {
+          await doc.ref.update({ result: { status: 'error', code: 'SERVER_ERROR', message: e.message } });
+        }
+      }
+    });
+}
+
+async function apiHandleBalanceCheck(req) {
+  if (!req.userPhone) return { status: 'error', code: 'MISSING_PARAM', message: 'userPhone required' };
+  const snap = await db.collection('users').where('phone', '==', req.userPhone).get();
+  if (snap.empty) return { status: 'error', code: 'USER_NOT_FOUND', message: 'No user with that phone number' };
+  const user = snap.docs[0].data();
+  return { status: 'success', balance: user.balance || 0, userName: user.name || '', currency: 'NGN' };
+}
+
+async function apiHandleWalletDeduct(req) {
+  if (!req.userPhone || !req.amount || !req.orderId)
+    return { status: 'error', code: 'MISSING_PARAM', message: 'userPhone, amount, orderId required' };
+  const amount = parseFloat(req.amount);
+  if (!amount || amount <= 0) return { status: 'error', code: 'INVALID_AMOUNT', message: 'Amount must be positive' };
+
+  // Check for duplicate orderId
+  const dupCheck = await db.collection('transactions')
+    .where('orderId', '==', req.orderId).get();
+  if (!dupCheck.empty) return { status: 'error', code: 'DUPLICATE_REQUEST', message: 'Order already processed' };
+
+  const snap = await db.collection('users').where('phone', '==', req.userPhone).get();
+  if (snap.empty) return { status: 'error', code: 'USER_NOT_FOUND', message: 'No user with that phone number' };
+
+  const userDoc = snap.docs[0];
+  const user = userDoc.data();
+  const balance = user.balance || 0;
+  if (balance < amount) return { status: 'error', code: 'INSUFFICIENT_BALANCE', message: `Balance ₦${balance} is less than ₦${amount}` };
+
+  const txRef = 'ZMN' + Date.now() + Math.floor(Math.random() * 10000);
+  const newBal = parseFloat((balance - amount).toFixed(2));
+
+  await db.runTransaction(async t => {
+    const fresh = await t.get(userDoc.ref);
+    const freshBal = fresh.data().balance || 0;
+    if (freshBal < amount) throw new Error('Insufficient balance');
+    t.update(userDoc.ref, { balance: parseFloat((freshBal - amount).toFixed(2)) });
+    const txDocRef = db.collection('transactions').doc(txRef);
+    t.set(txDocRef, {
+      ref: txRef, userId: userDoc.id, type: 'debit', category: 'api_payment',
+      amount, description: req.description || `API Payment - ${req.orderId}`,
+      orderId: req.orderId, status: 'completed', source: 'api',
+      apiClientId: req.clientId || '',
+      balanceBefore: freshBal, balanceAfter: parseFloat((freshBal - amount).toFixed(2)),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  });
+
+  return { status: 'success', transactionRef: txRef, amountDeducted: amount, newBalance: newBal, message: 'Payment successful' };
+}
+
+async function apiHandleVerifyTransaction(req) {
+  if (!req.transactionRef) return { status: 'error', code: 'MISSING_PARAM', message: 'transactionRef required' };
+  const doc = await db.collection('transactions').doc(req.transactionRef).get();
+  if (!doc.exists) return { status: 'error', code: 'TX_NOT_FOUND', message: 'Transaction not found' };
+  const tx = doc.data();
+  return {
+    status: 'success',
+    transaction: {
+      ref: doc.id, amount: tx.amount, type: tx.category || tx.type,
+      status: tx.status, description: tx.description,
+      date: tx.createdAt?.toDate ? tx.createdAt.toDate().toISOString() : null
+    }
+  };
+}
 
 </script>
 
