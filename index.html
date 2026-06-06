@@ -90,7 +90,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
 .chip{display:inline-flex;padding:3px 9px;border-radius:50px;font-size:10px;font-weight:700}
 .status-badge{display:inline-block;padding:3px 9px;border-radius:50px;font-size:10px;font-weight:800;letter-spacing:.04em}
 /* ── PWA Install Banner ── */
-#pwa-banner{position:sticky;top:0;left:0;right:0;z-index:9999;background:#fff;border-bottom:1.5px solid #e5e7eb;display:none;align-items:center;gap:10px;padding:10px 14px;box-shadow:0 2px 16px rgba(0,0,0,.10)}
+#pwa-banner{position:sticky;top:0;left:0;right:0;z-index:9999;background:#fff;border-bottom:1.5px solid #e5e7eb;display:flex;align-items:center;gap:10px;padding:10px 14px;box-shadow:0 2px 16px rgba(0,0,0,.10)}
 .pwa-icon{width:40px;height:40px;background:linear-gradient(135deg,#16a34a,#15803d);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .pwa-info{flex:1;min-width:0}
 .pwa-info strong{display:block;font-size:13px;font-weight:700;color:#111;line-height:1.3}
@@ -4989,127 +4989,135 @@ window.addEventListener('load', () => {
 });
 
 // ══════════════════════════════════════════════════
-// PWA INSTALL BANNER
+// PWA INSTALL BANNER — Always visible, works like Jumia
 // ══════════════════════════════════════════════════
-let _pwaPrompt = null;
-const PWA_DISMISSED_KEY = 'zmonie_pwa_dismissed';
-const PWA_INSTALLED_KEY = 'zmonie_pwa_installed';
+(function() {
+  var deferredPrompt = null;
+  var DISMISS_KEY = 'zmonie_banner_dismissed';
+  var INSTALLED_KEY = 'zmonie_installed';
 
-// Detect if already running as installed PWA
-function isRunningAsPwa() {
-  return window.matchMedia('(display-mode: standalone)').matches
-    || window.navigator.standalone === true
-    || document.referrer.includes('android-app://');
-}
-
-// Show banner immediately on page load — no waiting for browser event
-function initPwaBanner() {
-  // Don't show if already installed as PWA
-  if (isRunningAsPwa()) return;
-  if (localStorage.getItem(PWA_INSTALLED_KEY)) return;
-  // Don't show if dismissed within 3 days
-  const dismissed = localStorage.getItem(PWA_DISMISSED_KEY);
-  if (dismissed && Date.now() - parseInt(dismissed) < 3 * 24 * 60 * 60 * 1000) return;
-  // Show immediately
-  showPwaBanner();
-}
-
-// Capture the native prompt when available (Android Chrome)
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  _pwaPrompt = e;
-  // Already shown, just store the prompt for when user taps Install
-});
-
-// Hide permanently if installed
-window.addEventListener('appinstalled', () => {
-  hidePwaBanner();
-  localStorage.setItem(PWA_INSTALLED_KEY, '1');
-});
-
-function showPwaBanner() {
-  const banner = document.getElementById('pwa-banner');
-  if (banner) { banner.style.display = 'flex'; }
-}
-
-function hidePwaBanner() {
-  const banner = document.getElementById('pwa-banner');
-  if (banner) { banner.style.display = 'none'; }
-}
-
-function dismissPwaBanner() {
-  hidePwaBanner();
-  localStorage.setItem(PWA_DISMISSED_KEY, Date.now().toString());
-}
-
-async function triggerPwaInstall() {
-  if (_pwaPrompt) {
-    // Android Chrome — trigger native install dialog
-    _pwaPrompt.prompt();
-    const { outcome } = await _pwaPrompt.userChoice;
-    if (outcome === 'accepted') {
-      hidePwaBanner();
-      localStorage.setItem(PWA_INSTALLED_KEY, '1');
-    }
-    _pwaPrompt = null;
-  } else {
-    // iOS / Samsung / other browsers — show manual guide
-    showIosInstallModal();
+  function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true
+      || document.referrer.startsWith('android-app://');
   }
-}
 
-// Run on DOM ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initPwaBanner);
-} else {
-  initPwaBanner();
-}
+  function setBanner(visible) {
+    var b = document.getElementById('pwa-banner');
+    if (!b) return;
+    b.style.display = visible ? 'flex' : 'none';
+  }
 
-// iOS install instructions modal
-function showIosInstallModal() {
-  const existing = document.getElementById('ios-install-modal');
-  if (existing) { existing.style.display = 'flex'; return; }
-  const m = document.createElement('div');
-  m.id = 'ios-install-modal';
-  m.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center';
-  m.innerHTML = `
-    <div style="background:#fff;border-radius:22px 22px 0 0;padding:22px 20px 32px;width:100%;max-width:480px;position:relative">
-      <div style="width:36px;height:4px;background:#e5e7eb;border-radius:4px;margin:0 auto 18px"></div>
-      <div style="text-align:center;margin-bottom:18px">
-        <div style="width:52px;height:52px;background:linear-gradient(135deg,#16a34a,#15803d);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">
-          <span style="font-weight:800;font-size:24px;color:#fff">Z</span>
-        </div>
-        <h3 style="font-size:17px;font-weight:800;margin-bottom:4px">Install ZMONIE</h3>
-        <p style="font-size:12px;color:#6b7280">Add to your Home Screen for the best experience</p>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
-        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#f9fafb;border-radius:12px">
-          <div style="font-size:22px">1️⃣</div>
-          <div style="font-size:13px;color:#374151">Tap the <strong>Share</strong> button <span style="font-size:16px">⎙</span> at the bottom of your browser</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#f9fafb;border-radius:12px">
-          <div style="font-size:22px">2️⃣</div>
-          <div style="font-size:13px;color:#374151">Scroll down and tap <strong>"Add to Home Screen"</strong></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#f9fafb;border-radius:12px">
-          <div style="font-size:22px">3️⃣</div>
-          <div style="font-size:13px;color:#374151">Tap <strong>"Add"</strong> — ZMONIE will appear on your home screen like a real app</div>
-        </div>
-      </div>
-      <button onclick="document.getElementById('ios-install-modal').style.display='none'" style="width:100%;padding:13px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Got it!</button>
-    </div>`;
-  document.body.appendChild(m);
-  m.addEventListener('click', (e) => { if(e.target === m) m.style.display = 'none'; });
-}
+  function shouldShowBanner() {
+    if (isStandalone()) return false;
+    if (localStorage.getItem(INSTALLED_KEY)) return false;
+    var dismissed = localStorage.getItem(DISMISS_KEY);
+    if (dismissed && (Date.now() - parseInt(dismissed)) < 3 * 24 * 60 * 60 * 1000) return false;
+    return true;
+  }
 
-// Register Service Worker for offline support
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('[SW] Registered:', reg.scope))
-      .catch(err => console.warn('[SW] Failed:', err.message));
+  // Show banner on load
+  function onReady() {
+    if (shouldShowBanner()) {
+      setBanner(true);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', onReady);
+  } else {
+    onReady();
+  }
+
+  // Capture native install prompt (Android Chrome/Edge)
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Make sure banner is visible when prompt is available
+    if (shouldShowBanner()) setBanner(true);
   });
-}
+
+  // App installed — hide banner forever
+  window.addEventListener('appinstalled', function() {
+    setBanner(false);
+    localStorage.setItem(INSTALLED_KEY, '1');
+    deferredPrompt = null;
+  });
+
+  // Called by Install App button
+  window.triggerPwaInstall = async function() {
+    if (deferredPrompt) {
+      // Android Chrome — real native install, no Chrome icon
+      deferredPrompt.prompt();
+      var choice = await deferredPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        setBanner(false);
+        localStorage.setItem(INSTALLED_KEY, '1');
+      }
+      deferredPrompt = null;
+    } else {
+      // iOS Safari or unsupported browser — show step-by-step guide
+      showInstallGuide();
+    }
+  };
+
+  window.closePwaGuide = function() {
+    var m = document.getElementById('pwa-guide-modal');
+    if (m) m.style.display = 'none';
+  };
+
+  window.dismissPwaBanner = function() {
+    setBanner(false);
+    localStorage.setItem(DISMISS_KEY, Date.now().toString());
+  };
+
+  window.showInstallGuide = function() {
+    var isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    var isSamsung = /samsungbrowser/i.test(navigator.userAgent);
+    var step2 = isIos
+      ? 'Tap the <b>Share</b> button <span style="font-size:18px">⎙</span> at the bottom of Safari'
+      : isSamsung
+      ? 'Tap the <b>Menu</b> (⋮) then tap <b>"Add page to"</b>'
+      : 'Tap the <b>Menu</b> (⋮) at the top right of your browser';
+    var step3 = isIos
+      ? 'Tap <b>"Add to Home Screen"</b> then tap <b>Add</b>'
+      : 'Tap <b>"Add to Home Screen"</b> or <b>"Install App"</b>';
+
+    var existing = document.getElementById('pwa-guide-modal');
+    if (existing) { existing.style.display = 'flex'; return; }
+
+    var modal = document.createElement('div');
+    modal.id = 'pwa-guide-modal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.65);display:flex;align-items:flex-end;justify-content:center';
+    modal.innerHTML = '<div style="background:#fff;border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;max-width:500px">'
+      + '<div style="width:40px;height:4px;background:#e5e7eb;border-radius:4px;margin:0 auto 20px"></div>'
+      + '<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">'
+      + '<div style="width:56px;height:56px;background:linear-gradient(135deg,#22c55e,#15803d);border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:28px;font-weight:900;color:#fff">Z</span></div>'
+      + '<div><div style="font-size:18px;font-weight:800">Install ZMONIE</div>'
+      + '<div style="font-size:12px;color:#6b7280;margin-top:2px">Follow these steps to install</div></div></div>'
+      + '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">'
+      + '<div style="display:flex;gap:14px;align-items:center;background:#f0fdf4;border-radius:14px;padding:14px">'
+      + '<div style="width:32px;height:32px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;flex-shrink:0">1</div>'
+      + '<div style="font-size:13px;color:#374151">' + step2 + '</div></div>'
+      + '<div style="display:flex;gap:14px;align-items:center;background:#f0fdf4;border-radius:14px;padding:14px">'
+      + '<div style="width:32px;height:32px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;flex-shrink:0">2</div>'
+      + '<div style="font-size:13px;color:#374151">' + step3 + '</div></div></div>'
+      + '<button onclick="closePwaGuide()" style="width:100%;padding:14px;background:linear-gradient(135deg,#22c55e,#15803d);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif">Got it!</button>'
+      + '</div>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', function(e) { if (e.target === modal) closePwaGuide(); });
+  };
+
+  // Register Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('./sw.js')
+        .then(function(reg) { console.log('[SW] OK:', reg.scope); })
+        .catch(function(e) { console.log('[SW] Skip:', e.message); });
+    });
+  }
+
+})();
 
 </script>
 
