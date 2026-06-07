@@ -4366,76 +4366,97 @@ async function adminRecordCashRepayment(loanId, userId){
   const note = (noteEl?.value || '').trim();
   if(!amt || amt <= 0){ toast('Enter a valid repayment amount'); return; }
   if(!confirm('Record cash payment of NGN '+fmt(amt)+' for this loan?')) return;
+
+  // ── Step 1: Read loan ──
+  let snap;
   try{
-    const snap = await db.collection('loans').doc(loanId).get();
+    snap = await db.collection('loans').doc(loanId).get();
     if(!snap.exists){ toast('Loan not found'); return; }
-    const ln = snap.data();
-    let sch = ln.repaymentSchedule || [];
-    // If no schedule, generate one from activatedAt
-    if(!sch.length){
-      const activatedAt = ln.activatedAt?.toDate ? ln.activatedAt.toDate() : null;
-      if(activatedAt){
-        const totalRepay = ln.totalRepayable || ((ln.approvedAmount||ln.amount)*1.24);
-        sch = generateRepaymentSchedule(activatedAt, totalRepay);
-      }
+  }catch(e){ toast('Could not read loan: '+e.message); return; }
+
+  const ln = snap.data();
+  let sch = ln.repaymentSchedule || [];
+
+  // ── Step 2: Build schedule if missing ──
+  if(!sch.length){
+    const activatedAt = ln.activatedAt?.toDate ? ln.activatedAt.toDate() : null;
+    if(activatedAt){
+      const totalRepay = ln.totalRepayable || ((ln.approvedAmount||ln.amount)*1.24);
+      sch = generateRepaymentSchedule(activatedAt, totalRepay);
     }
-    // Find the first unpaid installment on or before the payment date
-    // and mark it paid (or multiple if amount covers more than one)
-    let remaining = amt;
-    let paidDays = 0;
-    for(let i = 0; i < sch.length; i++){
-      if(sch[i].paid) continue;
-      if(remaining <= 0) break;
-      if(sch[i].dueDate > payDate) break; // only mark days up to payment date
-      const dayAmt = sch[i].amount;
-      if(remaining >= dayAmt){
-        sch[i].paid = true;
-        sch[i].paidAt = new Date(payDate).toISOString();
-        sch[i].cashPayment = true;
-        sch[i].adminNote = note || 'Cash payment recorded by admin';
-        remaining -= dayAmt;
-        paidDays++;
-      } else {
-        // Partial payment — mark as partial
-        sch[i].partialPaid = (sch[i].partialPaid || 0) + remaining;
-        sch[i].adminNote = note || 'Partial cash payment';
-        remaining = 0;
-        paidDays++;
-      }
+  }
+
+  // ── Step 3: Mark installments paid up to payDate ──
+  let remaining = amt;
+  let paidDays = 0;
+  for(let i = 0; i < sch.length; i++){
+    if(sch[i].paid) continue;
+    if(remaining <= 0) break;
+    if(sch[i].dueDate > payDate) break;
+    const dayAmt = sch[i].amount;
+    if(remaining >= dayAmt){
+      sch[i].paid = true;
+      sch[i].paidAt = new Date(payDate).toISOString();
+      sch[i].cashPayment = true;
+      sch[i].adminNote = note || 'Cash payment recorded by admin';
+      remaining -= dayAmt;
+      paidDays++;
+    } else {
+      sch[i].partialPaid = (sch[i].partialPaid || 0) + remaining;
+      sch[i].adminNote = note || 'Partial cash payment';
+      remaining = 0;
+      paidDays++;
     }
-    if(paidDays === 0){
-      // No due installment found — just log as a general payment
-      toast('No due installments found for this date. Payment logged as a transaction only.');
-    }
-    const allPaid = sch.every(s => s.paid);
-    const totalPaid = sch.filter(s=>s.paid).length;
+  }
+  const allPaid = sch.every(s => s.paid);
+  const totalPaid = sch.filter(s=>s.paid).length;
+
+  // ── Step 4: Update loan (critical — must succeed) ──
+  try{
     await db.collection('loans').doc(loanId).update({
       repaymentSchedule: sch,
       status: allPaid ? 'repaid' : 'active',
       lastCashPaymentDate: payDate
     });
-    // Log transaction (no wallet deduction — cash was paid physically)
+  }catch(e){
+    toast('Permission denied on loans. Add this to Firestore rules:\n\nallow update: if isAdmin();\n\nError: '+e.message);
+    return;
+  }
+
+  // ── Step 5: Log transaction ──
+  try{
     await db.collection('transactions').add({
-      userId, type: 'loan_repayment_cash', amount: amt,
-      description: `Cash Loan Repayment — ${paidDays} day(s) (NGN ${fmt(amt)})${note?' · '+note:''}`,
-      status: 'success', loanId,
+      userId,
+      type: 'loan_repayment_cash',
+      amount: amt,
+      description: 'Cash Loan Repayment — '+paidDays+' day(s) (NGN '+fmt(amt)+')'+(note?' · '+note:''),
+      status: 'success',
+      loanId,
       paymentDate: payDate,
       recordedBy: 'admin',
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    // Notify user
-    await addFinanceNotif(userId, '✅ Cash Repayment Recorded',
-      `Admin has recorded your cash payment of NGN ${fmt(amt)} on ${payDate}. ${paidDays} installment(s) marked paid. ${allPaid ? 'Your loan is fully repaid!' : (30-totalPaid)+' days remaining.'}`);
-    if(allPaid){
-      await addFinanceNotif(userId, '🎉 Loan Fully Repaid!', `All 30 daily installments have been recorded. Your loan is now fully repaid. Thank you!`);
-    }
-    closeM('m-admin-cash-repay');
-    toast('✅ Cash payment recorded! '+(paidDays>0?paidDays+' day(s) marked paid.':'Transaction logged.'));
-    aTab('fin-loans');
-  }catch(er){
-    toast('❌ Error: '+er.message);
-  }
+  }catch(e){ console.warn('Transaction log skipped:',e.message); }
+
+  // ── Step 6: Notify user ──
+  try{
+    const msg = 'Admin recorded your cash payment of NGN '+fmt(amt)+' on '+payDate+'. '
+      +paidDays+' installment(s) marked paid. '
+      +(allPaid ? 'Loan is FULLY REPAID!' : (30-totalPaid)+' days remaining.');
+    await db.collection('financeNotifications').add({
+      userId,
+      title: allPaid ? '🎉 Loan Fully Repaid!' : '✅ Cash Repayment Recorded',
+      body: msg,
+      read: false,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }catch(e){ console.warn('Notification skipped:',e.message); }
+
+  closeM('m-admin-cash-repay');
+  toast(allPaid ? '🎉 Loan fully repaid!' : '✅ '+paidDays+' day(s) marked paid. Cash payment recorded.');
+  aTab('fin-loans');
 }
+
 
 async function recordDailyPayment(loanId, userId, dayIndex){
   const snap = await db.collection('loans').doc(loanId).get();
