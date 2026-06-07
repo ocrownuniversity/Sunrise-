@@ -114,14 +114,41 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--black);over
 .tsw{position:relative;width:44px;height:24px;background:var(--g200);border-radius:50px;cursor:pointer;transition:background .25s;flex-shrink:0}
 .tsw.on{background:var(--green)}.tsw::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.2)}.tsw.on::after{transform:translateX(20px)}
 /* ADMIN */
-.aside{width:220px;background:#0f172a;min-height:100vh;padding:14px 0;position:fixed;left:0;top:0;z-index:200;overflow-y:auto;transition:transform .3s ease}
-.aside.closed{transform:translateX(-100%)}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199}
-.overlay.show{display:block}
-.hamb{display:none;background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;background:var(--green-xl);color:var(--green-d)}
-@media(max-width:700px){.amain{margin-left:0!important;padding:12px}.aside{transform:translateX(-100%)}.aside.open{transform:translateX(0)}.hamb{display:flex;align-items:center;justify-content:center}}
-.amain{margin-left:220px;padding:20px;min-height:100vh;background:var(--bg)}
-@media(max-width:700px){.aside{display:none}.amain{margin-left:0;padding:14px}}
+/* ── Admin layout ── */
+.aside{
+  width:240px;background:#0f172a;min-height:100vh;padding:14px 0 80px;
+  position:fixed;left:0;top:0;z-index:300;overflow-y:auto;
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+  transform:translateX(0);
+}
+.aside.closed,.aside-hidden{transform:translateX(-100%);}
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.55);z-index:299;
+  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+}
+.overlay.show{display:block;}
+.hamb{
+  display:none;align-items:center;justify-content:center;
+  background:var(--green-xl);border:1.5px solid #86efac;
+  color:var(--green-d);border-radius:10px;cursor:pointer;
+  padding:8px;flex-shrink:0;
+}
+.amain{margin-left:240px;padding:20px;min-height:100vh;background:var(--bg);transition:margin .28s;}
+/* Admin quick-tab scroll bar */
+.admin-tabbar{
+  display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.admin-tabbar::-webkit-scrollbar{display:none;}
+.admin-tabbar button{flex-shrink:0;}
+/* Mobile */
+@media(max-width:768px){
+  .aside{transform:translateX(-100%);}
+  .aside.open{transform:translateX(0);}
+  .hamb{display:flex;}
+  .amain{margin-left:0;padding:14px 12px;}
+}
 .anav{display:flex;align-items:center;gap:9px;padding:10px 13px;border-radius:9px;cursor:pointer;margin-bottom:2px;color:rgba(255,255,255,.5);font-size:13px;font-weight:500;transition:all .2s}
 .anav:hover,.anav.on{background:rgba(22,163,74,.14);color:#4ade80}
 .statc{border-radius:14px;padding:18px 20px;color:#fff;position:relative;overflow:hidden}
@@ -768,74 +795,94 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- ADMIN PAGE -->
 <div id="pg-admin" class="page">
-  <div style="display:flex;min-height:100vh">
-    <div class="aside">
-      <div style="padding:0 13px 14px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:6px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:30px;height:30px;background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-weight:800;font-size:13px;color:#fff">Z</span></div>
-          <div><div style="font-weight:700;color:#fff;font-size:14px">ZMONIE</div><div style="font-size:10px;color:rgba(255,255,255,.3)">Admin Panel</div></div>
+  <!-- Sidebar -->
+  <div class="aside" id="adminSidebar">
+    <div style="padding:16px 14px 14px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:9px">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <span style="font-weight:900;font-size:14px;color:#fff">Z</span>
+        </div>
+        <div>
+          <div style="font-weight:800;color:#fff;font-size:14px;letter-spacing:-.02em">ZMONIE</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.3);font-weight:500">Admin Panel</div>
         </div>
       </div>
-      <nav style="padding:0 8px">
-        <div class="anav on" onclick="aTab('overview')">📊 Overview</div>
-        <div class="anav" onclick="aTab('users')">👥 Users</div>
-        <div class="anav" onclick="aTab('txs')">💳 Transactions</div>
-        <div class="anav" onclick="aTab('funding')">💰 Funding</div>
-        <div class="anav" onclick="aTab('fund-accounts')">🏦 Funding Accounts</div>
-        <div class="anav" onclick="aTab('data-plans')">📡 Data Plan Mgmt</div>
-        <div class="anav" onclick="aTab('withdrawals')">💸 Withdrawals</div>
-        <div class="anav" onclick="aTab('pins')">🔒 PIN Requests</div>
-        <div class="anav" onclick="aTab('pw-reset')">🔑 Password Resets</div>
-        <div class="anav" onclick="aTab('api-mgmt')">🔐 API Management</div>
-        <div class="anav" onclick="aTab('promos')">🎯 Promo Slides</div>
-        <div class="anav" onclick="aTab('broadcast')">📢 Broadcast</div>
-        <div class="anav" onclick="aTab('wallet')">👛 Wallet Ops</div>
-        <div style="font-size:10px;font-weight:700;color:rgba(167,139,250,.35);padding:10px 6px 4px;text-transform:uppercase;letter-spacing:.8px">Finance</div>
-        <div class="anav fin-tab" onclick="aTab('fin-loans')">🏦 Loan Requests</div>
-        <div class="anav fin-tab" onclick="aTab('fin-investments')">📈 Investments</div>
-        <div class="anav fin-tab" onclick="aTab('fin-analytics')">📊 Fin Analytics</div>
-        <div class="anav fin-tab" onclick="aTab('vtpass')">⚙️ API Settings</div>
-        <div style="font-size:10px;font-weight:700;color:rgba(74,222,128,.3);padding:10px 6px 4px;text-transform:uppercase;letter-spacing:.8px">Rewards</div>
-        <div class="anav" onclick="aTab('paystack')">💳 Paystack Settings</div>
-        <div class="anav" onclick="aTab('rewards-settings')">🎁 Rewards Settings</div>
-        <div class="anav" onclick="aTab('rewards-history')">📊 Rewards History</div>
-      </nav>
-      <div style="position:absolute;bottom:14px;left:0;right:0;padding:0 8px">
-        <button onclick="doLogout()" style="width:100%;padding:10px;border-radius:8px;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.18);color:#f87171;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Sign Out</button>
-      </div>
+      <!-- Close button — mobile only -->
+      <button onclick="closeAdminMenu()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
     </div>
-    <div class="overlay" id="adminOverlay" onclick="closeAdminMenu()"></div>
-    <div class="amain" style="flex:1">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-        <button class="hamb" onclick="openAdminMenu()" title="Menu">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-        <h1 style="font-size:20px;font-weight:800;letter-spacing:-.02em;flex:1" id="a-title">Overview</h1>
-        <button onclick="doLogout()" style="padding:7px 13px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Logout</button>
-      </div>
+    <nav style="padding:0 8px">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.25);padding:8px 6px 4px;text-transform:uppercase;letter-spacing:.8px">Main</div>
+      <div class="anav on" onclick="aTab('overview')">📊 Overview</div>
+      <div class="anav" onclick="aTab('users')">👥 Users</div>
+      <div class="anav" onclick="aTab('txs')">💳 Transactions</div>
+      <div class="anav" onclick="aTab('funding')">💰 Funding Requests</div>
+      <div class="anav" onclick="aTab('fund-accounts')">🏦 Funding Accounts</div>
+      <div class="anav" onclick="aTab('withdrawals')">💸 Withdrawals</div>
+      <div class="anav" onclick="aTab('pins')">🔒 PIN Requests</div>
+      <div class="anav" onclick="aTab('pw-reset')">🔑 Password Resets</div>
+      <div class="anav" onclick="aTab('promos')">🎯 Promo Slides</div>
+      <div class="anav" onclick="aTab('broadcast')">📢 Broadcast</div>
+      <div class="anav" onclick="aTab('wallet')">👛 Wallet Ops</div>
+      <div style="font-size:10px;font-weight:700;color:rgba(96,165,250,.35);padding:10px 6px 4px;text-transform:uppercase;letter-spacing:.8px">Data &amp; API</div>
+      <div class="anav" onclick="aTab('data-plans')">📡 Data Plan Mgmt</div>
+      <div class="anav" onclick="aTab('api-mgmt')">🔐 API Management</div>
+      <div class="anav fin-tab" onclick="aTab('vtpass')">⚙️ VTPass Settings</div>
+      <div style="font-size:10px;font-weight:700;color:rgba(167,139,250,.35);padding:10px 6px 4px;text-transform:uppercase;letter-spacing:.8px">Finance</div>
+      <div class="anav fin-tab" onclick="aTab('fin-loans')">🏦 Loan Requests</div>
+      <div class="anav fin-tab" onclick="aTab('fin-investments')">📈 Investments</div>
+      <div class="anav fin-tab" onclick="aTab('fin-analytics')">📊 Fin Analytics</div>
+      <div style="font-size:10px;font-weight:700;color:rgba(74,222,128,.3);padding:10px 6px 4px;text-transform:uppercase;letter-spacing:.8px">Payments &amp; Rewards</div>
+      <div class="anav" onclick="aTab('paystack')">💳 Paystack Settings</div>
+      <div class="anav" onclick="aTab('rewards-settings')">🎁 Rewards Settings</div>
+      <div class="anav" onclick="aTab('rewards-history')">📊 Rewards History</div>
+    </nav>
+    <div style="position:absolute;bottom:14px;left:0;right:0;padding:0 10px">
+      <button onclick="doLogout()" style="width:100%;padding:10px;border-radius:9px;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.2);color:#f87171;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">🚪 Sign Out</button>
+    </div>
+  </div>
 
-      <div class="sx" style="display:flex;gap:6px;margin-bottom:14px;padding-bottom:2px">
-        <button onclick="aTab('overview')" style="padding:7px 13px;border-radius:50px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Overview</button>
-        <button onclick="aTab('users')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Users</button>
-        <button onclick="aTab('funding')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Funding</button>
-        <button onclick="aTab('fund-accounts')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #86efac;background:#f0fdf4;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#15803d">🏦 Fund Accounts</button>
-        <button onclick="aTab('data-plans')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #bfdbfe;background:#eff6ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#1d4ed8">📡 Data Plans</button>
-        <button onclick="aTab('withdrawals')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #fce7f3;background:#fdf2f8;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#9d174d">💸 Withdrawals</button>
-        <button onclick="aTab('pins')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">PINs</button>
-        <button onclick="aTab('pw-reset')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #fca5a5;background:#fef2f2;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#dc2626">🔑 PW Resets</button>
-        <button onclick="aTab('api-mgmt')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#f5f3ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#7c3aed">🔐 API Mgmt</button>
-        <button onclick="aTab('promos')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Promos</button>
-        <button onclick="aTab('broadcast')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Broadcast</button>
-        <button onclick="aTab('wallet')" style="padding:7px 13px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">Wallet</button>
-        <button onclick="aTab('fin-loans')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Loans</button>
-        <button onclick="aTab('fin-investments')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Investments</button>
-        <button onclick="aTab('fin-analytics')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">Fin Stats</button>
-        <button onclick="aTab('vtpass')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">API</button>
-        <button onclick="aTab('paystack')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #60a5fa;background:#eff6ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#1d4ed8">💳 Paystack</button>
-        <button onclick="aTab('rewards-settings')" style="padding:7px 13px;border-radius:50px;border:1.5px solid #86efac;background:#f0fdf4;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#15803d">🎁 Rewards</button>
-      </div>
-      <div id="a-content"></div>
+  <!-- Overlay (mobile backdrop) -->
+  <div class="overlay" id="adminOverlay" onclick="closeAdminMenu()"></div>
+
+  <!-- Main content area -->
+  <div class="amain">
+    <!-- Top bar -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;position:sticky;top:0;background:var(--bg);z-index:10;padding:4px 0 10px;border-bottom:1px solid var(--g100)">
+      <button class="hamb" onclick="openAdminMenu()" title="Menu" aria-label="Open menu">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <h1 style="font-size:18px;font-weight:800;letter-spacing:-.02em;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="a-title">Overview</h1>
+      <button onclick="doLogout()" style="padding:7px 13px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;flex-shrink:0">Logout</button>
     </div>
+
+    <!-- Scrollable quick-tab bar -->
+    <div class="admin-tabbar" id="admin-tabbar">
+      <button onclick="aTab('overview')" data-tab="overview" style="padding:7px 14px;border-radius:50px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">📊 Overview</button>
+      <button onclick="aTab('users')" data-tab="users" style="padding:7px 14px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">👥 Users</button>
+      <button onclick="aTab('txs')" data-tab="txs" style="padding:7px 14px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">💳 Transactions</button>
+      <button onclick="aTab('funding')" data-tab="funding" style="padding:7px 14px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">💰 Funding</button>
+      <button onclick="aTab('fund-accounts')" data-tab="fund-accounts" style="padding:7px 14px;border-radius:50px;border:1.5px solid #86efac;background:#f0fdf4;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#15803d">🏦 Accounts</button>
+      <button onclick="aTab('withdrawals')" data-tab="withdrawals" style="padding:7px 14px;border-radius:50px;border:1.5px solid #fce7f3;background:#fdf2f8;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#9d174d">💸 Withdrawals</button>
+      <button onclick="aTab('pins')" data-tab="pins" style="padding:7px 14px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">🔒 PINs</button>
+      <button onclick="aTab('pw-reset')" data-tab="pw-reset" style="padding:7px 14px;border-radius:50px;border:1.5px solid #fca5a5;background:#fef2f2;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#dc2626">🔑 PW Resets</button>
+      <button onclick="aTab('data-plans')" data-tab="data-plans" style="padding:7px 14px;border-radius:50px;border:1.5px solid #bfdbfe;background:#eff6ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#1d4ed8">📡 Data Plans</button>
+      <button onclick="aTab('api-mgmt')" data-tab="api-mgmt" style="padding:7px 14px;border-radius:50px;border:1.5px solid #c4b5fd;background:#f5f3ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#7c3aed">🔐 API Mgmt</button>
+      <button onclick="aTab('promos')" data-tab="promos" style="padding:7px 14px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">🎯 Promos</button>
+      <button onclick="aTab('broadcast')" data-tab="broadcast" style="padding:7px 14px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">📢 Broadcast</button>
+      <button onclick="aTab('wallet')" data-tab="wallet" style="padding:7px 14px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif">👛 Wallet</button>
+      <button onclick="aTab('fin-loans')" data-tab="fin-loans" style="padding:7px 14px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">🏦 Loans</button>
+      <button onclick="aTab('fin-investments')" data-tab="fin-investments" style="padding:7px 14px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">📈 Investments</button>
+      <button onclick="aTab('fin-analytics')" data-tab="fin-analytics" style="padding:7px 14px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">📊 Fin Stats</button>
+      <button onclick="aTab('vtpass')" data-tab="vtpass" style="padding:7px 14px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">⚙️ VTPass</button>
+      <button onclick="aTab('paystack')" data-tab="paystack" style="padding:7px 14px;border-radius:50px;border:1.5px solid #60a5fa;background:#eff6ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#1d4ed8">💳 Paystack</button>
+      <button onclick="aTab('rewards-settings')" data-tab="rewards-settings" style="padding:7px 14px;border-radius:50px;border:1.5px solid #86efac;background:#f0fdf4;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#15803d">🎁 Rewards</button>
+    </div>
+
+    <div id="a-content"></div>
   </div>
 </div>
 
@@ -2403,9 +2450,26 @@ async function loadAdmin(){
   aTab('overview');
 }
 function aTab(tab){
+  // Highlight active sidebar nav item
   document.querySelectorAll('.anav').forEach(n=>n.classList.remove('on'));
-  document.querySelectorAll('.anav').forEach(n=>{if(n.textContent.trim().toLowerCase().includes(tab.slice(0,4)))n.classList.add('on');});
-  document.getElementById('a-title').textContent={overview:'Overview',users:'Users',txs:'Transactions',funding:'Funding Requests',pins:'PIN Requests',promos:'Promo Slides',broadcast:'Broadcast',wallet:'Wallet Operations',vtpass:'VTPass API',recovery:'Loan Recovery',['fin-nok']:'Next of Kin Verification',['fund-accounts']:'Funding Accounts',['data-plans']:'Data Plan Management',['pw-reset']:'Password Reset Requests',['api-mgmt']:'API Management',['api-docs']:'API Documentation',paystack:'Paystack Payment Settings'}[tab]||tab;
+  document.querySelectorAll('.anav').forEach(n=>{
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+tab+"'"))n.classList.add('on');
+  });
+  // Highlight active quick-tab button
+  document.querySelectorAll('#admin-tabbar button').forEach(b=>{
+    const isActive=b.dataset.tab===tab;
+    b.style.background=isActive?'var(--green)':'';
+    b.style.color=isActive?'#fff':'';
+    b.style.borderColor=isActive?'var(--green)':'';
+    b.style.fontWeight=isActive?'700':'600';
+  });
+  // Scroll active tab button into view
+  var activeBtn=document.querySelector('#admin-tabbar button[data-tab="'+tab+'"]');
+  if(activeBtn)activeBtn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  // Update page title
+  document.getElementById('a-title').textContent={overview:'Overview',users:'Users',txs:'Transactions',funding:'Funding Requests',pins:'PIN Requests',promos:'Promo Slides',broadcast:'Broadcast',wallet:'Wallet Operations',vtpass:'VTPass API',recovery:'Loan Recovery',['fin-nok']:'Next of Kin Verification',['fund-accounts']:'Funding Accounts',['data-plans']:'Data Plan Management',['pw-reset']:'Password Reset Requests',['api-mgmt']:'API Management',['api-docs']:'API Documentation',paystack:'Paystack Payment Settings',withdrawals:'Withdrawals',['fin-loans']:'Loan Requests',['fin-investments']:'Investments',['fin-analytics']:'Financial Analytics',['rewards-settings']:'Rewards Settings',['rewards-history']:'Rewards History'}[tab]||tab;
+  // Close sidebar on mobile after selecting a tab
+  if(window.innerWidth<=768)closeAdminMenu();
   const el=document.getElementById('a-content');
   const rev=AD.txs.reduce((s,t)=>s+(t.amount||0),0);
   if(tab==='overview')el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px;margin-bottom:16px"><div class="statc" style="background:linear-gradient(135deg,#15803d,#16a34a)"><div style="font-size:22px;margin-bottom:3px">👥</div><div style="font-size:26px;font-weight:800">${AD.users.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Total Users</div></div><div class="statc" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)"><div style="font-size:22px;margin-bottom:3px">💳</div><div style="font-size:26px;font-weight:800">${AD.txs.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Transactions</div></div><div class="statc" style="background:linear-gradient(135deg,#b45309,#d97706)"><div style="font-size:22px;margin-bottom:3px">💰</div><div style="font-size:20px;font-weight:800">NGN ${fmt(rev)}</div><div style="opacity:.65;font-size:12px;margin-top:1px">Revenue</div></div><div class="statc" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)"><div style="font-size:22px;margin-bottom:3px">🔒</div><div style="font-size:26px;font-weight:800">${AD.pins.length}</div><div style="opacity:.65;font-size:12px;margin-top:1px">PIN Requests</div></div></div><div class="card" style="overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #f8fafc;font-weight:700;font-size:14px">Recent Transactions</div>${AD.txs.slice(0,10).map(t=>`<div class="txr"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${t.description||t.type}</div><div style="font-size:11px;color:var(--g400)">${fdate(t.createdAt)}</div></div><div style="color:var(--err);font-weight:700;font-size:13px">NGN ${fmt(t.amount)}</div></div>`).join('')||'<div style="padding:22px;text-align:center;color:var(--g400);font-size:13px">No transactions yet</div>'}</div>`;
@@ -3478,12 +3542,18 @@ async function markInvestmentPaid(invId,userId,returnAmt){
 
 // ── Admin Hamburger Menu ──
 function openAdminMenu(){
-  document.querySelector('.aside')?.classList.add('open');
-  document.getElementById('adminOverlay')?.classList.add('show');
+  var s=document.getElementById('adminSidebar');
+  var o=document.getElementById('adminOverlay');
+  if(s)s.classList.add('open');
+  if(o)o.classList.add('show');
+  document.body.style.overflow='hidden'; // prevent background scroll
 }
 function closeAdminMenu(){
-  document.querySelector('.aside')?.classList.remove('open');
-  document.getElementById('adminOverlay')?.classList.remove('show');
+  var s=document.getElementById('adminSidebar');
+  var o=document.getElementById('adminOverlay');
+  if(s)s.classList.remove('open');
+  if(o)o.classList.remove('show');
+  document.body.style.overflow='';
 }
 
 // ── Image Viewer ──
