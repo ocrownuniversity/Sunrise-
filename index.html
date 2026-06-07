@@ -1058,7 +1058,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div style="font-size:11px;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Plan 1</div>
         <div style="font-size:11px;color:var(--g600);line-height:1.9">
           <div>&#128176; <strong>₦10,000 – ₦500,000</strong></div>
-          <div>&#128200; <strong>5% monthly</strong></div>
+          <div>&#128200; <strong>10% monthly</strong></div>
           <div>⏱ <strong>6 months</strong></div>
           <div>&#128275; Capital after 6 months</div>
         </div>
@@ -1066,8 +1066,8 @@ document.addEventListener('DOMContentLoaded', function() {
       <div style="background:linear-gradient(135deg,#faf5ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:13px;padding:14px">
         <div style="font-size:11px;font-weight:800;color:#6d28d9;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Plan 2</div>
         <div style="font-size:11px;color:var(--g600);line-height:1.9">
-          <div>&#128176; <strong>₦600,000+</strong></div>
-          <div>&#128200; <strong>5% monthly</strong></div>
+          <div>&#128176; <strong>₦500,001+</strong></div>
+          <div>&#128200; <strong>10% monthly</strong></div>
           <div>⏱ <strong>1 year+</strong></div>
           <div>&#128275; Capital after 1 year</div>
         </div>
@@ -1076,7 +1076,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div style="background:#f8fafc;border-radius:11px;padding:13px;margin-bottom:10px">
       <div style="font-size:12px;font-weight:700;color:var(--g700);margin-bottom:7px">2.3 Interest Payment</div>
-      <p style="font-size:12px;color:var(--g600);line-height:1.7;margin:0">Investors earn <strong>5% monthly interest</strong> on their investment. Interest payment schedule may be monthly or as agreed by the platform.</p>
+      <p style="font-size:12px;color:var(--g600);line-height:1.7;margin:0">Investors earn <strong>10% monthly interest</strong> on their investment. Interest payment schedule may be monthly or as agreed by the platform.</p>
     </div>
     <div style="background:#f8fafc;border-radius:11px;padding:13px;margin-bottom:10px">
       <div style="font-size:12px;font-weight:700;color:var(--g700);margin-bottom:7px">2.4 Investment Extension</div>
@@ -1219,8 +1219,46 @@ auth.onAuthStateChanged(async u=>{
     CU=u;
     const ref=db.collection('users').doc(u.uid);
     const snap=await ref.get();
-    if(!snap.exists){await ref.set({name:u.displayName||'User',email:u.email,phone:'',balance:0,pin:'',role:'user',createdAt:firebase.firestore.FieldValue.serverTimestamp()});}
+    if(!snap.exists){
+      // New user — create doc, include Google photo/name if available
+      await ref.set({
+        name: u.displayName||'User',
+        email: u.email||'',
+        phone: '',
+        balance: 0,
+        pin: '',
+        role: 'user',
+        photoURL: u.photoURL||'',
+        rewardsBalance: 0,
+        cashbackEarned: 0,
+        referralEarned: 0,
+        hasFundedFirst: false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      // Existing user — sync name/photo from Google if fields are empty or null
+      const existing = snap.data();
+      const updates = {};
+      if((!existing.name || existing.name==='null' || existing.name==='User') && u.displayName){
+        updates.name = u.displayName;
+      }
+      if(!existing.photoURL && u.photoURL){
+        updates.photoURL = u.photoURL;
+      }
+      if(!existing.email && u.email){
+        updates.email = u.email;
+      }
+      if(Object.keys(updates).length > 0){
+        await ref.update(updates);
+      }
+    }
     UD=(await ref.get()).data();
+    // Always override null/empty name with Google displayName as fallback
+    if((!UD.name||UD.name==='null'||UD.name==='User')&&u.displayName){
+      UD.name=u.displayName;
+    }
+    if(!UD.photoURL&&u.photoURL) UD.photoURL=u.photoURL;
+    if(!UD.email&&u.email) UD.email=u.email;
     if(isAdmin(u.email)){goPg('pg-admin');loadAdmin();startApiRequestProcessor();}
     else{goPg('pg-dash');loadDash();startPinApprovalListener(u.uid);}
   }else{CU=null;UD=null;goPg('pg-land');}
@@ -1298,10 +1336,39 @@ async function doGoogle(){
 // Called automatically when page loads after Google redirect
 auth.getRedirectResult().then(async function(result){
   if(!result||!result.user)return;
-  const ref=db.collection('users').doc(result.user.uid);
-  if(!(await ref.get()).exists){
-    await ref.set({name:result.user.displayName||'User',email:result.user.email,phone:'',balance:0,pin:'',role:'user',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    await addNotif(result.user.uid,'Welcome to ZMONIE!','Account created via Google. Set your transaction PIN in Profile.');
+  const u=result.user;
+  const ref=db.collection('users').doc(u.uid);
+  const snap=await ref.get();
+  if(!snap.exists){
+    // Brand new Google user
+    const refCode='ZM'+u.uid.slice(0,8).toUpperCase();
+    const urlRef=new URLSearchParams(window.location.search).get('ref')||sessionStorage.getItem('zmonie_ref')||'';
+    await ref.set({
+      name: u.displayName||'User',
+      email: u.email||'',
+      phone: '',
+      balance: 0,
+      pin: '',
+      role: 'user',
+      photoURL: u.photoURL||'',
+      rewardsBalance: 0,
+      cashbackEarned: 0,
+      referralEarned: 0,
+      hasFundedFirst: false,
+      referralCode: refCode,
+      referredBy: urlRef,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    sessionStorage.removeItem('zmonie_ref');
+    await addNotif(u.uid,'Welcome to ZMONIE!','Account created via Google. Please set your transaction PIN in Profile before making transactions.');
+  } else {
+    // Existing Google user — patch missing fields
+    const existing=snap.data();
+    const updates={};
+    if((!existing.name||existing.name==='null'||existing.name==='User')&&u.displayName) updates.name=u.displayName;
+    if(!existing.photoURL&&u.photoURL) updates.photoURL=u.photoURL;
+    if(!existing.email&&u.email) updates.email=u.email;
+    if(Object.keys(updates).length>0) await ref.update(updates);
   }
 }).catch(function(er){
   if(er.code&&er.code!=='auth/no-current-user'&&er.code!=='auth/null-user'){
@@ -1315,18 +1382,26 @@ function tpw(id){const el=document.getElementById(id);el.type=el.type==='passwor
 async function loadDash(){
   if(!CU)return;
   const s=await db.collection('users').doc(CU.uid).get();UD=s.data();
-  const nm=UD.name||'User';
-  const initials=nm.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  // Patch null/missing fields from Firebase Auth object (covers Google users)
+  if(!UD.name||UD.name==='null'||UD.name==='User'){
+    if(CU.displayName) UD.name=CU.displayName;
+  }
+  if(!UD.photoURL && CU.photoURL) UD.photoURL=CU.photoURL;
+  if(!UD.email && CU.email) UD.email=CU.email;
+  const nm=(UD.name&&UD.name!=='null')?UD.name:(CU.displayName||CU.email||'User');
+  const safeName=nm.replace(/null/gi,'').trim()||'User';
+  const initials=safeName.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase()||'U';
   // Update letter avatars
   const avLtr=document.getElementById('d-avatar-letter');if(avLtr)avLtr.textContent=initials;
   const prLtr=document.getElementById('pr-av-letter');if(prLtr)prLtr.textContent=initials;
-  document.getElementById('d-name').textContent=nm;
+  document.getElementById('d-name').textContent=safeName;
   document.getElementById('d-bal').textContent=bHid?'NGN ****':'NGN '+fmt(UD.balance||0);
   document.getElementById('d-accnum').textContent='Account: '+(UD.phone||'—');
-  document.getElementById('pr-name').textContent=nm;
-  document.getElementById('pr-em').textContent=UD.email||'—';
-  // Show profile photo if saved
-  if(UD.photoURL)updateAvatarUI(UD.photoURL);
+  document.getElementById('pr-name').textContent=safeName;
+  document.getElementById('pr-em').textContent=UD.email||CU.email||'—';
+  // Show profile photo — from Firestore first, then Google account photo
+  const photo=UD.photoURL||CU.photoURL||'';
+  if(photo)updateAvatarUI(photo);
   // Update rewards display
   const rwBal=UD.rewardsBalance||0;const cbEarned=UD.cashbackEarned||0;const rfEarned=UD.referralEarned||0;
   const cbEl=document.getElementById('d-cashback');if(cbEl)cbEl.textContent='NGN '+fmt(cbEarned);
@@ -2775,7 +2850,7 @@ function aTab(tab){
       if(active.length){
         html+=`<div style="font-weight:700;font-size:14px;color:#6d28d9;margin:14px 0 10px">&#128200; Active / Matured (${active.length})</div>`;
         active.forEach(inv=>{
-          const monthly=inv.monthlyInterest||(inv.amount*0.05);
+          const monthly=inv.monthlyInterest||(inv.amount*0.10);
           const months=inv.months||6;
           const payments=inv.interestPayments||[];
           const nextMonth=payments.length+1;
@@ -2783,7 +2858,7 @@ function aTab(tab){
           const totalPaid=payments.reduce((s,p)=>s+(p.amount||monthly),0);
           html+=`<div class="card" style="padding:14px;margin-bottom:8px;border-left:4px solid #7c3aed">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-              <div><div style="font-weight:600;font-size:13px">${inv.userName||inv.userEmail}</div><div style="font-size:20px;font-weight:800;color:var(--black)">NGN ${fmt(inv.amount)}</div><div style="font-size:12px;color:var(--g600)">5% monthly · ${months} months · Monthly: NGN ${fmt(monthly)}</div>${inv.maturityDate?`<div style="font-size:11px;color:var(--g400)">Matures: ${fdateShort(inv.maturityDate)}</div>`:''}</div>
+              <div><div style="font-weight:600;font-size:13px">${inv.userName||inv.userEmail}</div><div style="font-size:20px;font-weight:800;color:var(--black)">NGN ${fmt(inv.amount)}</div><div style="font-size:12px;color:var(--g600)">10% monthly · ${months} months · Monthly: NGN ${fmt(monthly)}</div>${inv.maturityDate?`<div style="font-size:11px;color:var(--g400)">Matures: ${fdateShort(inv.maturityDate)}</div>`:''}</div>
               <div style="text-align:right"><span class="status-badge sb-${inv.status}">${inv.status}</span><div style="font-size:11px;color:#6d28d9;margin-top:4px;font-weight:600">${payments.length}/${months} months paid</div></div>
             </div>
             <div style="background:#f0fdf4;border-radius:9px;padding:10px;margin-bottom:10px;font-size:12px">
@@ -3384,7 +3459,7 @@ async function loadFinTab(tab){
     if(!invs.length){el.innerHTML=`<div class="card" style="padding:32px;text-align:center;color:var(--g400)"><div style="font-size:36px;margin-bottom:10px">&#128200;</div><p style="font-size:14px;margin-bottom:14px">No investments yet</p><button onclick="openM('m-invest-apply')" style="padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border:none">Start Investing</button></div>`;return;}
     el.innerHTML=invs.map(inv=>{
       const months=inv.months||6;
-      const monthly=inv.monthlyInterest||(inv.amount*0.05);
+      const monthly=inv.monthlyInterest||(inv.amount*0.10);
       const totalRet=inv.expectedReturn||(inv.amount+(monthly*months));
       const isActive=inv.status==='active'||inv.status==='matured';
       const matDate=inv.maturityDate?.toDate?inv.maturityDate.toDate():null;
@@ -3399,7 +3474,7 @@ async function loadFinTab(tab){
         <div style="font-size:20px;font-weight:800;color:var(--black);margin-bottom:2px">NGN ${fmt(inv.amount)}</div>
         ${isActive?`
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0">
-          <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:9px;padding:10px"><div style="font-size:9px;color:#15803d;margin-bottom:2px">MONTHLY INTEREST (5%)</div><div style="font-size:14px;font-weight:800;color:#15803d">NGN ${fmt(monthly)}</div></div>
+          <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:9px;padding:10px"><div style="font-size:9px;color:#15803d;margin-bottom:2px">MONTHLY INTEREST (10%)</div><div style="font-size:14px;font-weight:800;color:#15803d">NGN ${fmt(monthly)}</div></div>
           <div style="background:linear-gradient(135deg,#faf5ff,#ede9fe);border-radius:9px;padding:10px"><div style="font-size:9px;color:#6d28d9;margin-bottom:2px">DURATION</div><div style="font-size:14px;font-weight:800;color:#6d28d9">${months} months</div></div>
           <div style="background:#f0fdf4;border-radius:9px;padding:10px"><div style="font-size:9px;color:var(--g400);margin-bottom:2px">TOTAL RETURN</div><div style="font-size:14px;font-weight:800;color:var(--green-d)">NGN ${fmt(totalRet)}</div></div>
           <div style="background:#f8fafc;border-radius:9px;padding:10px"><div style="font-size:9px;color:var(--g400);margin-bottom:2px">MATURITY DATE</div><div style="font-size:12px;font-weight:700">${matDate?matDate.toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}):'TBD'}</div></div>
@@ -3410,7 +3485,7 @@ async function loadFinTab(tab){
           <button onclick="event.stopPropagation();openInvDash('${inv.id}')" style="flex:1;padding:9px;background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">&#128202; View Details</button>
           ${inv.status!=='matured'?`<button onclick="event.stopPropagation();requestInvExtension('${inv.id}')" style="flex:1;padding:9px;background:#f0fdf4;border:1px solid #86efac;color:#15803d;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">&#128260; Renew/Extend</button>`:''}
         </div>
-        `:`<div style="font-size:12px;color:var(--g600);margin-top:5px">Duration: ${inv.duration||'—'} · Rate: ${inv.interestRate?inv.interestRate+'%':'5%'} monthly</div><div style="font-size:12px;color:var(--ok);margin-top:3px">Expected Return: NGN ${fmt(totalRet)}</div><div style="font-size:11px;color:var(--g400);margin-top:3px">Submitted: ${fdateShort(inv.createdAt)}</div>`}
+        `:`<div style="font-size:12px;color:var(--g600);margin-top:5px">Duration: ${inv.duration||'—'} · Rate: ${inv.interestRate?inv.interestRate+'%':'10%'} monthly</div><div style="font-size:12px;color:var(--ok);margin-top:3px">Expected Return: NGN ${fmt(totalRet)}</div><div style="font-size:11px;color:var(--g400);margin-top:3px">Submitted: ${fdateShort(inv.createdAt)}</div>`}
       </div>`;
     }).join('');
   }
@@ -4184,7 +4259,7 @@ async function submitLoan(){
 //  INVESTMENT MODULE - FULL IMPLEMENTATION
 // ============================================================
 function calcInvestmentReturns(amount, months){
-  const rate = 0.05; // 5% monthly
+  const rate = 0.10; // 10% monthly
   const monthlyInterest = amount * rate;
   const totalInterest = monthlyInterest * months;
   const totalReturn = amount + totalInterest;
@@ -4206,7 +4281,7 @@ async function submitInvestment(){
   const nokSocialMedia = document.getElementById('inv-nok-social')?.value.trim();
 
   if(!amt || amt < 10000){toast('Minimum investment is NGN 10,000');return;}
-  if(amt > 500000 && !duration.includes('Year')){toast('Investments above NGN 500,000 require minimum 1 year duration');return;}
+  if(amt > 500000 && !duration.includes('Year')){toast('Investments above NGN 500,000 require minimum 1 year duration. You are on Plan 2.');return;}
   if(!duration){toast('Select investment duration');return;}
   if(!nokName||!nokPhone||!nokRel||!nokAddr){toast('Next of kin details are required');return;}
   if(!nokDob){toast('Next of kin date of birth is required');return;}
@@ -4239,7 +4314,7 @@ async function submitInvestment(){
       userId: CU.uid, userEmail: CU.email, userName: UD?.name||'',
       amount: amt, duration, note,
       months,
-      interestRate: 5, // 5% monthly
+      interestRate: 10, // 10% monthly
       monthlyInterest: calc.monthlyInterest,
       totalInterest: calc.totalInterest,
       expectedReturn: calc.totalReturn,
@@ -4588,15 +4663,15 @@ async function approveInvestment(invId, userId, amount){
   const matDate = document.getElementById('iv-mat-'+invId)?.value;
   if(!matDate){toast('Select maturity date');return;}
 
-  // Calculate from rules: 5% monthly
+  // Calculate from rules: 10% monthly
   const snap = await db.collection('investments').doc(invId).get();
   const inv = snap.data();
   const months = inv.months || 6;
-  const monthlyReturn = amount * 0.05;
+  const monthlyReturn = amount * 0.10;
   const totalReturn = amount + (monthlyReturn * months);
 
   await db.collection('investments').doc(invId).update({
-    status:'active', interestRate: 5, monthlyInterest: monthlyReturn,
+    status:'active', interestRate: 10, monthlyInterest: monthlyReturn,
     totalInterest: monthlyReturn * months, expectedReturn: Math.round(totalReturn),
     maturityDate: firebase.firestore.Timestamp.fromDate(new Date(matDate)),
     approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -4613,7 +4688,7 @@ async function extendInvestment(invId, userId, additionalMonths){
   const snap = await db.collection('investments').doc(invId).get();
   const inv = snap.data();
   const newMonths = (inv.months||6) + additionalMonths;
-  const newReturn = inv.amount + (inv.amount * 0.05 * newMonths);
+  const newReturn = inv.amount + (inv.amount * 0.10 * newMonths);
   const oldMat = inv.maturityDate?.toDate ? inv.maturityDate.toDate() : new Date(inv.maturityDate);
   const newMat = new Date(oldMat.getTime() + additionalMonths*30*24*3600*1000);
 
@@ -4906,7 +4981,7 @@ async function openInvDash(invId){
     if(!snap.exists){el.innerHTML='<p style="padding:20px;color:#dc2626">Investment not found.</p>';return;}
     const inv=snap.data();
     const months=inv.months||6;
-    const monthly=inv.monthlyInterest||(inv.amount*0.05);
+    const monthly=inv.monthlyInterest||(inv.amount*0.10);
     const totalRet=inv.expectedReturn||(inv.amount+(monthly*months));
     const matDate=inv.maturityDate?.toDate?inv.maturityDate.toDate():null;
     const today=new Date();
@@ -4918,7 +4993,7 @@ async function openInvDash(invId){
       <div style="background:linear-gradient(135deg,#4c1d95,#6d28d9);border-radius:14px;padding:16px;margin-bottom:14px;color:#fff">
         <div style="font-size:10px;color:rgba(196,181,253,.7);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Investment Amount</div>
         <div style="font-size:28px;font-weight:800;margin-bottom:2px">NGN ${fmt(inv.amount)}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5)">${months} months · 5% monthly · ${(inv.status||'').toUpperCase()}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5)">${months} months · 10% monthly · ${(inv.status||'').toUpperCase()}</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
         <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:12px;padding:12px"><div style="font-size:9px;color:#15803d;font-weight:700;text-transform:uppercase;margin-bottom:4px">Monthly Interest</div><div style="font-size:18px;font-weight:800;color:#15803d">NGN ${fmt(monthly)}</div></div>
@@ -5057,7 +5132,7 @@ async function runMonthlyInvestmentPayouts(){
     const todayStr=today.toISOString().split('T')[0];
     for(const doc of investments.docs){
       const inv=doc.data();
-      const monthly=inv.monthlyInterest||(inv.amount*0.05);
+      const monthly=inv.monthlyInterest||(inv.amount*0.10);
       const months=inv.months||6;
       const approvedAt=inv.approvedAt?.toDate?inv.approvedAt.toDate():null;
       if(!approvedAt)continue;
@@ -6563,11 +6638,11 @@ async function apiHandleVerifyTransaction(req) {
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
     <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:12px;padding:12px">
       <div style="font-size:10px;font-weight:800;color:#15803d;margin-bottom:6px;text-transform:uppercase">Plan 1</div>
-      <div style="font-size:11px;color:var(--g700);line-height:1.8">₦10,000–₦500,000<br/><strong>5% monthly</strong><br/>6 months</div>
+      <div style="font-size:11px;color:var(--g700);line-height:1.8">₦10,000–₦500,000<br/><strong>10% monthly</strong><br/>6 months</div>
     </div>
     <div style="background:linear-gradient(135deg,#faf5ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:12px;padding:12px">
       <div style="font-size:10px;font-weight:800;color:#6d28d9;margin-bottom:6px;text-transform:uppercase">Plan 2</div>
-      <div style="font-size:11px;color:var(--g700);line-height:1.8">₦600,000+<br/><strong>5% monthly</strong><br/>1 year+</div>
+      <div style="font-size:11px;color:var(--g700);line-height:1.8">₦500,001+<br/><strong>10% monthly</strong><br/>1 year+</div>
     </div>
   </div>
 
@@ -6624,7 +6699,7 @@ async function apiHandleVerifyTransaction(req) {
   <!-- ── SECTION 5: Payment Details ── -->
   <div style="font-size:13px;font-weight:800;color:var(--black);margin-bottom:12px;padding:10px 14px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:10px;border-left:4px solid var(--green)">&#128179; Payment Details</div>
   <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:11px;padding:12px;margin-bottom:12px">
-    <p style="font-size:12px;color:#15803d;line-height:1.7">Your 5% monthly interest will be paid to the account number below. Make sure it is correct.</p>
+    <p style="font-size:12px;color:#15803d;line-height:1.7">Your 10% monthly interest will be paid to the account number below. Make sure it is correct.</p>
   </div>
   <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Bank Name *</label><input class="inp" id="inv-bank" placeholder="e.g. Zenith Bank, Opay, Moniepoint"/></div>
   <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Account Number *</label><input class="inp" type="tel" id="inv-acctnum" placeholder="10-digit account number" maxlength="10"/></div>
