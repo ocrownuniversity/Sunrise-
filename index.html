@@ -2448,6 +2448,96 @@ async function loadAdmin(){
   AD.loans=ls.docs.map(d=>({id:d.id,...d.data()}));
   AD.investments=ivs.docs.map(d=>({id:d.id,...d.data()}));
   aTab('overview');
+  // Run daily deductions for ALL active loan users when admin loads
+  runAdminGlobalLoanDeductions().catch(e=>console.warn('Global deduction:',e.message));
+}
+
+// ── Admin runs daily loan deductions for EVERY user ──
+async function runAdminGlobalLoanDeductions(){
+  const todayStr = localDateStr();
+  const activeLoans = await db.collection('loans').where('status','==','active').get();
+  if(activeLoans.empty) return;
+  let processed = 0;
+  for(const doc of activeLoans.docs){
+    const ln = doc.data();
+    if(ln.lastDeductionDate === todayStr) continue; // already done today
+    const totalRepay = ln.totalRepayable || ((ln.approvedAmount||ln.amount)*1.24);
+    const daily = Math.round((totalRepay/30)*100)/100;
+    let sch = ln.repaymentSchedule || [];
+    // Build schedule if missing
+    if(!sch.length){
+      const baseDate =
+        (ln.activatedAt?.toDate ? ln.activatedAt.toDate() : null) ||
+        (ln.approvedAt?.toDate ? ln.approvedAt.toDate() : null) ||
+        (ln.createdAt?.toDate ? ln.createdAt.toDate() : null) || new Date();
+      sch = generateRepaymentSchedule(baseDate, totalRepay);
+    }
+    // Find overdue unpaid days (dueDate <= today)
+    const overdue = sch.filter(s => !s.paid && s.dueDate <= todayStr);
+    if(!overdue.length) continue;
+    // Get user wallet balance
+    let userSnap;
+    try{ userSnap = await db.collection('users').doc(ln.userId).get(); }
+    catch(e){ continue; }
+    if(!userSnap.exists) continue;
+    let bal = userSnap.data().balance || 0;
+    let changed = false;
+    for(const day of overdue){
+      const dayAmt = day.amount || daily;
+      if(bal < dayAmt){
+        // Insufficient — notify and stop for this loan
+        try{
+          await db.collection('financeNotifications').add({
+            userId: ln.userId,
+            title: 'Loan Repayment Failed',
+            body: 'Day '+day.day+' payment of NGN '+fmt(dayAmt)+' could not be deducted. Wallet balance: NGN '+fmt(bal)+'. Fund your wallet immediately.',
+            read: false,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }catch(e){}
+        break;
+      }
+      // Deduct from wallet
+      try{
+        await db.collection('users').doc(ln.userId).update({
+          balance: firebase.firestore.FieldValue.increment(-dayAmt)
+        });
+        bal -= dayAmt;
+        // Mark day paid
+        const idx = sch.findIndex(s => s.day === day.day);
+        if(idx > -1){ sch[idx].paid = true; sch[idx].paidAt = todayStr; sch[idx].deductedOn = todayStr; }
+        changed = true;
+        // Log transaction
+        await db.collection('transactions').add({
+          userId: ln.userId, type: 'loan_repayment', amount: dayAmt,
+          description: 'Loan Repayment — Day '+day.day+'/30 (NGN '+fmt(dayAmt)+')',
+          status: 'success', loanId: doc.id,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        processed++;
+      }catch(e){ break; }
+    }
+    if(changed){
+      const allPaid = sch.every(s => s.paid);
+      try{
+        await doc.ref.update({
+          repaymentSchedule: sch,
+          status: allPaid ? 'repaid' : 'active',
+          lastDeductionDate: todayStr,
+          totalRepayable: totalRepay,
+          dailyRepayment: daily
+        });
+        if(allPaid){
+          await db.collection('financeNotifications').add({
+            userId: ln.userId, title: 'Loan Fully Repaid!',
+            body: 'All 30 daily payments for your NGN '+fmt(ln.approvedAmount||ln.amount)+' loan are complete. Loan closed!',
+            read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+      }catch(e){}
+    }
+  }
+  if(processed > 0) toast('Daily deductions: '+processed+' payment(s) processed for all users.');
 }
 function aTab(tab){
   // Highlight active sidebar nav item
@@ -4367,69 +4457,83 @@ async function adminRecordCashRepayment(loanId, userId){
   if(!amt || amt <= 0){ toast('Enter a valid repayment amount'); return; }
   if(!confirm('Record cash payment of NGN '+fmt(amt)+' for this loan?')) return;
 
-  // ── Step 1: Read loan ──
+  // Step 1: Read loan
   let snap;
-  try{
-    snap = await db.collection('loans').doc(loanId).get();
-    if(!snap.exists){ toast('Loan not found'); return; }
-  }catch(e){ toast('Could not read loan: '+e.message); return; }
+  try{ snap = await db.collection('loans').doc(loanId).get(); }
+  catch(e){ toast('Could not read loan: '+e.message); return; }
+  if(!snap.exists){ toast('Loan not found'); return; }
 
   const ln = snap.data();
   let sch = ln.repaymentSchedule || [];
+  const totalRepay = ln.totalRepayable || ((ln.approvedAmount||ln.amount)*1.24);
+  const daily = Math.round((totalRepay/30)*100)/100;
 
-  // ── Step 2: Build schedule if missing ──
+  // Step 2: Build schedule if missing or empty
+  // Use activatedAt → approvedAt → createdAt → today (whichever exists)
   if(!sch.length){
-    const activatedAt = ln.activatedAt?.toDate ? ln.activatedAt.toDate() : null;
-    if(activatedAt){
-      const totalRepay = ln.totalRepayable || ((ln.approvedAmount||ln.amount)*1.24);
-      sch = generateRepaymentSchedule(activatedAt, totalRepay);
-    }
+    const baseDate =
+      (ln.activatedAt?.toDate ? ln.activatedAt.toDate() : null) ||
+      (ln.approvedAt?.toDate ? ln.approvedAt.toDate() : null) ||
+      (ln.createdAt?.toDate ? ln.createdAt.toDate() : null) ||
+      new Date();
+    sch = generateRepaymentSchedule(baseDate, totalRepay);
   }
 
-  // ── Step 3: Mark installments paid up to payDate ──
+  // Step 3: Mark N days paid based on amount
+  // KEY FIX: Do NOT filter by dueDate — just mark the next unpaid days
+  // in order, regardless of whether their date has passed.
+  // This fixes the 0/30 problem on old loans.
   let remaining = amt;
   let paidDays = 0;
   for(let i = 0; i < sch.length; i++){
     if(sch[i].paid) continue;
     if(remaining <= 0) break;
-    if(sch[i].dueDate > payDate) break;
-    const dayAmt = sch[i].amount;
+    const dayAmt = sch[i].amount || daily;
     if(remaining >= dayAmt){
       sch[i].paid = true;
-      sch[i].paidAt = new Date(payDate).toISOString();
+      sch[i].paidAt = payDate;
       sch[i].cashPayment = true;
       sch[i].adminNote = note || 'Cash payment recorded by admin';
       remaining -= dayAmt;
       paidDays++;
     } else {
-      sch[i].partialPaid = (sch[i].partialPaid || 0) + remaining;
-      sch[i].adminNote = note || 'Partial cash payment';
+      // Partial — still mark it paid with the partial amount
+      sch[i].paid = true;
+      sch[i].paidAt = payDate;
+      sch[i].cashPayment = true;
+      sch[i].partialPaid = remaining;
+      sch[i].amount = remaining; // adjust this day's amount
+      sch[i].adminNote = 'Partial cash payment'+(note?' · '+note:'');
       remaining = 0;
       paidDays++;
     }
   }
+
   const allPaid = sch.every(s => s.paid);
   const totalPaid = sch.filter(s=>s.paid).length;
 
-  // ── Step 4: Update loan (critical — must succeed) ──
+  // Step 4: Update loan — save schedule + status
   try{
     await db.collection('loans').doc(loanId).update({
       repaymentSchedule: sch,
+      totalRepayable: totalRepay,
+      dailyRepayment: daily,
       status: allPaid ? 'repaid' : 'active',
       lastCashPaymentDate: payDate
     });
   }catch(e){
-    toast('Permission denied on loans. Add this to Firestore rules:\n\nallow update: if isAdmin();\n\nError: '+e.message);
+    toast('Failed to update loan: '+e.message);
     return;
   }
 
-  // ── Step 5: Log transaction ──
+  // Step 5: Log transaction (type includes both so user history shows it)
   try{
     await db.collection('transactions').add({
       userId,
-      type: 'loan_repayment_cash',
+      type: 'loan_repayment',
+      subType: 'cash',
       amount: amt,
-      description: 'Cash Loan Repayment — '+paidDays+' day(s) (NGN '+fmt(amt)+')'+(note?' · '+note:''),
+      description: 'Cash Loan Repayment — '+paidDays+' day(s) marked paid (NGN '+fmt(amt)+')'+(note?' · '+note:''),
       status: 'success',
       loanId,
       paymentDate: payDate,
@@ -4438,22 +4542,24 @@ async function adminRecordCashRepayment(loanId, userId){
     });
   }catch(e){ console.warn('Transaction log skipped:',e.message); }
 
-  // ── Step 6: Notify user ──
+  // Step 6: Notify user
   try{
-    const msg = 'Admin recorded your cash payment of NGN '+fmt(amt)+' on '+payDate+'. '
-      +paidDays+' installment(s) marked paid. '
-      +(allPaid ? 'Loan is FULLY REPAID!' : (30-totalPaid)+' days remaining.');
     await db.collection('financeNotifications').add({
       userId,
-      title: allPaid ? '&#127881; Loan Fully Repaid!' : '✅ Cash Repayment Recorded',
-      body: msg,
+      title: allPaid ? 'Loan Fully Repaid!' : 'Cash Repayment Recorded',
+      body: 'Admin recorded your cash payment of NGN '+fmt(amt)+' on '+payDate+'. '
+        +paidDays+' day(s) marked paid. '
+        +(allPaid?'Your loan is FULLY REPAID!':'Days paid: '+totalPaid+'/30.'),
       read: false,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   }catch(e){ console.warn('Notification skipped:',e.message); }
 
   closeM('m-admin-cash-repay');
-  toast(allPaid ? '&#127881; Loan fully repaid!' : '✅ '+paidDays+' day(s) marked paid. Cash payment recorded.');
+  toast(allPaid
+    ? 'Loan fully repaid! All 30 days marked.'
+    : paidDays+' day(s) marked paid. '+totalPaid+'/30 total paid.'
+  );
   aTab('fin-loans');
 }
 
@@ -4770,8 +4876,18 @@ async function openLoanDash(loanId){
       ${sch.length?`<div style="font-size:13px;font-weight:700;margin-bottom:10px">&#128197; Daily Schedule</div>
       <div style="max-height:260px;overflow-y:auto;border:1px solid #eef0f3;border-radius:10px">
         ${sch.map(s=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid #f8fafc;background:${s.paid?'#f0fdf4':'#fff'}">
-          <div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:${s.paid?'#dcfce7':'#f1f5f9'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${s.paid?'#15803d':'var(--g400)'}">${s.day}</div><div style="font-size:11px;color:var(--g500)">${s.dueDate}</div></div>
-          <div style="display:flex;align-items:center;gap:8px"><div style="font-weight:600;font-size:12px">NGN ${fmt(s.amount)}</div><span style="font-size:9px;font-weight:700;padding:3px 7px;border-radius:50px;background:${s.paid?'#dcfce7':'#fef3c7'};color:${s.paid?'#15803d':'#92400e'}">${s.paid?'✓ PAID':'DUE'}</span></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:26px;height:26px;border-radius:50%;background:${s.paid?'#dcfce7':'#f1f5f9'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${s.paid?'#15803d':'var(--g400)'}">${s.day}</div>
+            <div>
+              <div style="font-size:11px;color:var(--g500)">${s.dueDate}</div>
+              ${s.cashPayment?'<div style="font-size:9px;color:#92400e;font-weight:600">Cash payment</div>':''}
+              ${s.adminNote&&!s.cashPayment?'<div style="font-size:9px;color:var(--g400)">'+s.adminNote+'</div>':''}
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="font-weight:600;font-size:12px">NGN ${fmt(s.amount)}</div>
+            <span style="font-size:9px;font-weight:700;padding:3px 7px;border-radius:50px;background:${s.paid?(s.cashPayment?'#fef3c7':'#dcfce7'):'#fef3c7'};color:${s.paid?(s.cashPayment?'#92400e':'#15803d'):'#92400e'}">${s.paid?(s.cashPayment?'CASH':'AUTO'):'DUE'}</span>
+          </div>
         </div>`).join('')}
       </div>`:''}
       <div style="margin-top:14px;padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;font-size:12px;color:#92400e;line-height:1.7">⚡ NGN ${fmt(daily)} is automatically deducted from your wallet daily. Keep your wallet funded to avoid default.</div>`;
