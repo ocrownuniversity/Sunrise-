@@ -389,16 +389,16 @@ document.addEventListener('DOMContentLoaded', function() {
         <div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Password</label><input class="inp" type="password" id="rg-pw" placeholder="Min. 6 characters"/></div>
         <!-- Profile Photo Upload -->
         <div style="margin-bottom:14px">
-          <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:8px;display:block">Profile Photo <span style="color:var(--g400);font-weight:400">(optional)</span></label>
+          <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:8px;display:block">Profile Photo <span style="color:#dc2626;font-weight:600">* Required</span></label>
           <div style="display:flex;align-items:center;gap:12px">
-            <div id="rg-photo-preview" style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;overflow:hidden;flex-shrink:0;border:2px solid #dcfce7">📷</div>
+            <div id="rg-photo-preview" style="width:60px;height:60px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden;flex-shrink:0;border:2px dashed #fca5a5">📷</div>
             <div style="flex:1">
               <label for="rg-photo" style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:var(--green-xl);border:1.5px solid #86efac;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--green-d)">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 Choose Photo
               </label>
               <input type="file" id="rg-photo" accept="image/*" capture="user" style="display:none" onchange="previewRegPhoto(event)"/>
-              <div style="font-size:11px;color:var(--g400);margin-top:5px">JPG or PNG · Max 3MB</div>
+              <div style="font-size:11px;color:#dc2626;margin-top:5px;font-weight:600">Required · JPG or PNG · Max 3MB</div>
             </div>
           </div>
         </div>
@@ -1163,11 +1163,25 @@ async function doReg(){
   const fn=document.getElementById('rg-fn').value.trim(),ln=document.getElementById('rg-ln').value.trim();
   const em=document.getElementById('rg-em').value.trim(),ph=document.getElementById('rg-ph').value.trim(),pw=document.getElementById('rg-pw').value;
   const pin=[1,2,3,4].map(i=>document.getElementById('rp'+i).value).join('');
-  if(!fn||!ln||!em||!ph||!pw||pin.length!==4){toast('Please complete all fields including the 4-digit PIN');return;}
+  // Validate all required fields
+  if(!fn){toast('Please enter your First Name');document.getElementById('rg-fn').focus();return;}
+  if(!ln){toast('Please enter your Last Name');document.getElementById('rg-ln').focus();return;}
+  if(!em){toast('Please enter your Email Address');document.getElementById('rg-em').focus();return;}
+  if(!ph||ph.length<10){toast('Please enter a valid Phone Number');document.getElementById('rg-ph').focus();return;}
+  if(!pw||pw.length<6){toast('Password must be at least 6 characters');document.getElementById('rg-pw').focus();return;}
+  if(pin.length!==4){toast('Please set your 4-digit Transaction PIN');document.getElementById('rp1').focus();return;}
+  // Require profile photo
+  const photoFile=document.getElementById('rg-photo')?.files[0];
+  if(!photoFile){
+    toast('📸 Please upload your profile photo to continue');
+    document.getElementById('rg-photo-preview').style.border='2.5px dashed #dc2626';
+    document.getElementById('rg-photo').click();
+    return;
+  }
+  if(photoFile.size>3*1024*1024){toast('Photo too large. Max size is 3MB.');return;}
   try{
     let photoURL='';
-    const photoFile=document.getElementById('rg-photo')?.files[0];
-    if(photoFile&&photoFile.size<=3*1024*1024){
+    if(photoFile){
       photoURL=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(photoFile);});
     }
     const cr=await auth.createUserWithEmailAndPassword(em,pw);
@@ -1189,7 +1203,12 @@ function previewRegPhoto(event){
   const reader=new FileReader();
   reader.onload=e=>{
     const prev=document.getElementById('rg-photo-preview');
-    if(prev){prev.innerHTML='';const img=document.createElement('img');img.src=e.target.result;img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%';prev.appendChild(img);}
+    if(prev){
+      prev.innerHTML='';
+      prev.style.border='2px solid #86efac';
+      prev.style.background='transparent';
+      const img=document.createElement('img');img.src=e.target.result;img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%';prev.appendChild(img);
+    }
   };
   reader.readAsDataURL(file);
 }
@@ -2015,9 +2034,30 @@ function normalizePlans(plans){
   }));
 }
 
+// Detect category label from plan name
+function getPlanCategory(name){
+  const n=(name||'').toLowerCase();
+  if(/sme/i.test(name))            return 'SME';
+  if(/corp/i.test(name))           return 'Corporate';
+  if(/gifting|gift/i.test(name))   return 'Gifting';
+  if(/social|instagram|whatsapp|facebook|twitter|tiktok/i.test(name)) return 'Social';
+  if(/weekly|week/i.test(name))    return 'Weekly';
+  if(/hourly|hour/i.test(name))    return 'Hourly';
+  if(/yearly|annual|year/i.test(name)) return 'Yearly';
+  if(/monthly|month|30\s*day/i.test(name)) return 'Monthly';
+  if(/\d+\s*day/i.test(name))     return 'Daily';
+  if(/\d+GB|\d+MB/i.test(name))   return 'Standard';
+  return 'Other';
+}
+
+const CATEGORY_ORDER = ['SME','Corporate','Standard','Daily','Weekly','Monthly','Yearly','Gifting','Social','Hourly','Other'];
+
 function renderPlans(plans, sel, infoEl){
   currentPlanMeta = {};
-  sel.innerHTML = '<option value="">-- Select a plan --</option>';
+  sel.innerHTML = '';
+
+  // Group plans by category
+  const groups = {};
   plans.forEach(p=>{
     const name  = p.variation_name||'';
     const price = parseFloat(p.variation_amount||0);
@@ -2025,15 +2065,35 @@ function renderPlans(plans, sel, infoEl){
     const src   = (name+' '+(p.description||'')).toLowerCase();
     const dm=src.match(/(\d+)\s*day/i), mm=src.match(/(\d+)\s*month/i), hm=src.match(/(\d+)\s*hour/i);
     const validity = hm?hm[1]+' Hours':dm?dm[1]+' Days':mm?mm[1]+' Month'+(parseInt(mm[1])>1?'s':''):'';
-    const opt = document.createElement('option');
-    opt.value = price;
-    opt.dataset.code     = p.variation_code  || code;
-    opt.dataset.sno      = p.variation_sno   || '';
-    opt.dataset.validity = validity;
-    opt.dataset.name     = name;
-    opt.textContent      = name+(validity?' ('+validity+')':'')+' — NGN '+fmt(price);
-    sel.appendChild(opt);
+    const cat = getPlanCategory(name);
+    if(!groups[cat]) groups[cat]=[];
+    groups[cat].push({p, name, price, code, validity});
     currentPlanMeta[price+'_'+code] = {code, name, validity, price};
+  });
+
+  // Add placeholder
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = '-- Select a plan --';
+  sel.appendChild(placeholder);
+
+  // Render each category as an <optgroup>
+  const cats = CATEGORY_ORDER.filter(c=>groups[c]).concat(Object.keys(groups).filter(c=>!CATEGORY_ORDER.includes(c)));
+  cats.forEach(cat=>{
+    if(!groups[cat]||!groups[cat].length) return;
+    const grp = document.createElement('optgroup');
+    grp.label = '── '+cat+' ──';
+    groups[cat].forEach(({p, name, price, code, validity})=>{
+      const opt = document.createElement('option');
+      opt.value = price;
+      opt.dataset.code     = p.variation_code  || code;
+      opt.dataset.sno      = p.variation_sno   || '';
+      opt.dataset.validity = validity;
+      opt.dataset.name     = name;
+      opt.textContent      = name+(validity?' ('+validity+')':'')+' — NGN '+fmt(price);
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
   });
   if(infoEl) infoEl.style.display='none';
 }
@@ -4653,53 +4713,86 @@ async function requestInvExtension(invId){
 //  AUTO DAILY LOAN REPAYMENT ENGINE (runs on dashboard load)
 // ══════════════════════════════════════════════════════════════
 
+// Helper: get today's date string in LOCAL time (not UTC) — avoids timezone bugs
+function localDateStr(d){
+  const dt=d||new Date();
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+}
+
 async function runDailyLoanDeductions(){
   if(!CU)return;
   try{
     const loans=await db.collection('loans').where('userId','==',CU.uid).where('status','==','active').get();
     if(loans.empty)return;
-    const today=new Date();today.setHours(0,0,0,0);
-    const todayStr=today.toISOString().split('T')[0];
+    const todayStr=localDateStr();
+
     for(const doc of loans.docs){
       const ln=doc.data();
-      // Prevent double-deduction on same day
-      if(ln.lastDeductionDate===todayStr)continue;
+
+      // Build or regenerate repayment schedule if missing
       let sch=ln.repaymentSchedule||[];
-      // If no schedule exists, generate one from activatedAt date
       if(!sch.length){
-        const activatedAt=ln.activatedAt?.toDate?ln.activatedAt.toDate():null;
+        const activatedAt=ln.activatedAt?.toDate?ln.activatedAt.toDate():(ln.activatedAt?new Date(ln.activatedAt):null);
         if(!activatedAt)continue;
-        const totalRepay=ln.totalRepayable||(( ln.approvedAmount||ln.amount)*1.24);
+        const totalRepay=ln.totalRepayable||((ln.approvedAmount||ln.amount)*1.24);
         sch=generateRepaymentSchedule(activatedAt,totalRepay);
-        // Save the generated schedule
         await doc.ref.update({repaymentSchedule:sch,dailyRepayment:Math.round((totalRepay/30)*100)/100,totalRepayable:totalRepay});
       }
-      const dayIdx=sch.findIndex(s=>s.dueDate===todayStr&&!s.paid);
-      if(dayIdx===-1)continue;
-      const dayAmt=sch[dayIdx].amount;
+
+      // Collect ALL overdue unpaid days up to and including today
+      // (catches missed deductions from previous days when user was offline)
+      const overdueDays=sch.filter(s=>!s.paid && s.dueDate<=todayStr);
+      if(!overdueDays.length)continue;
+
+      // Get fresh wallet balance once per loan
       const udSnap=await db.collection('users').doc(CU.uid).get();
-      const bal=udSnap.data()?.balance||0;
-      if(bal<dayAmt){
-        await addFinanceNotif(CU.uid,'❌ Loan Repayment Failed',`Day ${sch[dayIdx].day} payment of NGN ${fmt(dayAmt)} could not be deducted — wallet balance NGN ${fmt(bal)} is insufficient. Fund your wallet immediately to avoid default.`);
-        continue;
+      let bal=udSnap.data()?.balance||0;
+
+      for(const day of overdueDays){
+        // Skip if already deducted today for this specific day
+        if(day.paidAt && localDateStr(new Date(day.paidAt))===todayStr)continue;
+
+        const dayAmt=day.amount;
+        if(bal<dayAmt){
+          // Not enough balance — notify and skip (don't process further days)
+          await addFinanceNotif(CU.uid,'❌ Loan Repayment Failed',
+            `Day ${day.day} payment of NGN ${fmt(dayAmt)} could not be deducted — wallet balance NGN ${fmt(bal)} is insufficient. Fund your wallet to avoid default.`);
+          break; // stop trying further days for this loan
+        }
+
+        // Deduct from wallet
+        await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-dayAmt)});
+        bal-=dayAmt; // track balance locally across iterations
+
+        // Mark this day paid in the schedule
+        const idx=sch.findIndex(s=>s.day===day.day);
+        if(idx>-1){ sch[idx].paid=true; sch[idx].paidAt=new Date().toISOString(); sch[idx].deductedOn=todayStr; }
+
+        // Log transaction
+        await db.collection('transactions').add({
+          userId:CU.uid,type:'loan_repayment',amount:dayAmt,
+          description:`Loan Repayment — Day ${day.day}/30 (NGN ${fmt(dayAmt)})`,
+          status:'success',loanId:doc.id,
+          createdAt:firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        const remaining=sch.filter(s=>!s.paid).length;
+        if(remaining>0){
+          await addFinanceNotif(CU.uid,'✅ Loan Repayment Deducted',
+            `NGN ${fmt(dayAmt)} deducted for Day ${day.day}/30. ${remaining} day(s) remaining.`);
+        }
       }
-      await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-dayAmt)});
-      sch[dayIdx].paid=true;sch[dayIdx].paidAt=new Date().toISOString();
+
+      // Save updated schedule and check if fully repaid
       const allPaid=sch.every(s=>s.paid);
       await doc.ref.update({repaymentSchedule:sch,status:allPaid?'repaid':'active',lastDeductionDate:todayStr});
-      await db.collection('transactions').add({
-        userId:CU.uid,type:'loan_repayment',amount:dayAmt,
-        description:`Loan Repayment — Day ${sch[dayIdx].day}/30 (NGN ${fmt(dayAmt)})`,
-        status:'success',loanId:doc.id,
-        createdAt:firebase.firestore.FieldValue.serverTimestamp()
-      });
       if(allPaid){
-        await addFinanceNotif(CU.uid,'🎉 Loan Fully Repaid!',`All 30 daily payments for your NGN ${fmt(ln.approvedAmount||ln.amount)} loan are complete. Loan is now closed!`);
-      }else{
-        const remaining=sch.filter(s=>!s.paid).length;
-        await addFinanceNotif(CU.uid,'✅ Daily Repayment Deducted',`NGN ${fmt(dayAmt)} deducted (Day ${sch[dayIdx].day}/30). ${remaining} days remaining.`);
+        await addFinanceNotif(CU.uid,'🎉 Loan Fully Repaid!',
+          `All 30 daily payments for your NGN ${fmt(ln.approvedAmount||ln.amount)} loan are complete. Loan is now closed!`);
       }
     }
+
+    // Refresh wallet balance display
     UD=(await db.collection('users').doc(CU.uid).get()).data();
     const balEl=document.getElementById('d-bal');
     if(balEl)balEl.textContent=bHid?'NGN ****':'NGN '+fmt(UD.balance||0);
