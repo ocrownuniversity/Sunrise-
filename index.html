@@ -944,17 +944,17 @@ document.addEventListener('DOMContentLoaded', function() {
     <div style="margin-bottom:10px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Pick Up Location *</label><select class="inp" id="eb-merchant"><option value="">Select pick up location</option><option value="No1 ibijoke street kudirat abiola way oregun ikeja lagos">No1 Ibijoke Street, Kudirat Abiola Way, Oregun, Ikeja, Lagos</option><option value="No1 odewale street Alausa ikeja lagos state">No1 Odewale Street, Alausa, Ikeja, Lagos State</option><option value="No5 odewale street Alausa ikeja lagos state">No5 Odewale Street, Alausa, Ikeja, Lagos State</option></select></div>
     <div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Additional Note <span style="font-weight:400;color:var(--g400)">(optional)</span></label><textarea class="inp" id="eb-note" placeholder="Colour, size, specifications..."></textarea></div>
     <div style="margin-bottom:14px">
-      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Product Photo * <span style="font-weight:400;color:var(--g400)">(picture of the product you want to buy)</span></label>
+      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Product Photo * <span style="font-weight:400;color:var(--g400)">(upload from phone gallery — picture of the product)</span></label>
       <div style="border:2px dashed #fcd34d;border-radius:11px;padding:14px;text-align:center;cursor:pointer;background:#fffbeb" id="eb-product-pic-drop" onclick="document.getElementById('eb-product-pic').click()">
         <div id="eb-product-pic-preview"><div style="font-size:28px;margin-bottom:6px">&#128717;</div><div style="font-size:12px;color:var(--g400)">Tap to upload product picture</div><div style="font-size:11px;color:var(--g300);margin-top:3px">JPG, PNG &bull; Max 3MB</div></div>
       </div>
-      <input type="file" id="eb-product-pic" accept="image/*" capture="environment" style="display:none" onchange="previewImg('eb-product-pic','eb-product-pic-preview','eb-product-pic-drop')"/>
+      <input type="file" id="eb-product-pic" accept="image/*" style="display:none" onchange="previewImg('eb-product-pic','eb-product-pic-preview','eb-product-pic-drop')"/>
     </div>
 
     <!-- SECTION 4: Your Documents -->
     <div style="font-size:13px;font-weight:800;color:var(--black);margin-bottom:12px;padding:10px 14px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border-radius:10px;border-left:4px solid #2563eb">&#128248; Your Documents (Mandatory)</div>
     <div style="margin-bottom:12px">
-      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Your Passport Photograph * <span style="font-weight:400;color:var(--g400)">(clear face photo)</span></label>
+      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Your Passport Photograph * <span style="font-weight:400;color:var(--g400)">(take selfie with front camera)</span></label>
       <div style="border:2px dashed #d1d5db;border-radius:11px;padding:14px;text-align:center;cursor:pointer" id="eb-passport-drop" onclick="document.getElementById('eb-passport').click()">
         <div id="eb-passport-preview"><div style="font-size:28px;margin-bottom:6px">&#129331;</div><div style="font-size:12px;color:var(--g400)">Tap to upload your passport photo</div><div style="font-size:11px;color:var(--g300);margin-top:3px">JPG, PNG &bull; Max 3MB</div></div>
       </div>
@@ -5888,18 +5888,36 @@ async function submitEasyBuyApp(){
   const totalRepay=balanceAmt;
   const daily=balanceAmt>0?Math.round((balanceAmt/days)*100)/100:0;
 
-  // Convert images to base64
-  async function toBase64(fileInput){
-    const file=document.getElementById(fileInput).files[0];
-    if(!file)return'';
-    return new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(file);});
-  }
-
   try{
     toast('Processing... please wait');
+
+    // Compress image to max ~200KB base64 before saving to Firestore
+    async function compressImage(fileInputId, maxW=600, quality=0.6){
+      const file=document.getElementById(fileInputId).files[0];
+      if(!file)return'';
+      return new Promise(res=>{
+        const reader=new FileReader();
+        reader.onload=e=>{
+          const img=new Image();
+          img.onload=()=>{
+            const canvas=document.createElement('canvas');
+            let w=img.width, h=img.height;
+            if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+            canvas.width=w;canvas.height=h;
+            canvas.getContext('2d').drawImage(img,0,0,w,h);
+            res(canvas.toDataURL('image/jpeg',quality));
+          };
+          img.src=e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
     const [passportB64,idImgB64,productPicB64,g1PhotoB64]=await Promise.all([
-      toBase64('eb-passport'),toBase64('eb-idimg'),toBase64('eb-product-pic'),
-      toBase64('eb-g1photo')
+      compressImage('eb-passport',600,0.65),
+      compressImage('eb-idimg',800,0.7),
+      compressImage('eb-product-pic',800,0.7),
+      compressImage('eb-g1photo',600,0.65)
     ]);
 
     const fullName=surname+' '+firstname+(othername?' '+othername:'');
