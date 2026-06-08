@@ -662,6 +662,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="fin-svc-item" onclick="loadFinTab('history')"><div style="font-size:24px;margin-bottom:4px">&#128203;</div><div style="font-size:11px;font-weight:700;color:var(--g700)">History</div></div>
         <div class="fin-svc-item" onclick="loadFinTab('active')"><div style="font-size:24px;margin-bottom:4px">⚡</div><div style="font-size:11px;font-weight:700;color:var(--g700)">Active Items</div></div>
         <div class="fin-svc-item" onclick="goPg('pg-fin-notif');loadFinanceNotifs()"><div style="font-size:24px;margin-bottom:4px">&#128276;</div><div style="font-size:11px;font-weight:700;color:var(--g700)">Alerts</div></div>
+        <div class="fin-svc-item" style="border:2px solid #f59e0b;background:#fffbeb" onclick="goPg('pg-easybuy');loadEasyBuyDash()"><div style="font-size:24px;margin-bottom:4px">&#128717;</div><div style="font-size:11px;font-weight:700;color:#92400e">EasyBuy</div></div>
       </div>
     </div>
     <div style="margin:14px 14px 0">
@@ -671,6 +672,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <button onclick="loadFinTab('active')" class="chip" style="background:var(--g100);color:var(--g600);cursor:pointer;white-space:nowrap;padding:7px 14px;border:none">⚡ Active</button>
         <button onclick="loadMyWithdrawals()" class="chip" style="background:#fce7f3;color:#9d174d;cursor:pointer;white-space:nowrap;padding:7px 14px;border:none">&#128184; Withdrawals</button>
         <button onclick="loadFinTab('history')" class="chip" style="background:var(--g100);color:var(--g600);cursor:pointer;white-space:nowrap;padding:7px 14px;border:none">&#128203; History</button>
+        <button onclick="goPg('pg-easybuy');loadEasyBuyDash()" class="chip" style="background:#fef3c7;color:#92400e;cursor:pointer;white-space:nowrap;padding:7px 14px;border:none">&#128717; EasyBuy</button>
       </div>
       <div id="fin-content"><div style="padding:28px;text-align:center;color:var(--g400)"><div style="font-size:28px;margin-bottom:7px">&#127974;</div><p style="font-size:13px">Loading finance data...</p></div></div>
     </div>
@@ -793,6 +795,120 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 
+
+<!-- ======== EASYBUY PAGE ======== -->
+<div id="pg-easybuy" class="page">
+  <div style="max-width:480px;margin:0 auto;background:var(--bg);min-height:100vh;padding-bottom:80px">
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#78350f,#b45309,#d97706);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button onclick="goPg('pg-finance')" style="background:rgba(255,255,255,.15);border:none;width:32px;height:32px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div>
+          <div style="font-size:11px;color:rgba(255,255,255,.6);font-weight:500">ZMONIE</div>
+          <div style="font-size:16px;font-weight:800;color:#fff">EasyBuy</div>
+        </div>
+      </div>
+      <button onclick="openM('m-easybuy-apply')" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:8px 14px;border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif">+ Apply</button>
+    </div>
+
+    <!-- Summary card -->
+    <div style="padding:14px">
+      <div style="background:linear-gradient(135deg,#78350f,#b45309);border-radius:18px;padding:20px;color:#fff;position:relative;overflow:hidden;margin-bottom:14px">
+        <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:4px">TOTAL OUTSTANDING BALANCE</div>
+        <div style="font-size:30px;font-weight:900;letter-spacing:-.03em" id="eb-total-bal">NGN 0</div>
+        <div style="display:flex;gap:16px;margin-top:14px">
+          <div><div style="font-size:10px;color:rgba(255,255,255,.5)">Active Plans</div><div style="font-size:16px;font-weight:700" id="eb-active-count">0</div></div>
+          <div><div style="font-size:10px;color:rgba(255,255,255,.5)">Completed</div><div style="font-size:16px;font-weight:700" id="eb-done-count">0</div></div>
+          <div><div style="font-size:10px;color:rgba(255,255,255,.5)">Pending</div><div style="font-size:16px;font-weight:700" id="eb-pend-count">0</div></div>
+        </div>
+      </div>
+
+      <!-- How it works -->
+      <div class="card" style="padding:14px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--g700)">&#128717; How EasyBuy Works</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:22px;height:22px;background:#f59e0b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;flex-shrink:0">1</div><div style="font-size:12px;color:var(--g600);line-height:1.5">Apply for any product from our approved merchants</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:22px;height:22px;background:#f59e0b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;flex-shrink:0">2</div><div style="font-size:12px;color:var(--g600);line-height:1.5">Pay the required deposit — receive the product immediately</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:22px;height:22px;background:#f59e0b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;flex-shrink:0">3</div><div style="font-size:12px;color:var(--g600);line-height:1.5">Balance is deducted automatically from your wallet daily</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:22px;height:22px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;flex-shrink:0">&#10003;</div><div style="font-size:12px;color:var(--g600);line-height:1.5">Plan marked complete when balance reaches &#8358;0</div></div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none">
+        <button onclick="loadEasyBuyTab('active')" id="ebt-active" style="padding:7px 14px;border-radius:50px;border:none;background:#f59e0b;color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:Inter,sans-serif;flex-shrink:0">Active</button>
+        <button onclick="loadEasyBuyTab('pending')" id="ebt-pending" style="padding:7px 14px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;color:var(--g600);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:Inter,sans-serif;flex-shrink:0">Pending</button>
+        <button onclick="loadEasyBuyTab('completed')" id="ebt-completed" style="padding:7px 14px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;color:var(--g600);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:Inter,sans-serif;flex-shrink:0">Completed</button>
+        <button onclick="loadEasyBuyTab('history')" id="ebt-history" style="padding:7px 14px;border-radius:50px;border:1.5px solid var(--g200);background:#fff;color:var(--g600);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:Inter,sans-serif;flex-shrink:0">History</button>
+      </div>
+      <div id="eb-content"><div style="text-align:center;padding:30px;color:var(--g400)"><div style="font-size:32px;margin-bottom:8px">&#128717;</div><p style="font-size:13px">Loading EasyBuy plans...</p></div></div>
+    </div>
+  </div>
+  <div class="bnav">
+    <div class="bni" onclick="goPg('pg-dash')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></div>
+    <div class="bni on" style="color:#b45309"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><span>EasyBuy</span></div>
+    <div class="bni" onclick="openM('m-easybuy-apply')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Apply</span></div>
+    <div class="bni" onclick="goPg('pg-notif')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span>Alerts</span></div>
+    <div class="bni" onclick="goPg('pg-profile')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profile</span></div>
+  </div>
+</div>
+
+<!-- ======== EASYBUY APPLY MODAL ======== -->
+<div class="modal" id="m-easybuy-apply">
+  <div class="mbox">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div><h3 style="font-size:16px;font-weight:800">&#128717; Apply for EasyBuy</h3><p style="font-size:11px;color:var(--g400);margin-top:2px">Buy now, pay daily from your wallet</p></div>
+      <button onclick="closeM('m-easybuy-apply')" style="background:var(--g100);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px">&#10005;</button>
+    </div>
+    <div class="info-box" style="margin-bottom:14px;background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:12px">
+      <p style="font-size:12px;color:#92400e;line-height:1.7">&#128161; After approval, pay the deposit and receive your product. The remaining balance is deducted daily from your Zmonie wallet.</p>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Product Name *</label>
+      <input class="inp" id="eb-product-name" placeholder="e.g. Samsung Galaxy A35, HP Laptop"/>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Merchant / Store *</label>
+      <input class="inp" id="eb-merchant" placeholder="e.g. TechZone Electronics, Lagos"/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div>
+        <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Product Price (NGN) *</label>
+        <input class="inp" type="number" id="eb-price" placeholder="e.g. 150000" oninput="calcEasyBuyDeposit()"/>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Repayment Days *</label>
+        <select class="inp" id="eb-days" onchange="calcEasyBuyDeposit()">
+          <option value="30">30 days</option>
+          <option value="60">60 days</option>
+          <option value="90">90 days</option>
+          <option value="120">120 days</option>
+        </select>
+      </div>
+    </div>
+    <div id="eb-calc-preview" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:12px;margin-bottom:14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><div style="font-size:10px;color:var(--g500)">Deposit (20%)</div><div style="font-size:14px;font-weight:800;color:#15803d" id="eb-calc-deposit">-</div></div>
+        <div><div style="font-size:10px;color:var(--g500)">Balance to Repay</div><div style="font-size:14px;font-weight:800;color:#b45309" id="eb-calc-balance">-</div></div>
+        <div><div style="font-size:10px;color:var(--g500)">Daily Deduction</div><div style="font-size:14px;font-weight:800;color:var(--g700)" id="eb-calc-daily">-</div></div>
+        <div><div style="font-size:10px;color:var(--g500)">Total Repayable</div><div style="font-size:14px;font-weight:800;color:var(--g700)" id="eb-calc-total">-</div></div>
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Additional Note (optional)</label>
+      <textarea class="inp" id="eb-note" placeholder="Any extra details about the product or delivery..."></textarea>
+    </div>
+    <button onclick="submitEasyBuyApp()" class="btn-g" style="width:100%;padding:13px;border-radius:12px;font-size:15px">Submit Application</button>
+  </div>
+</div>
+
+<!-- ======== EASYBUY PLAN DETAIL MODAL ======== -->
+<div class="modal" id="m-easybuy-detail">
+  <div class="mbox" id="eb-detail-body"></div>
+</div>
+
+
 <!-- ADMIN PAGE -->
 <div id="pg-admin" class="page">
   <!-- Sidebar -->
@@ -832,6 +948,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="anav fin-tab" onclick="aTab('fin-investments')">&#128200; Investments</div>
       <div class="anav fin-tab" onclick="aTab('fin-analytics')">&#128202; Fin Analytics</div>
       <div style="font-size:10px;font-weight:700;color:rgba(74,222,128,.3);padding:10px 6px 4px;text-transform:uppercase;letter-spacing:.8px">Payments &amp; Rewards</div>
+      <div class="anav" onclick="aTab('easybuy')">&#128717; EasyBuy</div>
       <div class="anav" onclick="aTab('paystack')">&#128179; Paystack Settings</div>
       <div class="anav" onclick="aTab('rewards-settings')">&#127873; Rewards Settings</div>
       <div class="anav" onclick="aTab('rewards-history')">&#128202; Rewards History</div>
@@ -878,6 +995,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <button onclick="aTab('fin-investments')" data-tab="fin-investments" style="padding:7px 14px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">&#128200; Investments</button>
       <button onclick="aTab('fin-analytics')" data-tab="fin-analytics" style="padding:7px 14px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">&#128202; Fin Stats</button>
       <button onclick="aTab('vtpass')" data-tab="vtpass" style="padding:7px 14px;border-radius:50px;border:1.5px solid #c4b5fd;background:#faf5ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#6d28d9">⚙️ VTPass</button>
+      <button onclick="aTab('easybuy')" data-tab="easybuy" style="padding:7px 14px;border-radius:50px;border:1.5px solid #fcd34d;background:#fffbeb;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#92400e">&#128717; EasyBuy</button>
       <button onclick="aTab('paystack')" data-tab="paystack" style="padding:7px 14px;border-radius:50px;border:1.5px solid #60a5fa;background:#eff6ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#1d4ed8">&#128179; Paystack</button>
       <button onclick="aTab('rewards-settings')" data-tab="rewards-settings" style="padding:7px 14px;border-radius:50px;border:1.5px solid #86efac;background:#f0fdf4;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;color:#15803d">&#127873; Rewards</button>
     </div>
@@ -2632,7 +2750,7 @@ function aTab(tab){
   var activeBtn=document.querySelector('#admin-tabbar button[data-tab="'+tab+'"]');
   if(activeBtn)activeBtn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
   // Update page title
-  document.getElementById('a-title').textContent={overview:'Overview',users:'Users',txs:'Transactions',funding:'Funding Requests',pins:'PIN Requests',promos:'Promo Slides',broadcast:'Broadcast',wallet:'Wallet Operations',vtpass:'VTPass API',recovery:'Loan Recovery',['fin-nok']:'Next of Kin Verification',['fund-accounts']:'Funding Accounts',['data-plans']:'Data Plan Management',['pw-reset']:'Password Reset Requests',['api-mgmt']:'API Management',['api-docs']:'API Documentation',paystack:'Paystack Payment Settings',withdrawals:'Withdrawals',['fin-loans']:'Loan Requests',['fin-investments']:'Investments',['fin-analytics']:'Financial Analytics',['rewards-settings']:'Rewards Settings',['rewards-history']:'Rewards History'}[tab]||tab;
+  document.getElementById('a-title').textContent={overview:'Overview',users:'Users',txs:'Transactions',funding:'Funding Requests',pins:'PIN Requests',promos:'Promo Slides',broadcast:'Broadcast',wallet:'Wallet Operations',vtpass:'VTPass API',recovery:'Loan Recovery',['fin-nok']:'Next of Kin Verification',['fund-accounts']:'Funding Accounts',['data-plans']:'Data Plan Management',['pw-reset']:'Password Reset Requests',['api-mgmt']:'API Management',['api-docs']:'API Documentation',easybuy:'EasyBuy Management',paystack:'Paystack Payment Settings',withdrawals:'Withdrawals',['fin-loans']:'Loan Requests',['fin-investments']:'Investments',['fin-analytics']:'Financial Analytics',['rewards-settings']:'Rewards Settings',['rewards-history']:'Rewards History'}[tab]||tab;
   // Close sidebar on mobile after selecting a tab
   if(window.innerWidth<=768)closeAdminMenu();
   const el=document.getElementById('a-content');
@@ -2666,6 +2784,7 @@ function aTab(tab){
   if(tab==='broadcast')el.innerHTML=`<div class="card" style="padding:18px;max-width:520px"><h3 style="font-weight:700;margin-bottom:13px;font-size:15px">Send Broadcast</h3><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Title</label><input class="inp" id="bc-t" placeholder="Announcement title"/></div><div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Message</label><textarea class="inp" id="bc-m" rows="4" placeholder="Message to all users..." style="resize:vertical"></textarea></div><button onclick="doBc()" class="btn-g" style="padding:12px 24px;border-radius:10px;font-size:14px">Send to All ${AD.users.length} Users</button></div>`;
   if(tab==='wallet')el.innerHTML=`<div class="card" style="padding:18px;max-width:440px"><h3 style="font-weight:700;margin-bottom:13px;font-size:15px">Credit or Debit Wallet</h3><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">User Email</label><input class="inp" id="aw-e" placeholder="user@example.com"/></div><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Amount (NGN)</label><input class="inp" type="number" id="aw-a" placeholder="1000"/></div><div style="margin-bottom:11px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Operation</label><select class="inp" id="aw-o"><option value="credit">Credit (Add funds)</option><option value="debit">Debit (Remove funds)</option></select></div><div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block">Note (shown to user)</label><input class="inp" id="aw-n" placeholder="Payment confirmed"/></div><button onclick="doWop()" class="btn-g" style="width:100%;padding:12px;border-radius:10px;font-size:14px">Process</button></div>`;
   // ── VTPass Settings tab ──
+  if(tab==='easybuy'){loadAdminEasyBuy(el);}
   if(tab==='paystack'){loadPaystackSettings(el);}
   if(tab==='rewards-settings'){loadRewardsSettings(el);}
   if(tab==='rewards-history'){loadRewardsHistoryAdmin(el);}
@@ -5524,6 +5643,611 @@ async function initPaystackPayment(amount){
 }
 
 const rwToggles={};
+
+// ══════════════════════════════════════════════════════════════
+//  ZMONIE EASYBUY — Full Feature Implementation
+// ══════════════════════════════════════════════════════════════
+
+// ── Helpers ──
+function ebLocalDate(d){
+  const dt=d||new Date();
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+}
+
+function calcEasyBuyDeposit(){
+  const price=parseFloat(document.getElementById('eb-price').value||0);
+  const days=parseInt(document.getElementById('eb-days').value||30);
+  const prev=document.getElementById('eb-calc-preview');
+  if(!price||price<1000){prev.style.display='none';return;}
+  const deposit=Math.round(price*0.20);
+  const balance=price-deposit;
+  const fee=Math.round(price*0.05); // 5% service fee
+  const totalRepay=balance+fee;
+  const daily=Math.round((totalRepay/days)*100)/100;
+  document.getElementById('eb-calc-deposit').textContent='NGN '+fmt(deposit);
+  document.getElementById('eb-calc-balance').textContent='NGN '+fmt(balance);
+  document.getElementById('eb-calc-daily').textContent='NGN '+fmt(daily)+'/day';
+  document.getElementById('eb-calc-total').textContent='NGN '+fmt(totalRepay);
+  prev.style.display='block';
+}
+
+// ── Submit Application ──
+async function submitEasyBuyApp(){
+  if(!CU){toast('Please log in first');return;}
+  const product=(document.getElementById('eb-product-name').value||'').trim();
+  const merchant=(document.getElementById('eb-merchant').value||'').trim();
+  const price=parseFloat(document.getElementById('eb-price').value||0);
+  const days=parseInt(document.getElementById('eb-days').value||30);
+  const note=(document.getElementById('eb-note').value||'').trim();
+  if(!product){toast('Enter product name');return;}
+  if(!merchant){toast('Enter merchant/store name');return;}
+  if(!price||price<1000){toast('Enter a valid price (min NGN 1,000)');return;}
+  const deposit=Math.round(price*0.20);
+  const balance=price-deposit;
+  const fee=Math.round(price*0.05);
+  const totalRepay=balance+fee;
+  const daily=Math.round((totalRepay/days)*100)/100;
+  const walBal=UD&&UD.balance||0;
+  if(walBal<deposit){
+    toast('Insufficient wallet balance for deposit. Need NGN '+fmt(deposit)+'. Fund your wallet first.');
+    return;
+  }
+  try{
+    await db.collection('easyBuy').add({
+      userId:CU.uid,
+      userName:UD&&UD.name||CU.displayName||'',
+      userEmail:CU.email||'',
+      userPhone:UD&&UD.phone||'',
+      product,merchant,price,deposit,
+      balance:totalRepay,
+      totalRepay,fee,daily,days,
+      note,status:'pending',
+      repaymentSchedule:[],
+      lastDeductionDate:null,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Notify admin via financeNotifications
+    await db.collection('financeNotifications').add({
+      userId:'admin',title:'New EasyBuy Application',
+      body:((UD&&UD.name)||CU.email||'A user')+' applied for EasyBuy: '+product+' (NGN '+fmt(price)+'). Deposit: NGN '+fmt(deposit)+'.',
+      read:false,type:'easybuy',createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Notify user
+    await db.collection('notifications').add({
+      userId:CU.uid,title:'EasyBuy Application Submitted',
+      body:'Your EasyBuy application for '+product+' (NGN '+fmt(price)+') has been submitted. Deposit required: NGN '+fmt(deposit)+'. Await admin approval.',
+      read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    closeM('m-easybuy-apply');
+    document.getElementById('eb-product-name').value='';
+    document.getElementById('eb-merchant').value='';
+    document.getElementById('eb-price').value='';
+    document.getElementById('eb-note').value='';
+    document.getElementById('eb-calc-preview').style.display='none';
+    toast('Application submitted! Await admin approval.');
+    loadEasyBuyDash();
+  }catch(e){toast('Error: '+e.message);}
+}
+
+// ── Load EasyBuy Dashboard ──
+async function loadEasyBuyDash(){
+  if(!CU)return;
+  try{
+    const snap=await db.collection('easyBuy').where('userId','==',CU.uid).get();
+    const all=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const active=all.filter(e=>e.status==='active');
+    const done=all.filter(e=>e.status==='completed');
+    const pend=all.filter(e=>e.status==='pending');
+    const totalBal=active.reduce((s,e)=>s+(e.balance||0),0);
+    const balEl=document.getElementById('eb-total-bal');
+    const acEl=document.getElementById('eb-active-count');
+    const dEl=document.getElementById('eb-done-count');
+    const pEl=document.getElementById('eb-pend-count');
+    if(balEl)balEl.textContent='NGN '+fmt(totalBal);
+    if(acEl)acEl.textContent=active.length;
+    if(dEl)dEl.textContent=done.length;
+    if(pEl)pEl.textContent=pend.length;
+    // Run daily deductions for this user
+    await runEasyBuyDeductions(active);
+    loadEasyBuyTab('active');
+  }catch(e){console.warn('EasyBuy dash:',e.message);}
+}
+
+// ── Tab Switcher ──
+function loadEasyBuyTab(tab){
+  ['active','pending','completed','history'].forEach(t=>{
+    const btn=document.getElementById('ebt-'+t);
+    if(btn){
+      btn.style.background=t===tab?'#f59e0b':'#fff';
+      btn.style.color=t===tab?'#fff':'var(--g600)';
+      btn.style.border=t===tab?'none':'1.5px solid var(--g200)';
+      btn.style.fontWeight=t===tab?'700':'600';
+    }
+  });
+  const el=document.getElementById('eb-content');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:24px;color:var(--g400)"><div style="font-size:28px">&#8987;</div><p style="font-size:12px;margin-top:6px">Loading...</p></div>';
+  if(tab==='history'){loadEasyBuyHistory();return;}
+  db.collection('easyBuy').where('userId','==',CU.uid).get().then(snap=>{
+    const all=snap.docs.map(d=>({id:d.id,...d.data()}));
+    let items=all;
+    if(tab==='active')items=all.filter(e=>e.status==='active');
+    else if(tab==='pending')items=all.filter(e=>e.status==='pending'||e.status==='approved');
+    else if(tab==='completed')items=all.filter(e=>e.status==='completed');
+    items.sort((a,b)=>{
+      const ta=a.createdAt&&a.createdAt.toDate?a.createdAt.toDate():new Date(0);
+      const tb=b.createdAt&&b.createdAt.toDate?b.createdAt.toDate():new Date(0);
+      return tb-ta;
+    });
+    if(!items.length){
+      el.innerHTML='<div style="text-align:center;padding:32px;color:var(--g400)"><div style="font-size:36px;margin-bottom:8px">&#128717;</div><p style="font-size:13px;font-weight:600">No '+tab+' EasyBuy plans</p><p style="font-size:12px;margin-top:4px">'+
+        (tab==='active'?'Apply for a product to get started':tab==='pending'?'No pending applications':'No completed plans yet')+'</p></div>';
+      return;
+    }
+    el.innerHTML=items.map(e=>{
+      const pct=e.totalRepay?Math.round(((e.totalRepay-(e.balance||0))/e.totalRepay)*100):0;
+      const statusColor={active:'#dbeafe',pending:'#fef3c7',approved:'#fef3c7',completed:'#dcfce7',rejected:'#fee2e2'}[e.status]||'#f1f5f9';
+      const statusText={active:'#1d4ed8',pending:'#92400e',approved:'#92400e',completed:'#15803d',rejected:'#dc2626'}[e.status]||'var(--g600)';
+      return '<div class="card" style="padding:16px;margin-bottom:10px;cursor:pointer" onclick="showEasyBuyDetail(\''+e.id+'\')">'+
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">'+
+        '<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.product+'</div>'+
+        '<div style="font-size:11px;color:var(--g400);margin-top:2px">'+e.merchant+'</div></div>'+
+        '<span style="background:'+statusColor+';color:'+statusText+';padding:4px 10px;border-radius:50px;font-size:10px;font-weight:800;flex-shrink:0;margin-left:8px">'+e.status.toUpperCase()+'</span></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">'+
+        '<div style="background:#f8fafc;border-radius:10px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--g400)">Price</div><div style="font-size:12px;font-weight:700">NGN '+fmt(e.price)+'</div></div>'+
+        '<div style="background:#fff8f0;border-radius:10px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--g400)">Balance</div><div style="font-size:12px;font-weight:700;color:#b45309">NGN '+fmt(e.balance||0)+'</div></div>'+
+        '<div style="background:#f0fdf4;border-radius:10px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--g400)">Daily</div><div style="font-size:12px;font-weight:700;color:#15803d">NGN '+fmt(e.daily||0)+'</div></div>'+
+        '</div>'+
+        (e.status==='active'?'<div style="background:#f1f5f9;border-radius:8px;height:8px;overflow:hidden"><div style="background:linear-gradient(90deg,#f59e0b,#16a34a);height:100%;width:'+pct+'%;transition:width .3s;border-radius:8px"></div></div>'+
+        '<div style="display:flex;justify-content:space-between;margin-top:4px"><div style="font-size:10px;color:var(--g400)">Repaid</div><div style="font-size:10px;font-weight:700;color:#15803d">'+pct+'%</div></div>':'')+
+        (e.status==='approved'?'<button onclick="event.stopPropagation();payEasyBuyDeposit(\''+e.id+'\',\''+e.userId+'\','+e.deposit+')" style="width:100%;margin-top:8px;padding:10px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif">Pay Deposit NGN '+fmt(e.deposit)+' &amp; Activate</button>':'')+
+        '</div>';
+    }).join('');
+  }).catch(e=>el.innerHTML='<div style="padding:20px;color:var(--err);font-size:13px">Error: '+e.message+'</div>');
+}
+
+// ── Pay Deposit & Activate ──
+async function payEasyBuyDeposit(ebId, userId, depositAmt){
+  if(!CU)return;
+  if(!confirm('Deduct deposit of NGN '+fmt(depositAmt)+' from your wallet and activate EasyBuy?'))return;
+  const uSnap=await db.collection('users').doc(CU.uid).get();
+  const bal=uSnap.data().balance||0;
+  if(bal<depositAmt){toast('Insufficient wallet balance. Fund your wallet first.');return;}
+  try{
+    const ebSnap=await db.collection('easyBuy').doc(ebId).get();
+    const eb=ebSnap.data();
+    // Build repayment schedule
+    const today=new Date();
+    const schedule=[];
+    for(let d=1;d<=eb.days;d++){
+      const due=new Date(today);due.setDate(due.getDate()+d);
+      schedule.push({day:d,dueDate:ebLocalDate(due),amount:eb.daily,paid:false});
+    }
+    // Deduct deposit from wallet
+    await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-depositAmt)});
+    // Activate plan
+    await db.collection('easyBuy').doc(ebId).update({
+      status:'active',activatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+      repaymentSchedule:schedule,lastDeductionDate:null
+    });
+    // Log deposit transaction
+    await db.collection('transactions').add({
+      userId:CU.uid,type:'debit',amount:depositAmt,
+      description:'EasyBuy Deposit — '+eb.product+' ('+eb.merchant+')',
+      status:'success',ebId,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Notify user
+    await db.collection('notifications').add({
+      userId:CU.uid,title:'EasyBuy Activated!',
+      body:'Your EasyBuy for '+eb.product+' is now active. Deposit of NGN '+fmt(depositAmt)+' deducted. Daily repayment of NGN '+fmt(eb.daily)+' starts tomorrow.',
+      read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    UD=(await db.collection('users').doc(CU.uid).get()).data();
+    const balEl=document.getElementById('d-bal');
+    if(balEl)balEl.textContent=bHid?'NGN ****':'NGN '+fmt(UD.balance||0);
+    toast('EasyBuy activated! Daily deductions start tomorrow.');
+    loadEasyBuyDash();
+  }catch(e){toast('Error: '+e.message);}
+}
+
+// ── Daily Deduction Engine (runs on login for this user) ──
+async function runEasyBuyDeductions(activePlans){
+  const todayStr=ebLocalDate();
+  for(const eb of activePlans){
+    if(eb.lastDeductionDate===todayStr)continue;
+    if(!eb.repaymentSchedule||!eb.repaymentSchedule.length)continue;
+    const overdue=eb.repaymentSchedule.filter(s=>!s.paid&&s.dueDate<=todayStr);
+    if(!overdue.length)continue;
+    const uSnap=await db.collection('users').doc(CU.uid).get();
+    let bal=uSnap.data().balance||0;
+    const sch=[...eb.repaymentSchedule];
+    let changed=false;
+    for(const day of overdue){
+      const dayAmt=day.amount;
+      if(bal<dayAmt){
+        // Missed payment
+        await db.collection('notifications').add({
+          userId:CU.uid,title:'EasyBuy Payment Missed',
+          body:'Day '+day.day+' payment of NGN '+fmt(dayAmt)+' for '+eb.product+' could not be deducted — wallet balance NGN '+fmt(bal)+'. Fund your wallet now.',
+          read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+        });
+        break;
+      }
+      await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-dayAmt)});
+      bal-=dayAmt;
+      const idx=sch.findIndex(s=>s.day===day.day);
+      if(idx>-1){sch[idx].paid=true;sch[idx].paidAt=todayStr;}
+      await db.collection('transactions').add({
+        userId:CU.uid,type:'debit',amount:dayAmt,
+        description:'EasyBuy Repayment — Day '+day.day+'/'+eb.days+' ('+eb.product+')',
+        status:'success',ebId:eb.id,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+      changed=true;
+    }
+    if(changed){
+      const newBal=Math.max(0,eb.balance-(overdue.filter((_,i)=>{
+        const idx=sch.findIndex(s=>s.day===overdue[i].day);return idx>-1&&sch[idx].paid;
+      }).length*eb.daily));
+      const allPaid=sch.every(s=>s.paid)||newBal<=0;
+      await db.collection('easyBuy').doc(eb.id).update({
+        repaymentSchedule:sch,balance:newBal,
+        status:allPaid?'completed':'active',lastDeductionDate:todayStr
+      });
+      if(allPaid){
+        await db.collection('notifications').add({
+          userId:CU.uid,title:'EasyBuy Completed!',
+          body:'Congratulations! Your EasyBuy plan for '+eb.product+' is fully paid. All deductions complete.',
+          read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await db.collection('financeNotifications').add({
+          userId:'admin',title:'EasyBuy Plan Completed',
+          body:((UD&&UD.name)||CU.email||'A user')+'\'s EasyBuy for '+eb.product+' is fully repaid.',
+          read:false,type:'easybuy',createdAt:firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }else{
+        const remaining=sch.filter(s=>!s.paid).length;
+        await db.collection('notifications').add({
+          userId:CU.uid,title:'EasyBuy Payment Deducted',
+          body:'NGN '+fmt(overdue[0].amount)+' deducted for '+eb.product+'. Balance remaining: NGN '+fmt(newBal)+'. '+remaining+' day(s) left.',
+          read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    }
+  }
+  // Refresh wallet display
+  UD=(await db.collection('users').doc(CU.uid).get()).data();
+  const balEl=document.getElementById('d-bal');
+  if(balEl)balEl.textContent=bHid?'NGN ****':'NGN '+fmt(UD.balance||0);
+}
+
+// ── Show Plan Detail ──
+async function showEasyBuyDetail(ebId){
+  const snap=await db.collection('easyBuy').doc(ebId).get();
+  if(!snap.exists)return;
+  const eb=snap.data();
+  const pct=eb.totalRepay?Math.round(((eb.totalRepay-(eb.balance||0))/eb.totalRepay)*100):0;
+  const sch=eb.repaymentSchedule||[];
+  const paidCount=sch.filter(s=>s.paid).length;
+  const body=document.getElementById('eb-detail-body');
+  body.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'+
+    '<div><h3 style="font-size:16px;font-weight:800">'+eb.product+'</h3><p style="font-size:11px;color:var(--g400)">'+eb.merchant+'</p></div>'+
+    '<button onclick="closeM(\'m-easybuy-detail\')" style="background:var(--g100);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px">&#10005;</button></div>'+
+
+    '<div style="background:linear-gradient(135deg,#78350f,#b45309);border-radius:14px;padding:16px;color:#fff;margin-bottom:14px">'+
+    '<div style="font-size:10px;color:rgba(255,255,255,.6);margin-bottom:4px">OUTSTANDING BALANCE</div>'+
+    '<div style="font-size:28px;font-weight:900">NGN '+fmt(eb.balance||0)+'</div>'+
+    '<div style="display:flex;gap:12px;margin-top:10px">'+
+    '<div><div style="font-size:9px;color:rgba(255,255,255,.5)">Product Price</div><div style="font-size:13px;font-weight:700">NGN '+fmt(eb.price)+'</div></div>'+
+    '<div><div style="font-size:9px;color:rgba(255,255,255,.5)">Deposit Paid</div><div style="font-size:13px;font-weight:700">NGN '+fmt(eb.deposit)+'</div></div>'+
+    '<div><div style="font-size:9px;color:rgba(255,255,255,.5)">Daily</div><div style="font-size:13px;font-weight:700">NGN '+fmt(eb.daily)+'</div></div>'+
+    '</div></div>'+
+
+    '<div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:14px">'+
+    '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:12px;font-weight:600">Repayment Progress</div><div style="font-size:12px;font-weight:700;color:#15803d">'+pct+'%</div></div>'+
+    '<div style="background:#e2e8f0;border-radius:6px;height:10px;overflow:hidden"><div style="background:linear-gradient(90deg,#f59e0b,#16a34a);height:100%;width:'+pct+'%;border-radius:6px"></div></div>'+
+    '<div style="display:flex;justify-content:space-between;margin-top:6px"><div style="font-size:11px;color:var(--g400)">'+paidCount+' of '+eb.days+' days paid</div><div style="font-size:11px;color:var(--g400)">'+(eb.days-paidCount)+' remaining</div></div></div>'+
+
+    (eb.status==='active'?
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'+
+    '<button onclick="manualEasyBuyRepay(\''+ebId+'\')" style="padding:11px;background:#f0fdf4;border:1.5px solid #86efac;color:#15803d;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif">Pay Manually</button>'+
+    '<button onclick="clearEasyBuyBalance(\''+ebId+'\')" style="padding:11px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif">Clear Balance</button>'+
+    '</div>':'')+
+
+    '<div style="font-size:13px;font-weight:700;margin-bottom:8px">Repayment Schedule</div>'+
+    '<div style="max-height:240px;overflow-y:auto;border:1px solid var(--g200);border-radius:10px">'+
+    (sch.length?sch.map(s=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #f8fafc;background:'+(s.paid?'#f0fdf4':'#fff')+'">'+
+      '<div style="display:flex;align-items:center;gap:8px">'+
+      '<div style="width:24px;height:24px;border-radius:50%;background:'+(s.paid?'#dcfce7':'#f1f5f9')+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:'+(s.paid?'#15803d':'var(--g400)')+'">'+s.day+'</div>'+
+      '<div style="font-size:11px;color:var(--g500)">'+s.dueDate+'</div></div>'+
+      '<div style="display:flex;align-items:center;gap:6px">'+
+      '<div style="font-size:12px;font-weight:600">NGN '+fmt(s.amount)+'</div>'+
+      '<span style="font-size:9px;font-weight:800;padding:3px 7px;border-radius:50px;background:'+(s.paid?(s.cashPayment?'#fef3c7':'#dcfce7'):'#fef3c7')+';color:'+(s.paid?(s.cashPayment?'#92400e':'#15803d'):'#92400e')+'">'+(s.paid?(s.cashPayment?'CASH':'AUTO'):'DUE')+'</span></div>'+
+      '</div>').join(''):'<div style="padding:16px;text-align:center;color:var(--g400);font-size:12px">No schedule yet</div>')+
+    '</div>';
+  openM('m-easybuy-detail');
+}
+
+// ── Manual Repayment ──
+async function manualEasyBuyRepay(ebId){
+  const snap=await db.collection('easyBuy').doc(ebId).get();
+  if(!snap.exists)return;
+  const eb=snap.data();
+  const amtStr=prompt('Enter amount to repay (NGN). Outstanding: NGN '+fmt(eb.balance||0));
+  if(!amtStr)return;
+  const amt=parseFloat(amtStr);
+  if(!amt||amt<=0){toast('Invalid amount');return;}
+  const uSnap=await db.collection('users').doc(CU.uid).get();
+  const walBal=uSnap.data().balance||0;
+  if(walBal<amt){toast('Insufficient wallet balance');return;}
+  if(!confirm('Deduct NGN '+fmt(amt)+' from your wallet as EasyBuy repayment?'))return;
+  try{
+    await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-amt)});
+    const sch=[...(eb.repaymentSchedule||[])];
+    let rem=amt;let paid=0;
+    for(let i=0;i<sch.length;i++){
+      if(sch[i].paid)continue;if(rem<=0)break;
+      if(rem>=sch[i].amount){sch[i].paid=true;sch[i].paidAt=ebLocalDate();rem-=sch[i].amount;paid++;}
+      else{sch[i].paid=true;sch[i].paidAt=ebLocalDate();sch[i].amount=rem;rem=0;paid++;}
+    }
+    const newBal=Math.max(0,(eb.balance||0)-amt);
+    const allPaid=sch.every(s=>s.paid)||newBal<=0;
+    await db.collection('easyBuy').doc(ebId).update({
+      repaymentSchedule:sch,balance:newBal,
+      status:allPaid?'completed':'active',lastDeductionDate:ebLocalDate()
+    });
+    await db.collection('transactions').add({
+      userId:CU.uid,type:'debit',amount:amt,
+      description:'EasyBuy Manual Repayment — '+eb.product+' ('+paid+' day(s))',
+      status:'success',ebId,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    if(allPaid){
+      await db.collection('notifications').add({
+        userId:CU.uid,title:'EasyBuy Completed!',
+        body:'Your EasyBuy plan for '+eb.product+' is fully repaid. Congratulations!',
+        read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+    UD=(await db.collection('users').doc(CU.uid).get()).data();
+    const balEl=document.getElementById('d-bal');
+    if(balEl)balEl.textContent=bHid?'NGN ****':'NGN '+fmt(UD.balance||0);
+    toast(allPaid?'EasyBuy fully paid! Plan completed.':'NGN '+fmt(amt)+' repaid. Balance: NGN '+fmt(newBal));
+    closeM('m-easybuy-detail');loadEasyBuyDash();
+  }catch(e){toast('Error: '+e.message);}
+}
+
+// ── Clear Full Balance ──
+async function clearEasyBuyBalance(ebId){
+  const snap=await db.collection('easyBuy').doc(ebId).get();
+  if(!snap.exists)return;
+  const eb=snap.data();
+  const outstanding=eb.balance||0;
+  if(outstanding<=0){toast('Balance already cleared');return;}
+  const uSnap=await db.collection('users').doc(CU.uid).get();
+  const walBal=uSnap.data().balance||0;
+  if(walBal<outstanding){toast('Insufficient balance to clear NGN '+fmt(outstanding)+'. Fund your wallet.');return;}
+  if(!confirm('Clear entire outstanding balance of NGN '+fmt(outstanding)+' now?'))return;
+  try{
+    await db.collection('users').doc(CU.uid).update({balance:firebase.firestore.FieldValue.increment(-outstanding)});
+    const sch=(eb.repaymentSchedule||[]).map(s=>({...s,paid:true,paidAt:ebLocalDate()}));
+    await db.collection('easyBuy').doc(ebId).update({
+      repaymentSchedule:sch,balance:0,status:'completed',
+      completedAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await db.collection('transactions').add({
+      userId:CU.uid,type:'debit',amount:outstanding,
+      description:'EasyBuy Full Balance Clearance — '+eb.product,
+      status:'success',ebId,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await db.collection('notifications').add({
+      userId:CU.uid,title:'EasyBuy Fully Cleared!',
+      body:'You have cleared the full balance of NGN '+fmt(outstanding)+' for '+eb.product+'. Plan completed!',
+      read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    UD=(await db.collection('users').doc(CU.uid).get()).data();
+    const balEl=document.getElementById('d-bal');
+    if(balEl)balEl.textContent=bHid?'NGN ****':'NGN '+fmt(UD.balance||0);
+    toast('Balance cleared! EasyBuy plan completed.');
+    closeM('m-easybuy-detail');loadEasyBuyDash();
+  }catch(e){toast('Error: '+e.message);}
+}
+
+// ── Repayment History ──
+async function loadEasyBuyHistory(){
+  const el=document.getElementById('eb-content');
+  try{
+    const snap=await db.collection('transactions')
+      .where('userId','==',CU.uid).get();
+    const txs=snap.docs.map(d=>({id:d.id,...d.data()}))
+      .filter(t=>t.description&&t.description.toLowerCase().includes('easybuy'))
+      .sort((a,b)=>{
+        const ta=a.createdAt&&a.createdAt.toDate?a.createdAt.toDate():new Date(0);
+        const tb=b.createdAt&&b.createdAt.toDate?b.createdAt.toDate():new Date(0);
+        return tb-ta;
+      });
+    if(!txs.length){el.innerHTML='<div style="text-align:center;padding:32px;color:var(--g400)"><div style="font-size:36px">&#128203;</div><p style="font-size:13px;margin-top:8px">No EasyBuy transactions yet</p></div>';return;}
+    el.innerHTML='<div class="card" style="overflow:hidden">'+txs.map(t=>{
+      const dt=t.createdAt&&t.createdAt.toDate?t.createdAt.toDate():new Date(0);
+      return '<div class="txr"><div style="width:38px;height:38px;background:#fff8f0;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">&#128717;</div>'+
+        '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.description+'</div>'+
+        '<div style="font-size:11px;color:var(--g400);margin-top:2px">'+fd(t.createdAt)+'</div></div>'+
+        '<div style="font-weight:700;color:#dc2626;flex-shrink:0">-NGN '+fmt(t.amount)+'</div></div>';
+    }).join('')+'</div>';
+  }catch(e){el.innerHTML='<div style="padding:16px;color:var(--err);font-size:13px">Error: '+e.message+'</div>';}
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ADMIN EASYBUY MANAGEMENT
+// ══════════════════════════════════════════════════════════════
+async function loadAdminEasyBuy(el){
+  el.innerHTML='<div style="text-align:center;padding:30px;color:var(--g400)"><div style="font-size:28px">&#8987;</div><p style="font-size:13px;margin-top:6px">Loading EasyBuy data...</p></div>';
+  try{
+    const snap=await db.collection('easyBuy').get();
+    const all=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const pending=all.filter(e=>e.status==='pending');
+    const approved=all.filter(e=>e.status==='approved');
+    const active=all.filter(e=>e.status==='active');
+    const completed=all.filter(e=>e.status==='completed');
+    const rejected=all.filter(e=>e.status==='rejected');
+    const totalSales=all.reduce((s,e)=>s+(e.price||0),0);
+    const totalRepaid=all.reduce((s,e)=>s+((e.totalRepay||0)-(e.balance||0)),0);
+    const totalOut=active.reduce((s,e)=>s+(e.balance||0),0);
+
+    el.innerHTML=
+      // Stats row
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px">'+
+      '<div class="fin-stat" style="background:linear-gradient(135deg,#78350f,#b45309);color:#fff"><div style="font-size:10px;opacity:.7;margin-bottom:4px">Total Sales</div><div style="font-size:18px;font-weight:800">NGN '+fmt(totalSales)+'</div></div>'+
+      '<div class="fin-stat" style="background:linear-gradient(135deg,#15803d,#16a34a);color:#fff"><div style="font-size:10px;opacity:.7;margin-bottom:4px">Total Repaid</div><div style="font-size:18px;font-weight:800">NGN '+fmt(totalRepaid)+'</div></div>'+
+      '<div class="fin-stat" style="background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff"><div style="font-size:10px;opacity:.7;margin-bottom:4px">Outstanding</div><div style="font-size:18px;font-weight:800">NGN '+fmt(totalOut)+'</div></div>'+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:18px">'+
+      ['&#8987; '+pending.length+' Pending','&#10003; '+approved.length+' Approved','&#9889; '+active.length+' Active','&#127881; '+completed.length+' Done','&#10007; '+rejected.length+' Rejected'].map((t,i)=>
+        '<div style="background:#f8fafc;border-radius:10px;padding:10px 6px;text-align:center;font-size:11px;font-weight:700;color:var(--g700)">'+t+'</div>'
+      ).join('')+'</div>'+
+
+      // Sections
+      adminEbSection('Pending Approval',pending,'pending')+
+      adminEbSection('Approved — Awaiting Deposit',approved,'approved')+
+      adminEbSection('Active Plans',active,'active')+
+      adminEbSection('Completed',completed,'completed')+
+      adminEbSection('Rejected',rejected,'rejected');
+
+    // Run global deductions when admin loads
+    runAdminEasyBuyDeductions().catch(e=>console.warn(e));
+  }catch(e){el.innerHTML='<div style="padding:20px;color:var(--err)">Error: '+e.message+'</div>';}
+}
+
+function adminEbSection(title,items,status){
+  if(!items.length)return'';
+  const colors={pending:'#fef3c7',approved:'#fef9c3',active:'#dbeafe',completed:'#dcfce7',rejected:'#fee2e2'};
+  const tc={pending:'#92400e',approved:'#713f12',active:'#1d4ed8',completed:'#15803d',rejected:'#dc2626'};
+  return '<div style="margin-bottom:18px">'+
+    '<div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--g700)">'+title+' ('+items.length+')</div>'+
+    items.map(e=>'<div class="card" style="padding:14px;margin-bottom:8px">'+
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">'+
+      '<div style="flex:1;min-width:0">'+
+      '<div style="font-weight:800;font-size:13px">'+e.product+'</div>'+
+      '<div style="font-size:11px;color:var(--g400)">'+e.merchant+' · '+(e.userName||e.userEmail||e.userId)+'</div>'+
+      '</div><span style="background:'+colors[status]+';color:'+tc[status]+';padding:3px 9px;border-radius:50px;font-size:10px;font-weight:800;flex-shrink:0;margin-left:8px">'+status.toUpperCase()+'</span></div>'+
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">'+
+      '<div style="background:#f8fafc;border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--g400)">Price</div><div style="font-size:11px;font-weight:700">NGN '+fmt(e.price)+'</div></div>'+
+      '<div style="background:#fff8f0;border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--g400)">Deposit</div><div style="font-size:11px;font-weight:700">NGN '+fmt(e.deposit)+'</div></div>'+
+      '<div style="background:#fef3c7;border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--g400)">Balance</div><div style="font-size:11px;font-weight:700;color:#b45309">NGN '+fmt(e.balance||0)+'</div></div>'+
+      '<div style="background:#f0fdf4;border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--g400)">Daily</div><div style="font-size:11px;font-weight:700;color:#15803d">NGN '+fmt(e.daily)+'</div></div>'+
+      '</div>'+
+      (e.note?'<div style="font-size:11px;color:var(--g500);margin-bottom:8px;font-style:italic">Note: '+e.note+'</div>':'')+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+      (status==='pending'?
+        '<button onclick="adminEbAction(\''+e.id+'\',\'approved\')" style="flex:1;padding:7px;background:#dcfce7;border:1px solid #86efac;color:#15803d;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif">Approve</button>'+
+        '<button onclick="adminEbAction(\''+e.id+'\',\'rejected\')" style="flex:1;padding:7px;background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif">Reject</button>':'')+
+      (status==='active'?
+        '<button onclick="adminEbCashRepay(\''+e.id+'\',\''+e.userId+'\',\''+e.product+'\')" style="flex:1;padding:7px;background:#fef3c7;border:1px solid #fde047;color:#92400e;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif">Cash Pay</button>'+
+        '<button onclick="adminEbMarkDone(\''+e.id+'\',\''+e.userId+'\',\''+e.product+'\')" style="flex:1;padding:7px;background:#dbeafe;border:1px solid #93c5fd;color:#1d4ed8;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif">Mark Done</button>':'')+
+      '</div></div>'
+    ).join('')+'</div>';
+}
+
+async function adminEbAction(ebId,newStatus){
+  const snap=await db.collection('easyBuy').doc(ebId).get();
+  if(!snap.exists)return;
+  const eb=snap.data();
+  if(!confirm((newStatus==='approved'?'Approve':'Reject')+' EasyBuy for '+eb.product+'?'))return;
+  try{
+    await db.collection('easyBuy').doc(ebId).update({status:newStatus,reviewedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await db.collection('notifications').add({
+      userId:eb.userId,
+      title:'EasyBuy '+(newStatus==='approved'?'Approved!':'Rejected'),
+      body:newStatus==='approved'?
+        'Your EasyBuy application for '+eb.product+' has been approved! Open EasyBuy to pay your deposit of NGN '+fmt(eb.deposit)+' and activate your plan.':
+        'Your EasyBuy application for '+eb.product+' was not approved at this time. Contact support for more information.',
+      read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    toast(newStatus==='approved'?'Approved! User notified to pay deposit.':'Rejected. User notified.');
+    aTab('easybuy');
+  }catch(e){toast('Error: '+e.message);}
+}
+
+async function adminEbCashRepay(ebId,userId,product){
+  const amtStr=prompt('Enter cash amount received for EasyBuy: '+product);
+  if(!amtStr)return;
+  const amt=parseFloat(amtStr);if(!amt||amt<=0){toast('Invalid amount');return;}
+  try{
+    const snap=await db.collection('easyBuy').doc(ebId).get();
+    const eb=snap.data();
+    const sch=[...(eb.repaymentSchedule||[])];
+    let rem=amt;let paid=0;
+    for(let i=0;i<sch.length;i++){
+      if(sch[i].paid)continue;if(rem<=0)break;
+      if(rem>=sch[i].amount){sch[i].paid=true;sch[i].paidAt=ebLocalDate();sch[i].cashPayment=true;rem-=sch[i].amount;paid++;}
+      else{sch[i].paid=true;sch[i].paidAt=ebLocalDate();sch[i].cashPayment=true;sch[i].amount=rem;rem=0;paid++;}
+    }
+    const newBal=Math.max(0,(eb.balance||0)-amt);
+    const allPaid=sch.every(s=>s.paid)||newBal<=0;
+    await db.collection('easyBuy').doc(ebId).update({repaymentSchedule:sch,balance:newBal,status:allPaid?'completed':'active',lastCashPaymentDate:ebLocalDate()});
+    await db.collection('transactions').add({userId,type:'debit',amount:amt,description:'EasyBuy Cash Repayment — '+product+' ('+paid+' day(s))',status:'success',ebId,recordedBy:'admin',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await db.collection('notifications').add({userId,title:'EasyBuy Cash Payment Recorded',body:'Admin recorded cash payment of NGN '+fmt(amt)+' for '+product+'. Balance remaining: NGN '+fmt(newBal)+'.',read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    toast(allPaid?'Plan completed!':paid+' day(s) marked paid. Balance: NGN '+fmt(newBal));
+    aTab('easybuy');
+  }catch(e){toast('Error: '+e.message);}
+}
+
+async function adminEbMarkDone(ebId,userId,product){
+  if(!confirm('Mark EasyBuy plan for '+product+' as COMPLETED?'))return;
+  try{
+    const snap=await db.collection('easyBuy').doc(ebId).get();
+    const eb=snap.data();
+    const sch=(eb.repaymentSchedule||[]).map(s=>({...s,paid:true,paidAt:ebLocalDate()}));
+    await db.collection('easyBuy').doc(ebId).update({status:'completed',balance:0,repaymentSchedule:sch,completedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await db.collection('notifications').add({userId,title:'EasyBuy Completed!',body:'Admin has marked your EasyBuy plan for '+product+' as fully completed.',read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    toast('Plan marked completed. User notified.');
+    aTab('easybuy');
+  }catch(e){toast('Error: '+e.message);}
+}
+
+// ── Admin runs global EasyBuy deductions for ALL users ──
+async function runAdminEasyBuyDeductions(){
+  const todayStr=ebLocalDate();
+  const snap=await db.collection('easyBuy').where('status','==','active').get();
+  if(snap.empty)return;
+  let processed=0;
+  for(const doc of snap.docs){
+    const eb=doc.data();
+    if(eb.lastDeductionDate===todayStr)continue;
+    if(!eb.repaymentSchedule||!eb.repaymentSchedule.length)continue;
+    const overdue=eb.repaymentSchedule.filter(s=>!s.paid&&s.dueDate<=todayStr);
+    if(!overdue.length)continue;
+    try{
+      const uSnap=await db.collection('users').doc(eb.userId).get();
+      if(!uSnap.exists)continue;
+      let bal=uSnap.data().balance||0;
+      const sch=[...eb.repaymentSchedule];
+      let changed=false;
+      for(const day of overdue){
+        const dayAmt=day.amount;
+        if(bal<dayAmt){
+          await db.collection('notifications').add({userId:eb.userId,title:'EasyBuy Payment Missed',body:'Day '+day.day+' payment of NGN '+fmt(dayAmt)+' for '+eb.product+' failed — insufficient wallet balance.',read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+          break;
+        }
+        await db.collection('users').doc(eb.userId).update({balance:firebase.firestore.FieldValue.increment(-dayAmt)});
+        bal-=dayAmt;
+        const idx=sch.findIndex(s=>s.day===day.day);
+        if(idx>-1){sch[idx].paid=true;sch[idx].paidAt=todayStr;}
+        await db.collection('transactions').add({userId:eb.userId,type:'debit',amount:dayAmt,description:'EasyBuy Auto-Deduction — Day '+day.day+'/'+eb.days+' ('+eb.product+')',status:'success',ebId:doc.id,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+        changed=true;processed++;
+      }
+      if(changed){
+        const newBal=Math.max(0,(eb.balance||0)-(overdue.filter((_,i)=>{const idx=sch.findIndex(s=>s.day===overdue[i].day);return idx>-1&&sch[idx].paid;}).length*(eb.daily||0)));
+        const allPaid=sch.every(s=>s.paid)||newBal<=0;
+        await doc.ref.update({repaymentSchedule:sch,balance:newBal,status:allPaid?'completed':'active',lastDeductionDate:todayStr});
+        if(allPaid){
+          await db.collection('notifications').add({userId:eb.userId,title:'EasyBuy Completed!',body:'Your EasyBuy plan for '+eb.product+' is fully paid. Congratulations!',read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+        }
+      }
+    }catch(e){console.warn('EasyBuy deduction for '+eb.userId+':',e.message);}
+  }
+  if(processed>0)toast('EasyBuy: '+processed+' deduction(s) processed for all users.');
+}
+
 async function loadRewardsSettings(el){
   let cfg={cashbackEnabled:true,cashbackPct:1,referralEnabled:true,referralAmt:100};
   try{const s=await db.collection('settings').doc('rewards').get();if(s.exists)cfg={...cfg,...s.data()};}catch(e){}
