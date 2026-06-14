@@ -695,6 +695,20 @@ body{padding-bottom:70px}
 </style>
 
 <style>
+/* ===== WALLET SYSTEM STYLES ===== */
+#page-wallet .admin-card { margin-bottom: 0; }
+#wallet-tx-list > div:last-child { border-bottom: none; }
+#wallet-history-body > div:last-child { border-bottom: none; }
+#wallet-funding-requests > div:last-child { border-bottom: none; }
+.payment-option#pay-wallet { border-color: rgba(22,163,74,.4); }
+.payment-option#pay-wallet.selected { border-color: var(--green); background: rgba(22,163,74,.06); }
+.payment-option#pay-paystack { border-color: rgba(0,181,216,.4); }
+.payment-option#pay-paystack.selected { border-color: #00b5d8; background: rgba(0,181,216,.06); }
+#wallet-paystack-btn { display: none; }
+/* Paystack toggle */
+#paystack-enabled-toggle:checked + #paystack-toggle-track { background: #16a34a !important; }
+#paystack-enabled-toggle:checked + #paystack-toggle-track #paystack-toggle-thumb { left: 27px !important; }
+
 /* ===== PASSWORD RESET SYSTEM STYLES ===== */
 #admin-pwresets .admin-table th { font-size: 11px; white-space: nowrap; }
 #admin-pwresets .admin-table td { vertical-align: middle; font-size: 12px; }
@@ -1226,10 +1240,28 @@ body{padding-bottom:65px!important;background:#f2f2f2!important}
     </div>
     <div class="checkout-section">
       <div class="checkout-title"><i class="fas fa-credit-card"></i> Payment Method</div>
+      <!-- WALLET PAYMENT OPTION -->
+      <div class="payment-option" id="pay-wallet" onclick="selectPayment('wallet')">
+        <input type="radio" name="payment" value="wallet">
+        <span style="font-size:14px;font-weight:700">💰 Pay With Wallet</span>
+        <span id="checkout-wallet-balance-label" style="margin-left:auto;font-size:12px;font-weight:800;color:var(--green)">₦0</span>
+      </div>
+      <div id="wallet-pay-info" style="display:none;background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.3);border-radius:8px;padding:10px;margin-top:6px;font-size:13px">
+        <div id="wallet-pay-ok" style="display:none"><i class="fas fa-check-circle" style="color:var(--green)"></i> Your wallet has sufficient balance for this order.</div>
+        <div id="wallet-pay-low" style="display:none;color:var(--red)"><i class="fas fa-exclamation-triangle"></i> Insufficient wallet balance. <a onclick="navigate('wallet')" style="color:var(--orange);font-weight:800;cursor:pointer">Fund your wallet</a> or choose another method.</div>
+      </div>
+      <!-- PAYSTACK OPTION (shown dynamically) -->
+      <div class="payment-option" id="pay-paystack" onclick="selectPayment('paystack')" style="display:none">
+        <input type="radio" name="payment" value="paystack">
+        <span style="font-size:14px;font-weight:700">⚡ Pay With Paystack</span>
+        <i class="fas fa-bolt" style="margin-left:auto;color:#00b5d8"></i>
+      </div>
+      <!-- BANK TRANSFER -->
       <div class="payment-option" id="pay-bank" onclick="selectPayment('bank')">
         <input type="radio" name="payment" value="bank"> <span style="font-size:14px;font-weight:700">Bank Transfer</span>
         <i class="fas fa-university" style="margin-left:auto;color:var(--orange)"></i>
       </div>
+      <!-- PAY ON DELIVERY -->
       <div class="payment-option" id="pay-cod" onclick="selectPayment('cod')">
         <input type="radio" name="payment" value="cod"> <span style="font-size:14px;font-weight:700">Pay on Delivery</span>
         <i class="fas fa-hand-holding-usd" style="margin-left:auto;color:var(--green)"></i>
@@ -1421,6 +1453,12 @@ body{padding-bottom:65px!important;background:#f2f2f2!important}
       <div class="profile-avatar"><i class="fas fa-user"></i></div>
       <div class="profile-name" id="profile-display-name">User</div>
       <div class="profile-email" id="profile-display-email">user@example.com</div>
+      <!-- WALLET BALANCE WIDGET -->
+      <div onclick="navigate('wallet')" style="margin-top:12px;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border-radius:12px;padding:14px 20px;cursor:pointer;text-align:center;min-width:200px">
+        <div style="font-size:11px;font-weight:700;opacity:.85;letter-spacing:.5px">WALLET BALANCE</div>
+        <div id="profile-wallet-balance" style="font-size:22px;font-weight:900;margin-top:2px">₦0.00</div>
+        <div style="font-size:11px;opacity:.8;margin-top:2px">Tap to manage wallet →</div>
+      </div>
     </div>
     <div class="profile-section">
       <div class="profile-section-title"><i class="fas fa-user-edit"></i> Edit Profile</div>
@@ -1432,6 +1470,40 @@ body{padding-bottom:65px!important;background:#f2f2f2!important}
       <div class="profile-section-title"><i class="fas fa-lock"></i> Change Password</div>
       <div class="form-group"><label class="form-label">New Password</label><input class="form-input" id="new-password" type="password" placeholder="New password"></div>
       <button class="btn-primary" onclick="changePassword()"><i class="fas fa-key"></i> Update Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- WALLET PAGE -->
+<div id="page-wallet" class="page">
+  <div class="page-header">
+    <button class="back-btn" onclick="navigate('profile')"><i class="fas fa-arrow-left"></i></button>
+    <h2>💰 My Wallet</h2>
+  </div>
+  <div style="max-width:600px;margin:0 auto;padding:16px">
+    <!-- Balance Card -->
+    <div style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border-radius:16px;padding:24px;margin-bottom:16px;text-align:center">
+      <div style="font-size:12px;font-weight:700;opacity:.85;letter-spacing:1px;text-transform:uppercase">Available Balance</div>
+      <div id="wallet-balance-display" style="font-size:36px;font-weight:900;margin:8px 0">₦0.00</div>
+      <div style="font-size:12px;opacity:.8" id="wallet-uid-label"></div>
+    </div>
+    <!-- Fund Wallet Buttons -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <button onclick="showFundWalletModal('bank')" style="background:var(--surface);border:2px solid var(--orange);color:var(--orange);border-radius:12px;padding:14px;font-size:13px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px">
+        <i class="fas fa-university" style="font-size:22px"></i>
+        Bank Transfer
+        <span style="font-size:10px;opacity:.7;font-weight:600">Upload Proof</span>
+      </button>
+      <button id="wallet-paystack-btn" onclick="showFundWalletModal('paystack')" style="background:var(--surface);border:2px solid #00b5d8;color:#00b5d8;border-radius:12px;padding:14px;font-size:13px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;display:none">
+        <i class="fas fa-bolt" style="font-size:22px"></i>
+        Paystack
+        <span style="font-size:10px;opacity:.7;font-weight:600">Instant Funding</span>
+      </button>
+    </div>
+    <!-- Transaction History -->
+    <div class="admin-card">
+      <div class="admin-card-title">📋 Transaction History</div>
+      <div id="wallet-tx-list"><p style="color:var(--gray-400);font-size:13px;text-align:center;padding:20px"><i class="fas fa-spinner fa-spin"></i> Loading...</p></div>
     </div>
   </div>
 </div>
@@ -1489,6 +1561,8 @@ body{padding-bottom:65px!important;background:#f2f2f2!important}
       <button class="admin-tab" onclick="switchAdminTab('banners',this)">🖼️ Banners</button>
       <button class="admin-tab" onclick="switchAdminTab('chats',this)">Chat Sessions</button>
       <button class="admin-tab" data-tab="pwresets" onclick="switchAdminTab('pwresets',this)" style="position:relative">🔑 PW Resets <span id="pw-reset-badge" style="display:none;position:absolute;top:4px;right:4px;background:#ef4444;color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:900;align-items:center;justify-content:center"></span></button>
+      <button class="admin-tab" onclick="switchAdminTab('wallets',this)">💰 Wallets</button>
+      <button class="admin-tab" onclick="switchAdminTab('paystack',this)">⚡ Paystack</button>
     </div>
     <!-- PASSWORD RESET REQUESTS TAB -->
     <div id="admin-pwresets" class="admin-tab-content hidden">
@@ -1534,6 +1608,68 @@ body{padding-bottom:65px!important;background:#f2f2f2!important}
         <div id="pwreset-audit-log" style="max-height:220px;overflow-y:auto;font-size:12px;color:var(--text-muted);background:var(--surface2);border-radius:8px;padding:12px;margin-top:8px;border:1px solid var(--border)">
           <p style="color:var(--gray-400)">Audit log will appear here...</p>
         </div>
+      </div>
+    </div>
+
+    <!-- ADMIN WALLET MANAGEMENT TAB -->
+    <div id="admin-wallets" class="admin-tab-content hidden">
+      <div class="admin-card">
+        <div class="admin-card-title">
+          <span>💰 Wallet Funding Requests</span>
+          <button onclick="loadAdminWallets()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <p style="font-size:12px;color:var(--gray-500);margin-bottom:14px">Review and approve user bank-transfer wallet funding requests. Approved funds are added automatically.</p>
+        <div id="wallet-funding-requests"><p style="color:var(--gray-400);font-size:13px;text-align:center;padding:20px"><i class="fas fa-spinner fa-spin"></i> Loading...</p></div>
+      </div>
+      <div class="admin-card" style="margin-top:14px">
+        <div class="admin-card-title">👥 All User Wallets</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input class="form-input" id="admin-wallet-search" placeholder="Search by email or name..." style="flex:1;font-size:13px" oninput="filterAdminWallets()">
+        </div>
+        <div style="overflow-x:auto">
+          <table class="admin-table" style="min-width:580px">
+            <thead><tr><th>User</th><th>Balance</th><th>Last Activity</th><th>Actions</th></tr></thead>
+            <tbody id="admin-wallets-tbody"><tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:20px"><i class="fas fa-spinner fa-spin"></i></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYSTACK SETTINGS TAB -->
+    <div id="admin-paystack" class="admin-tab-content hidden">
+      <div class="admin-card">
+        <div class="admin-card-title">⚡ Paystack Payment Settings</div>
+        <p style="font-size:12px;color:var(--gray-500);margin-bottom:18px">Enter your Paystack API keys. Keys are saved in your database — no code editing required. Changes take effect immediately across the site.</p>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;background:var(--surface2);border-radius:10px;padding:14px">
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:800">Paystack Integration</div>
+            <div id="paystack-status-label" style="font-size:12px;color:var(--gray-400);margin-top:2px">Loading status...</div>
+          </div>
+          <label style="position:relative;display:inline-block;width:52px;height:28px;cursor:pointer">
+            <input type="checkbox" id="paystack-enabled-toggle" onchange="savePaystackSettings()" style="opacity:0;width:0;height:0">
+            <span id="paystack-toggle-track" style="position:absolute;inset:0;border-radius:14px;background:#ccc;transition:.3s;cursor:pointer">
+              <span id="paystack-toggle-thumb" style="position:absolute;height:22px;width:22px;left:3px;bottom:3px;border-radius:50%;background:#fff;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.3)"></span>
+            </span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Paystack Public Key <span style="color:var(--gray-400);font-weight:400">(starts with pk_)</span></label>
+          <input class="form-input" id="ps-public-key" placeholder="pk_live_xxxxxxxxxxxxxxxx" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Paystack Secret Key <span style="color:var(--gray-400);font-weight:400">(starts with sk_)</span></label>
+          <input class="form-input" id="ps-secret-key" type="password" placeholder="sk_live_xxxxxxxxxxxxxxxx" autocomplete="off">
+          <p style="font-size:11px;color:var(--gray-400);margin-top:4px"><i class="fas fa-shield-alt"></i> Secret key is stored securely and used only for server-side verification.</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Webhook Secret <span style="color:var(--gray-400);font-weight:400">(optional — for webhook verification)</span></label>
+          <input class="form-input" id="ps-webhook-secret" type="password" placeholder="Optional webhook secret">
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+          <button class="btn-primary" onclick="savePaystackSettings()"><i class="fas fa-save"></i> Save Paystack Settings</button>
+          <button onclick="testPaystackKey()" style="background:rgba(0,181,216,.12);color:#00b5d8;border:1px solid #00b5d8;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer"><i class="fas fa-plug"></i> Test Connection</button>
+        </div>
+        <div id="paystack-save-msg" style="margin-top:10px;display:none"></div>
       </div>
     </div>
 
@@ -2446,8 +2582,118 @@ body{padding-bottom:65px!important;background:#f2f2f2!important}
     </div>
   </div>
 </div>
-<!-- PASSWORD RESET SEND MODAL -->
-<div class="modal-overlay" id="modal-send-reset">
+<!-- FUND WALLET MODAL -->
+<div class="modal-overlay" id="modal-fund-wallet">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <span class="modal-title" id="fund-wallet-title">💰 Fund Wallet</span>
+      <button class="modal-close" onclick="closeModal('modal-fund-wallet')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:14px">
+      <!-- AMOUNT -->
+      <div>
+        <label class="form-label">Amount to Fund (₦) *</label>
+        <input class="form-input" id="fund-amount" type="number" min="100" placeholder="e.g. 5000" oninput="updateFundPreview()">
+        <div id="fund-amount-preview" style="font-size:12px;color:var(--green);margin-top:4px;display:none"></div>
+      </div>
+      <!-- BANK TRANSFER FIELDS -->
+      <div id="fund-bank-fields">
+        <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:10px;font-size:13px">
+          <div style="font-weight:800;margin-bottom:6px;color:var(--orange)">Transfer To:</div>
+          <div>Bank: <strong>Opay</strong></div>
+          <div>Name: <strong>Adewole Aderonke Aishat</strong></div>
+          <div>Account: <strong style="font-size:16px;color:var(--orange)">9168031213</strong></div>
+          <div style="margin-top:6px;font-size:12px;color:var(--gray-400)">Use your email as transfer reference.</div>
+        </div>
+        <div>
+          <label class="form-label">Upload Payment Proof *</label>
+          <input type="file" id="fund-proof-file" accept="image/*,application/pdf" class="form-input" style="padding:6px">
+          <div id="fund-proof-preview" style="margin-top:8px;display:none"><img id="fund-proof-img" style="max-width:100%;max-height:120px;object-fit:cover;border-radius:8px;border:2px solid var(--orange)"></div>
+        </div>
+        <div>
+          <label class="form-label">Note / Reference <span style="color:var(--gray-400);font-weight:400">(optional)</span></label>
+          <input class="form-input" id="fund-note" placeholder="e.g. transfer ref: 12345">
+        </div>
+      </div>
+      <!-- PAYSTACK FIELDS -->
+      <div id="fund-paystack-fields" style="display:none">
+        <div style="background:rgba(0,181,216,.08);border:1px solid rgba(0,181,216,.3);border-radius:10px;padding:14px;font-size:13px">
+          <i class="fas fa-bolt" style="color:#00b5d8"></i> <strong>Instant funding via Paystack.</strong> Your wallet will be credited immediately after payment.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-fund-wallet')">Cancel</button>
+      <button class="btn-primary" id="fund-wallet-submit-btn" onclick="submitFundWallet()"><i class="fas fa-paper-plane"></i> Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN WALLET ADJUST MODAL -->
+<div class="modal-overlay" id="modal-wallet-adjust">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <span class="modal-title" id="wallet-adjust-title">Adjust Wallet</span>
+      <button class="modal-close" onclick="closeModal('modal-wallet-adjust')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:14px">
+      <input type="hidden" id="wallet-adjust-uid">
+      <div id="wallet-adjust-user-info" style="font-size:13px;font-weight:700;color:var(--orange)"></div>
+      <div>
+        <label class="form-label">Action</label>
+        <select class="form-input" id="wallet-adjust-action">
+          <option value="credit">➕ Add Money (Credit)</option>
+          <option value="debit">➖ Deduct Money (Debit)</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Amount (₦) *</label>
+        <input class="form-input" id="wallet-adjust-amount" type="number" min="1" placeholder="e.g. 1000">
+      </div>
+      <div>
+        <label class="form-label">Reason / Note *</label>
+        <input class="form-input" id="wallet-adjust-note" placeholder="e.g. Refund for order #BNM-123">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-wallet-adjust')">Cancel</button>
+      <button class="btn-primary" onclick="submitWalletAdjust()"><i class="fas fa-check"></i> Apply Adjustment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN WALLET TX HISTORY MODAL -->
+<div class="modal-overlay" id="modal-wallet-history">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <span class="modal-title" id="wallet-history-title">Wallet Transactions</span>
+      <button class="modal-close" onclick="closeModal('modal-wallet-history')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="wallet-history-body" style="max-height:400px;overflow-y:auto;padding:0">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-wallet-history')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- APPROVE FUNDING MODAL -->
+<div class="modal-overlay" id="modal-approve-funding">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <span class="modal-title">Review Funding Request</span>
+      <button class="modal-close" onclick="closeModal('modal-approve-funding')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="approve-funding-body">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="rejectFundingRequest()"><i class="fas fa-times"></i> Reject</button>
+      <button class="btn-primary" onclick="approveFundingRequest()"><i class="fas fa-check"></i> Approve & Fund</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
   <div class="modal" style="max-width:460px">
     <div class="modal-header">
       <span class="modal-title">🔑 Send Password Reset Link</span>
@@ -2549,13 +2795,18 @@ onAuthStateChanged(auth, async (user) => {
     await loadCart();
     await loadWishlist();
     loadUserProfile();
+    loadWalletBalance();
   } else {
     cart = [];
     wishlist = [];
+    _walletBalance = 0;
     updateCartBadge();
     updateWishBadge();
   }
 });
+
+// Load Paystack settings on startup (for all users)
+loadPaystackSettings();
 
 function updateAuthUI() {
   const loggedIn = !!currentUser;
@@ -3129,6 +3380,548 @@ window.changePassword = async function() {
   } catch(e) { showToast('Please re-login and try again','error'); }
 };
 
+// ===== WALLET SYSTEM =====
+
+let _walletBalance = 0;
+let _paystackPublicKey = '';
+let _paystackEnabled = false;
+let _currentFundingRequestId = null;
+let _allAdminWallets = [];
+
+// ---- Get or create wallet for current user ----
+async function getOrCreateWallet(uid) {
+  if (!uid) return null;
+  const wRef = doc(db, 'wallets', uid);
+  const snap = await getDoc(wRef);
+  if (snap.exists()) return snap.data();
+  // Create wallet with 0 balance
+  const wallet = { uid, balance: 0, createdAt: serverTimestamp(), updatedAt: serverTimestamp() };
+  await setDoc(wRef, wallet);
+  return wallet;
+}
+
+// ---- Load wallet balance for current user ----
+async function loadWalletBalance() {
+  if (!currentUser) return;
+  try {
+    const w = await getOrCreateWallet(currentUser.uid);
+    _walletBalance = w ? (w.balance || 0) : 0;
+    // Update all balance displays
+    const displays = ['profile-wallet-balance','wallet-balance-display','checkout-wallet-balance-label'];
+    displays.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '₦' + _walletBalance.toLocaleString('en-NG', {minimumFractionDigits:2});
+    });
+    const uidLbl = document.getElementById('wallet-uid-label');
+    if (uidLbl) uidLbl.textContent = currentUser.email;
+  } catch(e) { console.error('loadWalletBalance:', e); }
+}
+
+// ---- Credit wallet (internal) ----
+async function creditWallet(uid, amount, type, description, refId) {
+  if (!uid || amount <= 0) return;
+  const wRef = doc(db, 'wallets', uid);
+  const snap = await getDoc(wRef);
+  const cur = snap.exists() ? (snap.data().balance || 0) : 0;
+  const newBal = cur + amount;
+  await setDoc(wRef, { balance: newBal, updatedAt: serverTimestamp(), uid }, { merge: true });
+  // Record transaction
+  await addDoc(collection(db, 'wallet_transactions'), {
+    uid, amount, type, description, refId: refId || '',
+    balanceBefore: cur, balanceAfter: newBal,
+    createdAt: serverTimestamp(), createdAtISO: new Date().toISOString()
+  });
+  return newBal;
+}
+
+// ---- Debit wallet (internal) ----
+async function debitWallet(uid, amount, type, description, refId) {
+  if (!uid || amount <= 0) return false;
+  const wRef = doc(db, 'wallets', uid);
+  const snap = await getDoc(wRef);
+  const cur = snap.exists() ? (snap.data().balance || 0) : 0;
+  if (cur < amount) return false; // insufficient
+  const newBal = cur - amount;
+  await setDoc(wRef, { balance: newBal, updatedAt: serverTimestamp(), uid }, { merge: true });
+  await addDoc(collection(db, 'wallet_transactions'), {
+    uid, amount: -amount, type, description, refId: refId || '',
+    balanceBefore: cur, balanceAfter: newBal,
+    createdAt: serverTimestamp(), createdAtISO: new Date().toISOString()
+  });
+  return newBal;
+}
+
+// ---- Load wallet transaction history ----
+async function loadWalletTransactions() {
+  if (!currentUser) return;
+  const list = document.getElementById('wallet-tx-list');
+  if (!list) return;
+  list.innerHTML = '<p style="color:var(--gray-400);font-size:13px;text-align:center;padding:20px"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+  try {
+    const snap = await getDocs(query(collection(db,'wallet_transactions'),
+      where('uid','==',currentUser.uid), orderBy('createdAt','desc'), limit(50)));
+    if (snap.empty) {
+      list.innerHTML = '<p style="color:var(--gray-400);font-size:13px;text-align:center;padding:20px">No transactions yet.</p>';
+      return;
+    }
+    const typeIcons = { credit:'⬆️', debit:'⬇️', purchase:'🛒', refund:'↩️', admin_credit:'🎁', admin_debit:'🔻', paystack:'⚡', bank_transfer:'🏦' };
+    list.innerHTML = snap.docs.map(d => {
+      const t = d.data();
+      const amt = t.amount || 0;
+      const isCredit = amt > 0;
+      const icon = typeIcons[t.type] || (isCredit ? '⬆️' : '⬇️');
+      const dt = t.createdAtISO ? new Date(t.createdAtISO).toLocaleString('en-NG',{dateStyle:'short',timeStyle:'short'}) : '—';
+      return `<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border)">
+        <div style="font-size:22px;flex-shrink:0">${icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--text)">${escHtml(t.description||t.type||'Transaction')}</div>
+          <div style="font-size:11px;color:var(--gray-400)">${dt}</div>
+        </div>
+        <div style="font-size:14px;font-weight:900;color:${isCredit?'var(--green)':'var(--red)'}">
+          ${isCredit?'+':''} ₦${Math.abs(amt).toLocaleString('en-NG',{minimumFractionDigits:2})}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { list.innerHTML = '<p style="color:var(--red);font-size:13px;text-align:center;padding:20px">Error loading transactions.</p>'; }
+}
+
+// ---- Show fund wallet modal ----
+window.showFundWalletModal = function(method) {
+  document.getElementById('fund-wallet-title').textContent = method === 'paystack' ? '⚡ Fund Wallet via Paystack' : '🏦 Fund Wallet via Bank Transfer';
+  document.getElementById('fund-bank-fields').style.display = method === 'bank' ? 'block' : 'none';
+  document.getElementById('fund-paystack-fields').style.display = method === 'paystack' ? 'block' : 'none';
+  document.getElementById('fund-amount').value = '';
+  document.getElementById('fund-amount-preview').style.display = 'none';
+  document.getElementById('fund-wallet-submit-btn').dataset.method = method;
+  document.getElementById('fund-wallet-submit-btn').innerHTML = method === 'paystack' ? '<i class="fas fa-bolt"></i> Pay with Paystack' : '<i class="fas fa-paper-plane"></i> Submit Request';
+  if (method === 'bank') {
+    const proofInput = document.getElementById('fund-proof-file');
+    if (proofInput) proofInput.value = '';
+    document.getElementById('fund-proof-preview').style.display = 'none';
+    const noteEl = document.getElementById('fund-note');
+    if (noteEl) noteEl.value = '';
+  }
+  openModal('modal-fund-wallet');
+};
+
+window.updateFundPreview = function() {
+  const amt = parseFloat(document.getElementById('fund-amount').value) || 0;
+  const preview = document.getElementById('fund-amount-preview');
+  if (amt > 0) {
+    preview.textContent = '₦' + amt.toLocaleString('en-NG', {minimumFractionDigits:2}) + ' will be added to your wallet after approval.';
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+};
+
+// ---- Submit fund wallet request ----
+window.submitFundWallet = async function() {
+  if (!currentUser) return showToast('Please sign in','error');
+  const method = document.getElementById('fund-wallet-submit-btn').dataset.method;
+  const amount = parseFloat(document.getElementById('fund-amount').value);
+  if (!amount || amount < 100) return showToast('Minimum funding amount is ₦100','error');
+
+  if (method === 'paystack') {
+    // Load Paystack key from settings
+    closeModal('modal-fund-wallet');
+    initiatePaystackFunding(amount);
+    return;
+  }
+
+  // Bank transfer — validate proof file
+  const fileInput = document.getElementById('fund-proof-file');
+  if (!fileInput.files.length) return showToast('Please upload payment proof','error');
+  const file = fileInput.files[0];
+  if (file.size > 5 * 1024 * 1024) return showToast('File too large (max 5MB)','error');
+
+  const btn = document.getElementById('fund-wallet-submit-btn');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+  try {
+    // Convert image to base64 for storage
+    const base64 = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+
+    const note = document.getElementById('fund-note')?.value || '';
+    // Fetch user profile for name
+    let userName = currentUser.displayName || currentUser.email.split('@')[0];
+    try {
+      const uSnap = await getDoc(doc(db,'users',currentUser.uid));
+      if (uSnap.exists()) userName = uSnap.data().name || userName;
+    } catch(e) {}
+
+    await addDoc(collection(db,'wallet_funding_requests'), {
+      uid: currentUser.uid,
+      email: currentUser.email,
+      userName,
+      amount,
+      method: 'bank_transfer',
+      proofBase64: base64,
+      note,
+      status: 'pending',
+      createdAt: serverTimestamp(),
+      createdAtISO: new Date().toISOString()
+    });
+
+    showToast('Funding request submitted! Admin will review shortly.','success');
+    closeModal('modal-fund-wallet');
+    loadWalletTransactions();
+  } catch(e) {
+    showToast('Failed to submit request: ' + e.message,'error');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Request';
+};
+
+// ---- Paystack wallet funding ----
+async function initiatePaystackFunding(amount) {
+  if (!_paystackPublicKey) {
+    showToast('Paystack is not configured. Please use bank transfer.','error');
+    return;
+  }
+  if (!window.PaystackPop) {
+    // Load Paystack inline script dynamically
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://js.paystack.co/v1/inline.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+  const refId = 'BENIM-WF-' + Date.now() + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
+  const handler = window.PaystackPop.setup({
+    key: _paystackPublicKey,
+    email: currentUser.email,
+    amount: amount * 100, // Paystack uses kobo
+    currency: 'NGN',
+    ref: refId,
+    metadata: { uid: currentUser.uid, purpose: 'wallet_funding' },
+    callback: async function(response) {
+      await handlePaystackWalletSuccess(response, amount, refId);
+    },
+    onClose: function() {
+      showToast('Payment cancelled.','info');
+    }
+  });
+  handler.openIframe();
+}
+
+async function handlePaystackWalletSuccess(response, amount, refId) {
+  // Prevent duplicate credits by checking refId
+  try {
+    const existingSnap = await getDocs(query(collection(db,'wallet_transactions'), where('refId','==',refId)));
+    if (!existingSnap.empty) {
+      showToast('This payment has already been credited to your wallet.','info');
+      return;
+    }
+    const newBal = await creditWallet(currentUser.uid, amount, 'paystack', 'Wallet funded via Paystack', refId);
+    _walletBalance = newBal;
+    await loadWalletBalance();
+    await loadWalletTransactions();
+    // Save funding record
+    await addDoc(collection(db,'wallet_funding_requests'), {
+      uid: currentUser.uid, email: currentUser.email, amount,
+      method: 'paystack', status: 'completed', paystackRef: refId,
+      paystackResponse: response, createdAt: serverTimestamp(), createdAtISO: new Date().toISOString()
+    });
+    showToast('₦' + amount.toLocaleString() + ' added to your wallet! 🎉','success');
+  } catch(e) {
+    showToast('Payment received but wallet update failed. Contact support.','error');
+  }
+}
+
+// ---- ADMIN: Load all wallet funding requests ----
+window.loadAdminWallets = async function() {
+  if (!isAdmin) return;
+  // Load funding requests
+  const reqDiv = document.getElementById('wallet-funding-requests');
+  if (reqDiv) reqDiv.innerHTML = '<p style="color:var(--gray-400);font-size:13px;text-align:center;padding:20px"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+
+  try {
+    const snap = await getDocs(query(collection(db,'wallet_funding_requests'), orderBy('createdAt','desc'), limit(100)));
+    const requests = snap.docs.map(d => ({id:d.id,...d.data()}));
+    renderFundingRequests(requests, reqDiv);
+  } catch(e) {
+    if (reqDiv) reqDiv.innerHTML = '<p style="color:var(--red);font-size:13px;text-align:center;padding:20px">Error loading requests.</p>';
+  }
+
+  // Load all wallets
+  const tbody = document.getElementById('admin-wallets-tbody');
+  if (tbody) {
+    try {
+      const wSnap = await getDocs(collection(db,'wallets'));
+      _allAdminWallets = [];
+      for (const wd of wSnap.docs) {
+        const w = { id: wd.id, ...wd.data() };
+        // Get user email from users collection
+        try {
+          const uSnap = await getDoc(doc(db,'users',wd.id));
+          if (uSnap.exists()) { w.email = uSnap.data().email || ''; w.name = uSnap.data().name || ''; }
+        } catch(e) {}
+        _allAdminWallets.push(w);
+      }
+      renderAdminWalletsTable(_allAdminWallets, tbody);
+    } catch(e) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--red);text-align:center;padding:20px">Error loading wallets.</td></tr>';
+    }
+  }
+};
+
+function renderFundingRequests(list, container) {
+  if (!container) return;
+  const pending = list.filter(r => r.status === 'pending');
+  if (!list.length) { container.innerHTML = '<p style="color:var(--gray-400);font-size:13px;text-align:center;padding:20px">No funding requests yet.</p>'; return; }
+  const statusBadge = {
+    pending: '<span style="background:#fef3c7;color:#92400e;border-radius:99px;padding:3px 10px;font-size:11px;font-weight:800">⏳ Pending</span>',
+    completed: '<span style="background:#dcfce7;color:#15803d;border-radius:99px;padding:3px 10px;font-size:11px;font-weight:800">✅ Approved</span>',
+    rejected: '<span style="background:#fee2e2;color:#991b1b;border-radius:99px;padding:3px 10px;font-size:11px;font-weight:800">❌ Rejected</span>'
+  };
+  container.innerHTML = list.slice(0,30).map(r => {
+    const dt = r.createdAtISO ? new Date(r.createdAtISO).toLocaleString('en-NG',{dateStyle:'medium',timeStyle:'short'}) : '—';
+    const badge = statusBadge[r.status] || statusBadge.pending;
+    const actionBtn = r.status === 'pending' ? `<button class="admin-approve-funding-btn" data-id="${r.id}" style="background:var(--orange);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer">Review</button>` : '';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid var(--border);flex-wrap:wrap">
+      <div style="flex:1;min-width:160px">
+        <div style="font-size:13px;font-weight:800">${escHtml(r.email||'')}</div>
+        <div style="font-size:11px;color:var(--gray-400)">${escHtml(r.userName||'')} · ${r.method==='paystack'?'⚡ Paystack':'🏦 Bank Transfer'} · ${dt}</div>
+      </div>
+      <div style="font-size:14px;font-weight:900;color:var(--green)">₦${(r.amount||0).toLocaleString()}</div>
+      ${badge}
+      ${actionBtn}
+    </div>`;
+  }).join('');
+  // Attach click handlers
+  container.querySelectorAll('.admin-approve-funding-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      openFundingReviewModal(this.getAttribute('data-id'), list.find(r => r.id === this.getAttribute('data-id')));
+    });
+  });
+}
+
+function renderAdminWalletsTable(list, tbody) {
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:20px">No wallets found.</td></tr>'; return; }
+  window._adminWalletMap = {};
+  list.forEach(w => { window._adminWalletMap[w.id] = w; });
+  tbody.innerHTML = list.map(w => {
+    return `<tr>
+      <td>
+        <div style="font-size:13px;font-weight:800">${escHtml(w.email||w.id)}</div>
+        <div style="font-size:11px;color:var(--gray-400)">${escHtml(w.name||'')}</div>
+      </td>
+      <td style="font-size:14px;font-weight:900;color:var(--green)">₦${(w.balance||0).toLocaleString('en-NG',{minimumFractionDigits:2})}</td>
+      <td style="font-size:11px;color:var(--gray-400)">${w.updatedAt ? 'Recent' : '—'}</td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap;padding:8px 6px">
+        <button class="admin-wallet-adjust-btn" data-uid="${w.id}" style="background:var(--orange);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;padding:5px 8px;cursor:pointer"><i class="fas fa-edit"></i> Adjust</button>
+        <button class="admin-wallet-history-btn" data-uid="${w.id}" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:700;padding:5px 8px;cursor:pointer"><i class="fas fa-list"></i> History</button>
+      </td>
+    </tr>`;
+  }).join('');
+  tbody.querySelectorAll('.admin-wallet-adjust-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const uid = this.getAttribute('data-uid');
+      const w = window._adminWalletMap[uid];
+      openWalletAdjustModal(uid, w);
+    });
+  });
+  tbody.querySelectorAll('.admin-wallet-history-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const uid = this.getAttribute('data-uid');
+      const w = window._adminWalletMap[uid];
+      openAdminWalletHistory(uid, w);
+    });
+  });
+}
+
+window.filterAdminWallets = function() {
+  const q = (document.getElementById('admin-wallet-search')?.value || '').toLowerCase();
+  const filtered = _allAdminWallets.filter(w => (w.email||'').toLowerCase().includes(q) || (w.name||'').toLowerCase().includes(q));
+  const tbody = document.getElementById('admin-wallets-tbody');
+  if (tbody) renderAdminWalletsTable(filtered, tbody);
+};
+
+// ---- Open funding review modal ----
+function openFundingReviewModal(id, req) {
+  _currentFundingRequestId = id;
+  window._currentFundingRequest = req;
+  const body = document.getElementById('approve-funding-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:12px;padding:4px 0">
+      <div style="font-size:13px"><strong>User:</strong> ${escHtml(req.email)}</div>
+      <div style="font-size:13px"><strong>Amount:</strong> <span style="color:var(--green);font-weight:900">₦${(req.amount||0).toLocaleString()}</span></div>
+      <div style="font-size:13px"><strong>Submitted:</strong> ${req.createdAtISO ? new Date(req.createdAtISO).toLocaleString('en-NG') : '—'}</div>
+      ${req.note ? `<div style="font-size:13px"><strong>Note:</strong> ${escHtml(req.note)}</div>` : ''}
+      ${req.proofBase64 ? `<div><div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--gray-500)">PAYMENT PROOF</div><img src="${req.proofBase64}" style="max-width:100%;max-height:200px;object-fit:contain;border-radius:8px;border:2px solid var(--border)"></div>` : ''}
+    </div>`;
+  openModal('modal-approve-funding');
+}
+
+window.approveFundingRequest = async function() {
+  if (!_currentFundingRequestId || !window._currentFundingRequest) return;
+  const req = window._currentFundingRequest;
+  try {
+    // Credit wallet
+    await creditWallet(req.uid, req.amount, 'bank_transfer', `Wallet funded via Bank Transfer (approved by admin)`, _currentFundingRequestId);
+    // Update request status
+    await updateDoc(doc(db,'wallet_funding_requests',_currentFundingRequestId), { status: 'completed', approvedAt: serverTimestamp() });
+    showToast('₦' + req.amount.toLocaleString() + ' credited to user wallet!','success');
+    closeModal('modal-approve-funding');
+    loadAdminWallets();
+  } catch(e) { showToast('Error approving: ' + e.message,'error'); }
+};
+
+window.rejectFundingRequest = async function() {
+  if (!_currentFundingRequestId) return;
+  try {
+    await updateDoc(doc(db,'wallet_funding_requests',_currentFundingRequestId), { status: 'rejected', rejectedAt: serverTimestamp() });
+    showToast('Request rejected.','info');
+    closeModal('modal-approve-funding');
+    loadAdminWallets();
+  } catch(e) { showToast('Error rejecting: '+e.message,'error'); }
+};
+
+// ---- Admin: wallet adjust ----
+function openWalletAdjustModal(uid, w) {
+  document.getElementById('wallet-adjust-uid').value = uid;
+  const infoEl = document.getElementById('wallet-adjust-user-info');
+  infoEl.textContent = (w.email || uid) + ' — Balance: ₦' + (w.balance||0).toLocaleString();
+  document.getElementById('wallet-adjust-action').value = 'credit';
+  document.getElementById('wallet-adjust-amount').value = '';
+  document.getElementById('wallet-adjust-note').value = '';
+  document.getElementById('wallet-adjust-title').textContent = 'Adjust Wallet — ' + (w.name || w.email || uid);
+  openModal('modal-wallet-adjust');
+}
+
+window.submitWalletAdjust = async function() {
+  if (!isAdmin) return;
+  const uid = document.getElementById('wallet-adjust-uid').value;
+  const action = document.getElementById('wallet-adjust-action').value;
+  const amount = parseFloat(document.getElementById('wallet-adjust-amount').value);
+  const note = document.getElementById('wallet-adjust-note').value.trim();
+  if (!uid || !amount || amount <= 0) return showToast('Please fill all fields','error');
+  if (!note) return showToast('Please enter a reason/note','error');
+  try {
+    if (action === 'credit') {
+      await creditWallet(uid, amount, 'admin_credit', 'Admin credit: ' + note, 'admin-'+Date.now());
+      showToast('₦' + amount.toLocaleString() + ' credited to wallet!','success');
+    } else {
+      const result = await debitWallet(uid, amount, 'admin_debit', 'Admin debit: ' + note, 'admin-'+Date.now());
+      if (result === false) { showToast('Insufficient wallet balance','error'); return; }
+      showToast('₦' + amount.toLocaleString() + ' deducted from wallet','success');
+    }
+    closeModal('modal-wallet-adjust');
+    loadAdminWallets();
+  } catch(e) { showToast('Error: ' + e.message,'error'); }
+};
+
+// ---- Admin: wallet tx history ----
+async function openAdminWalletHistory(uid, w) {
+  document.getElementById('wallet-history-title').textContent = 'Transactions — ' + (w.name || w.email || uid);
+  const body = document.getElementById('wallet-history-body');
+  body.innerHTML = '<p style="padding:20px;text-align:center;color:var(--gray-400)"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+  openModal('modal-wallet-history');
+  try {
+    const snap = await getDocs(query(collection(db,'wallet_transactions'), where('uid','==',uid), orderBy('createdAt','desc'), limit(40)));
+    if (snap.empty) { body.innerHTML = '<p style="padding:20px;text-align:center;color:var(--gray-400)">No transactions found.</p>'; return; }
+    const typeIcons = { credit:'⬆️', debit:'⬇️', purchase:'🛒', refund:'↩️', admin_credit:'🎁', admin_debit:'🔻', paystack:'⚡', bank_transfer:'🏦' };
+    body.innerHTML = snap.docs.map(d => {
+      const t = d.data();
+      const amt = t.amount || 0;
+      const isCredit = amt > 0;
+      const icon = typeIcons[t.type] || (isCredit?'⬆️':'⬇️');
+      const dt = t.createdAtISO ? new Date(t.createdAtISO).toLocaleString('en-NG',{dateStyle:'short',timeStyle:'short'}) : '—';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid var(--border)">
+        <div style="font-size:20px">${icon}</div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700">${escHtml(t.description||t.type)}</div>
+          <div style="font-size:10px;color:var(--gray-400)">${dt} · Bal after: ₦${(t.balanceAfter||0).toLocaleString()}</div>
+        </div>
+        <div style="font-size:13px;font-weight:900;color:${isCredit?'var(--green)':'var(--red)'}">
+          ${isCredit?'+':''}₦${Math.abs(amt).toLocaleString()}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { body.innerHTML = '<p style="padding:20px;color:var(--red)">Error loading history.</p>'; }
+}
+
+// ---- PAYSTACK SETTINGS ----
+async function loadPaystackSettings() {
+  try {
+    const snap = await getDoc(doc(db,'settings','paystack'));
+    if (!snap.exists()) { updatePaystackToggleUI(false); return; }
+    const d = snap.data();
+    _paystackPublicKey = d.publicKey || '';
+    _paystackEnabled = d.enabled === true && !!d.publicKey;
+    updatePaystackToggleUI(_paystackEnabled);
+    // Show Paystack funding button if enabled
+    const psBtn = document.getElementById('wallet-paystack-btn');
+    if (psBtn) psBtn.style.display = _paystackEnabled ? 'flex' : 'none';
+    // Show Paystack checkout option
+    const psCheckout = document.getElementById('pay-paystack');
+    if (psCheckout) psCheckout.style.display = _paystackEnabled ? 'flex' : 'none';
+    // Populate admin fields if admin
+    if (isAdmin) {
+      const pub = document.getElementById('ps-public-key');
+      const sec = document.getElementById('ps-secret-key');
+      const wh = document.getElementById('ps-webhook-secret');
+      const tog = document.getElementById('paystack-enabled-toggle');
+      if (pub) pub.value = d.publicKey || '';
+      if (sec) sec.value = d.secretKey || '';
+      if (wh) wh.value = d.webhookSecret || '';
+      if (tog) tog.checked = d.enabled === true;
+    }
+  } catch(e) { console.error('loadPaystackSettings:', e); }
+}
+
+function updatePaystackToggleUI(enabled) {
+  const track = document.getElementById('paystack-toggle-track');
+  const thumb = document.getElementById('paystack-toggle-thumb');
+  const label = document.getElementById('paystack-status-label');
+  if (track) track.style.background = enabled ? '#16a34a' : '#ccc';
+  if (thumb) thumb.style.left = enabled ? '27px' : '3px';
+  if (label) label.textContent = enabled ? '✅ Paystack is enabled and active' : '⚠️ Paystack is disabled';
+}
+
+window.savePaystackSettings = async function() {
+  if (!isAdmin) return;
+  const publicKey = (document.getElementById('ps-public-key')?.value || '').trim();
+  const secretKey = (document.getElementById('ps-secret-key')?.value || '').trim();
+  const webhookSecret = (document.getElementById('ps-webhook-secret')?.value || '').trim();
+  const enabled = document.getElementById('paystack-enabled-toggle')?.checked || false;
+  const msgEl = document.getElementById('paystack-save-msg');
+  try {
+    await setDoc(doc(db,'settings','paystack'), {
+      publicKey, secretKey, webhookSecret, enabled,
+      updatedAt: serverTimestamp(), updatedBy: currentUser?.email || 'admin'
+    });
+    _paystackPublicKey = publicKey;
+    _paystackEnabled = enabled && !!publicKey;
+    updatePaystackToggleUI(_paystackEnabled);
+    // Update site dynamically
+    const psBtn = document.getElementById('wallet-paystack-btn');
+    if (psBtn) psBtn.style.display = _paystackEnabled ? 'flex' : 'none';
+    const psCheckout = document.getElementById('pay-paystack');
+    if (psCheckout) psCheckout.style.display = _paystackEnabled ? 'flex' : 'none';
+    if (msgEl) { msgEl.style.display='block'; msgEl.innerHTML='<div style="background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.3);border-radius:8px;padding:10px;font-size:13px;color:var(--green);font-weight:700"><i class="fas fa-check-circle"></i> Paystack settings saved! Changes are live immediately.</div>'; }
+    showToast('Paystack settings saved!','success');
+  } catch(e) {
+    if (msgEl) { msgEl.style.display='block'; msgEl.innerHTML='<div style="background:rgba(220,38,38,.1);border-radius:8px;padding:10px;font-size:13px;color:var(--red)">Error: '+e.message+'</div>'; }
+    showToast('Failed to save settings','error');
+  }
+};
+
+window.testPaystackKey = async function() {
+  const key = (document.getElementById('ps-public-key')?.value || '').trim();
+  if (!key) return showToast('Enter your Paystack public key first','error');
+  if (!key.startsWith('pk_')) return showToast('Public key should start with pk_test_ or pk_live_','error');
+  showToast('Public key format looks valid! Save settings to activate.','success');
+};
+
 // ===== PRODUCTS =====
 async function loadProducts() {
   try {
@@ -3573,6 +4366,11 @@ async function loadCheckout() {
   const couponInput = document.getElementById('coupon-input'); if(couponInput) couponInput.value='';
   loadLoyaltyPoints();
   updateCheckoutTotal();
+  // Load wallet balance for checkout
+  await loadWalletBalance();
+  // Show/hide Paystack checkout option based on settings
+  const psOpt = document.getElementById('pay-paystack');
+  if (psOpt) psOpt.style.display = _paystackEnabled ? 'flex' : 'none';
 }
 
 window.selectAddr = async function(el, id) {
@@ -3603,12 +4401,24 @@ window.selectAddr = async function(el, id) {
 
 window.selectPayment = function(type) {
   selectedPayment = type;
-  document.getElementById('pay-bank').classList.toggle('selected', type==='bank');
-  document.getElementById('pay-cod').classList.toggle('selected', type==='cod');
-  document.getElementById('bank-info').classList.toggle('hidden', type!=='bank');
-  document.querySelectorAll('#pay-bank input, #pay-cod input').forEach(inp=>{
-    inp.checked = (inp.parentElement.id === 'pay-'+type);
+  ['wallet','paystack','bank','cod'].forEach(t => {
+    const el = document.getElementById('pay-'+t);
+    if (el) el.classList.toggle('selected', t === type);
+    const radio = el ? el.querySelector('input[type=radio]') : null;
+    if (radio) radio.checked = (t === type);
   });
+  document.getElementById('bank-info').classList.toggle('hidden', type !== 'bank');
+  // Wallet info
+  const walletInfo = document.getElementById('wallet-pay-info');
+  if (walletInfo) {
+    walletInfo.style.display = type === 'wallet' ? 'block' : 'none';
+    if (type === 'wallet') {
+      const total = window._checkoutGrandTotal || 0;
+      const sufficient = _walletBalance >= total;
+      document.getElementById('wallet-pay-ok').style.display = sufficient ? 'block' : 'none';
+      document.getElementById('wallet-pay-low').style.display = sufficient ? 'none' : 'block';
+    }
+  }
 };
 
 
@@ -3827,6 +4637,23 @@ window.placeOrder = async function() {
   if(!selectedPayment) return showToast('Please select a payment method','error');
   if(!cart.length) return showToast('Your cart is empty','error');
 
+  // ---- Paystack checkout ----
+  if (selectedPayment === 'paystack') {
+    if (!_paystackPublicKey) return showToast('Paystack is not configured. Choose another payment method.','error');
+    const total = window._checkoutGrandTotal || cart.reduce((s,x)=>s+(x.price*x.qty),0);
+    initiatePaystackCheckout(total);
+    return;
+  }
+
+  // ---- Wallet checkout ----
+  if (selectedPayment === 'wallet') {
+    const total = window._checkoutGrandTotal || cart.reduce((s,x)=>s+(x.price*x.qty),0);
+    if (_walletBalance < total) {
+      showToast('Insufficient wallet balance. Please fund your wallet or choose another payment method.','error');
+      return;
+    }
+  }
+
   try {
     // Build address object depending on delivery type
     let addr = {};
@@ -3865,13 +4692,20 @@ window.placeOrder = async function() {
     };
     const orderRef = await addDoc(collection(db,'orders'), orderData);
     lastOrderId = orderRef.id;
+
+    // ---- Debit wallet if paying with wallet ----
+    if (selectedPayment === 'wallet') {
+      await debitWallet(currentUser.uid, grandTotal, 'purchase', `Order payment: ${orderId}`, orderId);
+      await loadWalletBalance();
+    }
+
     // Award loyalty points (2% of order as points)
     awardLoyaltyPoints(orderId, grandTotal);
     // Increment coupon usage count
     if(appliedCoupon && appliedCoupon.firestoreId) {
       try { await updateDoc(doc(db,'coupons',appliedCoupon.firestoreId), { usageCount: (appliedCoupon.usageCount||0)+1 }); } catch(e) {}
     }
-    // Clear cart BEFORE notifications (so items don't appear empty)
+    // Clear cart BEFORE notifications
     const itemNames = itemsCopy.map(x=>{
       let detail = x.name;
       if(x.size) detail += ` (Size: ${x.size})`;
@@ -3898,13 +4732,11 @@ window.placeOrder = async function() {
         }
       } catch(e) { console.warn('Stock update failed for', pid, e); }
     }
-    // Notify ADMIN first (gets the browser popup, most important)
+    // Notify ADMIN first
     notifyAdminWhatsApp(orderId, addr.name||currentUser.email.split('@')[0], currentUser.email, itemNames, subtotal, deliveryFee, selectedPayment, addrStr, addr.phone||'', couponDiscount, appliedCoupon?.code||'', loyaltyDiscount);
-    // Notify BUYER after a short delay (secondary popup — buyer gets receipt on screen anyway)
     setTimeout(()=>{
       notifyBuyerWhatsApp(addr.phone||'', orderId, 'pending', itemNames, addr.name||currentUser.email.split('@')[0], grandTotal, deliveryFee);
     }, 2000);
-    // Show receipt
     showReceipt(orderId, orderData);
     navigate('success');
     showToast('Order placed successfully! 🎉');
@@ -3912,6 +4744,89 @@ window.placeOrder = async function() {
     showToast('Failed to place order: '+e.message,'error');
   }
 };
+
+// Paystack checkout flow (for full order payment via Paystack)
+async function initiatePaystackCheckout(amount) {
+  if (!window.PaystackPop) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://js.paystack.co/v1/inline.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+  const refId = 'BENIM-ORD-' + Date.now() + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
+  const handler = window.PaystackPop.setup({
+    key: _paystackPublicKey,
+    email: currentUser.email,
+    amount: amount * 100,
+    currency: 'NGN',
+    ref: refId,
+    metadata: { uid: currentUser.uid, purpose: 'order_payment' },
+    callback: async function(response) {
+      // Mark payment ref in order and proceed
+      window._paystackOrderRef = refId;
+      selectedPayment = 'paystack_paid';
+      await placeOrderAfterPaystack(refId);
+    },
+    onClose: function() { showToast('Payment cancelled','info'); }
+  });
+  handler.openIframe();
+}
+
+async function placeOrderAfterPaystack(paystackRef) {
+  // Re-run order placement with paystack_paid status
+  const savedPayment = selectedPayment;
+  selectedPayment = 'paystack';
+  // Temporarily mark it done then place
+  const dType = window._deliveryType || 'home';
+  try {
+    let addr = {};
+    if (dType === 'pickup' && window._selectedPickupStation) {
+      const ps = window._selectedPickupStation;
+      addr = { name: (currentUser.displayName || currentUser.email.split('@')[0]), phone:'', street: ps.address, city: ps.area, state: document.getElementById('pickup-state-select')?.value||'', pickupStation: ps.name, isPickup: true };
+    } else {
+      const addrSnap = await getDoc(doc(db,`users/${currentUser.uid}/addresses`,selectedAddress));
+      addr = addrSnap.exists() ? addrSnap.data() : {};
+    }
+    const subtotal = cart.reduce((s,x)=>s+(x.price*x.qty),0);
+    const deliveryFee = window._checkoutDeliveryFee !== undefined ? window._checkoutDeliveryFee : 3500;
+    const couponDiscount = window._checkoutCouponDiscount || 0;
+    const loyaltyDiscount = useLoyaltyDiscount || 0;
+    const grandTotal = Math.max(0, subtotal - couponDiscount - loyaltyDiscount + deliveryFee);
+    const orderId = 'BNM-'+Date.now();
+    const itemsCopy = [...cart];
+    const orderData = {
+      orderId, userId: currentUser.uid, userEmail: currentUser.email,
+      items: itemsCopy, address: addr, payment: 'paystack',
+      paystackRef, deliveryType: dType,
+      pickupStation: dType === 'pickup' ? (window._selectedPickupStation?.name || '') : '',
+      subtotal, deliveryFee, couponCode: appliedCoupon?.code||'', couponDiscount, loyaltyDiscount,
+      total: grandTotal, status: 'pending', createdAt: serverTimestamp(),
+      phone: addr.phone || '', buyerPhone: addr.phone || ''
+    };
+    await addDoc(collection(db,'orders'), orderData);
+    if(appliedCoupon && appliedCoupon.firestoreId) {
+      try { await updateDoc(doc(db,'coupons',appliedCoupon.firestoreId), { usageCount: (appliedCoupon.usageCount||0)+1 }); } catch(e) {}
+    }
+    awardLoyaltyPoints(orderId, grandTotal);
+    cart = []; await saveCart(); updateCartBadge();
+    for(const item of itemsCopy) {
+      if(!item.productId && !item.id) continue;
+      const pid = item.productId || item.id;
+      try {
+        const pRef = doc(db,'products',pid);
+        const pSnap = await getDoc(pRef);
+        if(pSnap.exists()) {
+          await updateDoc(pRef, { stock: Math.max(0,(pSnap.data().stock||0)-(item.qty||1)), soldCount:(pSnap.data().soldCount||0)+(item.qty||1) });
+        }
+      } catch(e) {}
+    }
+    showReceipt(orderId, orderData);
+    navigate('success');
+    showToast('Order placed! Paid with Paystack 🎉');
+  } catch(e) { showToast('Error placing order: '+e.message,'error'); }
+}
 
 function showReceipt(orderId, data) {
   const wrap = document.getElementById('receipt-wrap');
@@ -4601,6 +5516,8 @@ window.switchAdminTab = function(tab, btn) {
   else if(tab==='analytics') loadAnalytics();
   else if(tab==='coupons') loadAdminCoupons();
   else if(tab==='pwresets') loadPWResetRequests();
+  else if(tab==='wallets') loadAdminWallets();
+  else if(tab==='paystack') loadPaystackSettings();
 };
 
 
@@ -5310,6 +6227,7 @@ function _showPage(page) {
   if(page==='search') { if(!allProducts.length) loadProducts(); applyFilters(); }
   if(page==='admin') { loadAdminProducts(); loadAdminStats(); updatePWResetBadge(); }
   if(page==='profile') loadUserProfile();
+  if(page==='wallet') { loadWalletBalance(); loadWalletTransactions(); loadPaystackSettings(); }
   if(page==='forgot') {
     // Reset forgot password form state
     const fw = document.getElementById('forgot-form-wrap');
