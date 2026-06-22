@@ -2624,8 +2624,8 @@ async function confirmTransfer(){
 const pin=['trp1','trp2','trp3','trp4'].map(id=>document.getElementById(id)?.value||'').join('');
 if(pin.length<4){return;}
 const savedPin=UD?.pin||'';
-if(savedPin&&pin!==savedPin){toast('Incorrect PIN. Please try again.');return;}
 if(!savedPin){toast('Set a transaction PIN in Profile first.');return;}
+if(hp(pin)!==savedPin){toast('Incorrect PIN. Please try again.');['trp1','trp2','trp3','trp4'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('trp1')?.focus();return;}
 const amt=parseFloat(document.getElementById('tr-amount')?.value||0);
 const note=document.getElementById('tr-note')?.value?.trim()||'Internal Transfer';
 if(!_transferTarget||!amt){toast('Transfer details missing');return;}
